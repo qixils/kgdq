@@ -18,8 +18,8 @@ import java.time.Duration
  */
 @Suppress("HttpUrlsUsage")
 class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
-    private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build()
     private val apiPath: String
+    private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build()
     private val runners: MutableMap<Int, Wrapper<Runner>> = mutableMapOf()
 
     /**
