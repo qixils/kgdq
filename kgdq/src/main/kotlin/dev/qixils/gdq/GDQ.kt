@@ -49,6 +49,8 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         return Json.decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
     }
 
+    // TODO cache stuff should be moved to its own thing
+
     /**
      * Searches for the runner with the provided ID.
      *
@@ -64,5 +66,14 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
                 throw IllegalArgumentException("Runner with ID $id could not be found.")
         }
         return runners[id]!!.value
+    }
+
+    /**
+     * Loads and caches data for the provided [event].
+     *
+     * @param event the id of the event to cache
+     */
+    suspend fun loadEvent(event: Int) {
+        query("type=runner&event=$event", Runner.serializer()).forEach { runners[it.id] = it }
     }
 }

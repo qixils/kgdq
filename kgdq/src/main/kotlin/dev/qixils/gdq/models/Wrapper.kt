@@ -9,7 +9,7 @@ import kotlinx.serialization.Transient
 data class Wrapper<T : Model>(
     @SerialName("model") val modelName: String,
     @SerialName("pk") val id: Int,
-    @SerialName("fields") val value: T)
-{
+    @SerialName("fields") val value: T
+) {
     @Transient val modelType = ModelType.get(modelName)
 }
