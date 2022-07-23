@@ -1,9 +1,6 @@
 package dev.qixils.gdq
 
-import dev.qixils.gdq.models.Event
-import dev.qixils.gdq.models.Model
-import dev.qixils.gdq.models.Run
-import dev.qixils.gdq.models.Runner
+import dev.qixils.gdq.models.*
 import kotlinx.serialization.KSerializer
 import kotlin.reflect.KClass
 
@@ -23,6 +20,8 @@ data class ModelType<M : Model>(
 
         fun get(id: String): ModelType<*>? = types[id.replaceFirst("tracker.", "")]
 
+        val BID = register(ModelType("bid", Bid::class, Bid.serializer()))
+        val BID_TARGET = register(ModelType("bidtarget", Bid::class, Bid.serializer()))
         val EVENT = register(ModelType("event", Event::class, Event.serializer()))
         val RUN = register(ModelType("run", Run::class, Run.serializer()))
         val RUNNER = register(ModelType("runner", Runner::class, Runner.serializer()))

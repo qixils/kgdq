@@ -1,7 +1,6 @@
 package dev.qixils.gdq
 
 import dev.qixils.gdq.models.Model
-import dev.qixils.gdq.models.Runner
 import dev.qixils.gdq.models.Wrapper
 import kotlinx.coroutines.future.await
 import kotlinx.serialization.KSerializer
@@ -20,7 +19,6 @@ import java.time.Duration
 class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
     private val apiPath: String
     private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build()
-    private val runners: MutableMap<Int, Wrapper<Runner>> = mutableMapOf()
 
     /**
      * Constructs a new GDQ instance with the provided API path.
@@ -46,7 +44,9 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
     suspend fun <M : Model> query(query: String, modelSerializer: KSerializer<M>): List<Wrapper<M>> {
         val request = HttpRequest.newBuilder(URI.create("$apiPath?$query")).GET().build()
         val body = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).await().body()
-        return Json.decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
+        val models = Json.decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
+        models.forEach { it.value.loadData(this) }
+        return models
     }
 
     /**
@@ -62,6 +62,7 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         runner: Int? = null,
         run: Int? = null,
     ): List<Wrapper<M>> {
+        // TODO: caching
         // create query string
         val params = mutableListOf("type=${type.id}")
         if (id != null) params.add("id=${id}")
@@ -71,31 +72,5 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         val query = params.joinToString("&")
         // perform query
         return query(query, type.serializer)
-    }
-
-    // TODO cache stuff should be moved to its own thing
-
-    /**
-     * Searches for the runner with the provided ID.
-     *
-     * @param id the ID of the runner to search for
-     * @return the runner
-     */
-    suspend fun getRunner(id: Int): Runner {
-        if (!runners.containsKey(id)) {
-            val runner = query(type=ModelType.RUNNER, id=id).firstOrNull()
-                ?: throw IllegalArgumentException("Runner with ID $id could not be found.")
-            runners[id] = runner
-        }
-        return runners[id]!!.value
-    }
-
-    /**
-     * Loads and caches data for the provided [event].
-     *
-     * @param event the id of the event to cache
-     */
-    suspend fun loadEvent(event: Int) {
-        query(type=ModelType.RUNNER, event=event).forEach { runners[it.id] = it }
     }
 }

@@ -1,5 +1,8 @@
 package dev.qixils.gdq.models
 
-interface Model {
+import dev.qixils.gdq.GDQ
 
+interface Model {
+    suspend fun loadData(api: GDQ) {
+    }
 }
