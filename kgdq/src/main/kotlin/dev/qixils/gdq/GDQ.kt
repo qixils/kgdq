@@ -11,6 +11,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
+import java.time.Instant
 
 /**
  * The central class for performing requests to an instance of the GDQ donation tracker.
@@ -19,6 +20,7 @@ import java.time.Duration
 class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
     private val apiPath: String
     private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build()
+    private val cache: MutableMap<Pair<ModelType<*>, Int>, Pair<Wrapper<*>, Instant>> = mutableMapOf()
 
     /**
      * Constructs a new GDQ instance with the provided API path.
@@ -45,14 +47,21 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         val request = HttpRequest.newBuilder(URI.create("$apiPath?$query")).GET().build()
         val body = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).await().body()
         val models = Json.decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
-        models.forEach { it.value.loadData(this) }
+        models.forEach {
+            it.value.loadData(this) // initialize model's data
+            cache[it.modelType to it.id] = it to Instant.now() // cache model
+        }
         return models
     }
 
     /**
-     * Performs a search on the GDQ tracker for the provided [query].
+     * Performs a search on the GDQ tracker for the provided query
      *
-     * @param query the query to search for
+     * @param type   the type of model being queried for
+     * @param id     optional: the id of the model to get
+     * @param event  optional: the event to query from
+     * @param runner optional: the runner to query from
+     * @param run    optional: the run to query from
      * @return a list of models matching the query
      */
     suspend fun <M : Model> query(
@@ -62,7 +71,17 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         runner: Int? = null,
         run: Int? = null,
     ): List<Wrapper<M>> {
-        // TODO: caching
+        // load from cache if possible
+        if (id != null) {
+            val pair = type to id
+            if (cache.containsKey(pair)) {
+                val (wrapper, cachedAt) = cache[pair]!!
+                if (cachedAt.plus(type.cacheFor).isAfter(Instant.now())) {
+                    @Suppress("UNCHECKED_CAST") // the type is correct it's ok
+                    return listOf(wrapper) as List<Wrapper<M>>
+                }
+            }
+        }
         // create query string
         val params = mutableListOf("type=${type.id}")
         if (id != null) params.add("id=${id}")
