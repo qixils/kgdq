@@ -4,8 +4,8 @@ import dev.qixils.gdq.models.Model
 import dev.qixils.gdq.models.Runner
 import dev.qixils.gdq.models.Wrapper
 import kotlinx.coroutines.future.await
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.net.URI
 import java.net.http.HttpClient
@@ -39,15 +39,14 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
     /**
      * Performs a search on the GDQ tracker for the provided [query].
      *
-     * @param query the query to search for
-     * @param model the type of model being queried for
+     * @param query           the query to search for
+     * @param modelSerializer the serializer of model being queried for
      * @return a list of models matching the query
      */
-    suspend fun <T : Model> query(query: String, model: Class<T>): List<T> {
+    suspend fun <T : Model> query(query: String, modelSerializer: KSerializer<T>): List<Wrapper<T>> {
         val request = HttpRequest.newBuilder(URI.create("$apiPath?$query")).GET().build()
-        val response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).await()
-        val body = response.body()
-        return Json.decodeFromString(ListSerializer(Wrapper.serializer(model)), body)
+        val body = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).await().body()
+        return Json.decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
     }
 
     /**
@@ -56,9 +55,14 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
      * @param id the ID of the runner to search for
      * @return the runner
      */
-    fun getRunner(id: Int): Runner {
+    suspend fun getRunner(id: Int): Runner {
         if (!runners.containsKey(id)) {
-
+            val runner = query("type=runner&id=$id", Runner.serializer()).firstOrNull()
+            if (runner != null)
+                runners[id] = runner
+            else
+                throw IllegalArgumentException("Runner with ID $id could not be found.")
         }
+        return runners[id]!!.value
     }
 }
