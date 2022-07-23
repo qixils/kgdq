@@ -43,10 +43,34 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
      * @param modelSerializer the serializer of model being queried for
      * @return a list of models matching the query
      */
-    suspend fun <T : Model> query(query: String, modelSerializer: KSerializer<T>): List<Wrapper<T>> {
+    suspend fun <M : Model> query(query: String, modelSerializer: KSerializer<M>): List<Wrapper<M>> {
         val request = HttpRequest.newBuilder(URI.create("$apiPath?$query")).GET().build()
         val body = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).await().body()
         return Json.decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
+    }
+
+    /**
+     * Performs a search on the GDQ tracker for the provided [query].
+     *
+     * @param query the query to search for
+     * @return a list of models matching the query
+     */
+    suspend fun <M : Model> query(
+        type: ModelType<M>,
+        id: Int? = null,
+        event: Int? = null,
+        runner: Int? = null,
+        run: Int? = null,
+    ): List<Wrapper<M>> {
+        // create query string
+        val params = mutableListOf("type=${type.id}")
+        if (id != null) params.add("id=${id}")
+        if (event != null) params.add("event=${event}")
+        if (runner != null) params.add("runner=${runner}")
+        if (run != null) params.add("run=${run}")
+        val query = params.joinToString("&")
+        // perform query
+        return query(query, type.serializer)
     }
 
     // TODO cache stuff should be moved to its own thing
@@ -59,11 +83,9 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
      */
     suspend fun getRunner(id: Int): Runner {
         if (!runners.containsKey(id)) {
-            val runner = query("type=runner&id=$id", Runner.serializer()).firstOrNull()
-            if (runner != null)
-                runners[id] = runner
-            else
-                throw IllegalArgumentException("Runner with ID $id could not be found.")
+            val runner = query(type=ModelType.RUNNER, id=id).firstOrNull()
+                ?: throw IllegalArgumentException("Runner with ID $id could not be found.")
+            runners[id] = runner
         }
         return runners[id]!!.value
     }
@@ -74,6 +96,6 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
      * @param event the id of the event to cache
      */
     suspend fun loadEvent(event: Int) {
-        query("type=runner&event=$event", Runner.serializer()).forEach { runners[it.id] = it }
+        query(type=ModelType.RUNNER, event=event).forEach { runners[it.id] = it }
     }
 }
