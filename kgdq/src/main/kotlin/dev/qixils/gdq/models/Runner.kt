@@ -8,8 +8,8 @@ data class Runner(
     val stream: String,
     val twitter: String,
     val youtube: String,
-    val platform: String,
-    val pronouns: String,
+//    val platform: String?, - this field is always set to "TWITCH" and thus misleading & useless
+    val pronouns: String = "",
 //    val donor: Int?,
     val public: String
 ) : Model

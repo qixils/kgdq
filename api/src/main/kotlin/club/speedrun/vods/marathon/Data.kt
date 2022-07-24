@@ -3,12 +3,17 @@ package club.speedrun.vods.marathon
 import dev.qixils.gdq.models.*
 import dev.qixils.gdq.serializers.DurationSerializer
 import dev.qixils.gdq.serializers.InstantSerializer
+import dev.qixils.gdq.serializers.ZoneIdSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.time.Duration
 import java.time.Instant
+import java.time.ZoneId
 
 @Serializable
 data class RunData(
+    @Transient private val source: Run? = null,
     val id: Int,
     val event: Int,
     val name: String,
@@ -25,13 +30,14 @@ data class RunData(
     val coop: Boolean,
     val category: String,
     val releaseYear: Int?,
-    val runners: List<Runner>,
+    val runners: MutableList<Runner>,
     val bids: List<BidData>,
 ) {
     // TODO: add parameter for RunOverrides
     constructor(run: Wrapper<Run>, bids: List<BidData>, previousRun: RunData?) : this(
+        source = run.value,
         id = run.id,
-        event = run.value.event.id,
+        event = run.value.eventId,
         name = run.value.name,
         displayName = run.value.displayName,
         twitchName = run.value.twitchName,
@@ -46,9 +52,13 @@ data class RunData(
         coop = run.value.coop,
         category = run.value.category,
         releaseYear = run.value.releaseYear,
-        runners = run.value.runners.map { it.value },
+        runners = mutableListOf(),
         bids = bids,
     )
+
+    suspend fun loadRunners() {
+        runners.addAll(source!!.runners().map { it.value })
+    }
 
     val runTimeText: String get() = DurationSerializer.format(runTime)
     val setupTimeText: String get() = DurationSerializer.format(setupTime)
@@ -66,6 +76,7 @@ data class RunData(
 
 @Serializable
 data class BidData(
+    // TODO: id?
     val children: List<BidData>,
     val name: String,
     val state: BidState,
@@ -94,5 +105,50 @@ data class BidData(
         donationTotal = bid.total,
         donationCount = bid.count,
         pinned = bid.pinned
+    )
+}
+
+@Serializable
+data class EventData(
+    val id: Int,
+    val short: String,
+    val name: String,
+    val hashtag: String,
+    val receiverName: String,
+    val targetAmount: Float,
+    val minimumDonation: Float,
+    val paypalEmail: String,
+    val paypalCurrency: String,
+    @Serializable(with = InstantSerializer::class) val datetime: Instant,
+    @Serializable(with = ZoneIdSerializer::class) val timezone: ZoneId,
+    val locked: Boolean,
+    val allowDonations: Boolean,
+    val canonicalUrl: String,
+    val public: String,
+    val amount: Float,
+    val count: Int,
+    val max: Float,
+    val avg: Double,
+) {
+    constructor(event: Wrapper<Event>) : this(
+        id = event.id,
+        short = event.value.short,
+        name = event.value.name,
+        hashtag = event.value.hashtag,
+        receiverName = event.value.receiverName,
+        targetAmount = event.value.targetAmount,
+        minimumDonation = event.value.minimumDonation,
+        paypalEmail = event.value.paypalEmail,
+        paypalCurrency = event.value.paypalCurrency,
+        datetime = event.value.datetime,
+        timezone = event.value.timezone,
+        locked = event.value.locked,
+        allowDonations = event.value.allowDonations,
+        canonicalUrl = event.value.canonicalUrl,
+        public = event.value.public,
+        amount = event.value.amount,
+        count = event.value.count,
+        max = event.value.max,
+        avg = event.value.avg,
     )
 }

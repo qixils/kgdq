@@ -1,6 +1,7 @@
 package dev.qixils.gdq
 
 import dev.qixils.gdq.models.Model
+import dev.qixils.gdq.models.Runner
 import dev.qixils.gdq.models.Wrapper
 import kotlinx.coroutines.future.await
 import kotlinx.serialization.KSerializer
@@ -18,9 +19,9 @@ import java.util.logging.Logger
  * The central class for performing requests to an instance of the GDQ donation tracker.
  */
 @Suppress("HttpUrlsUsage")
-class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
+open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
     private val logger = Logger.getLogger("GDQ")
-    private val apiPath: String
+    val apiPath: String
     private val json: Json = Json {
         ignoreUnknownKeys = true
         isLenient = true
@@ -28,6 +29,7 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
     }
     private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build()
     private val cache: MutableMap<Pair<ModelType<*>, Int>, Pair<Wrapper<*>, Instant>> = mutableMapOf()
+    private var lastCachedRunners: Instant? = null
 
     /**
      * Constructs a new GDQ instance with the provided API path.
@@ -51,16 +53,30 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
      * @return a list of models matching the query
      */
     suspend fun <M : Model> query(query: String, modelSerializer: KSerializer<M>): List<Wrapper<M>> {
+        // logging
         val url = "$apiPath?$query"
         logger.info("Querying $url")
         val uri = URI.create(url)
+
+        // perform request
         val request = HttpRequest.newBuilder(uri).GET().build()
         val body = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).await().body()
-        val models = json.decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
-        models.forEach {
-            it.value.loadData(this) // initialize model's data
-            cache[it.modelType to it.id] = it to Instant.now() // cache model
-        }
+
+        // deserialize
+        val models = json
+            .decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
+            .toMutableList()
+
+        // load data
+        models.forEach { it.value.loadData(this, it.id) }
+
+        // remove invalid models
+        models.removeIf{ !it.value.isValid() }
+
+        // cache models
+        models.forEach { cache[it.modelType to it.id] = it to Instant.now() }
+
+        // return
         return models
     }
 
@@ -80,8 +96,11 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         event: Int? = null,
         runner: Int? = null,
         run: Int? = null,
-        offset: Int? = null,
+        offset: Int? = null, // TODO: send PR to ESA fixing this param (edit https://github.com/ESAMarathon/donation-tracker/blob/esa/views/api.py#L165-L166 using https://github.com/GamesDoneQuick/donation-tracker/blob/master/tracker/views/api.py#L384-L395)
     ): List<Wrapper<M>> {
+        // ensure runners are cached (they're high in quantity but basically fixed)
+        if (type == ModelType.RUNNER) cacheRunners()
+
         // load from cache if possible
         if (id != null) {
             val pair = type to id
@@ -93,6 +112,7 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
                 }
             }
         }
+
         // create query string
         val params = mutableListOf("type=${type.id}")
         if (id != null) params.add("id=${id}")
@@ -101,7 +121,24 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         if (run != null) params.add("run=${run}")
         if (offset != null) params.add("offset=${offset}")
         val query = params.joinToString("&")
+
         // perform query
         return query(query, type.serializer)
+    }
+
+    protected open suspend fun cacheRunners() { // TODO: remove `open` when ESA fixes their API bug
+        // only cache runners every few hours
+        val now = Instant.now()
+        if (lastCachedRunners != null && lastCachedRunners!!.plus(ModelType.RUNNER.cacheFor).isAfter(now))
+            return
+        lastCachedRunners = now
+
+        // cache runners
+        var offset = 0
+        var runners: List<Wrapper<Runner>>
+        do {
+            runners = query(type = ModelType.RUNNER, offset = offset)
+            offset += runners.size
+        } while (runners.isNotEmpty())
     }
 }
