@@ -19,6 +19,10 @@ import java.time.Instant
 @Suppress("HttpUrlsUsage")
 class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
     private val apiPath: String
+    private val json: Json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
     private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build()
     private val cache: MutableMap<Pair<ModelType<*>, Int>, Pair<Wrapper<*>, Instant>> = mutableMapOf()
 
@@ -46,7 +50,7 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
     suspend fun <M : Model> query(query: String, modelSerializer: KSerializer<M>): List<Wrapper<M>> {
         val request = HttpRequest.newBuilder(URI.create("$apiPath?$query")).GET().build()
         val body = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).await().body()
-        val models = Json.decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
+        val models = json.decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
         models.forEach {
             it.value.loadData(this) // initialize model's data
             cache[it.modelType to it.id] = it to Instant.now() // cache model

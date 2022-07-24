@@ -19,8 +19,8 @@ data class Event(
     val hashtag: String,
     @SerialName("use_one_step_screening") val useOneStepScreening: Boolean,
     @SerialName("receivername") val receiverName: String,
-    @SerialName("targetamount") val targetAmount: Int,
-    @SerialName("minimumdonation") val minimumDonation: Int,
+    @SerialName("targetamount") val targetAmount: Float,
+    @SerialName("minimumdonation") val minimumDonation: Float,
     @SerialName("paypalemail") val paypalEmail: String,
     @SerialName("paypalcurrency") val paypalCurrency: String,
     @Serializable(with = InstantSerializer::class) val datetime: Instant,
@@ -29,10 +29,10 @@ data class Event(
     @SerialName("allow_donations") val allowDonations: Boolean,
     @SerialName("canonical_url") val canonicalUrl: String,
     val public: String,
-    val amount: Double,
+    val amount: Float,
     val count: Int,
-    val max: Double,
-    val avg: Double
+    val max: Float,
+    val avg: Double,
     // TODO: prize countries?
 ) : Model {
 
