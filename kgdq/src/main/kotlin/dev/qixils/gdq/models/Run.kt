@@ -6,6 +6,7 @@ import dev.qixils.gdq.serializers.DurationSerializer
 import dev.qixils.gdq.serializers.InstantSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.time.Duration
 import java.time.Instant
 
@@ -35,8 +36,8 @@ data class Run(
     val runTimeText: String get() = DurationSerializer.format(runTime)
     val setupTimeText: String get() = DurationSerializer.format(setupTime)
 
-    private var _event: Wrapper<Event>? = null
-    private var _runners: List<Wrapper<Runner>>? = null
+    @Transient private var _event: Wrapper<Event>? = null
+    @Transient private var _runners: List<Wrapper<Runner>>? = null
 
     override suspend fun loadData(api: GDQ) {
         _event = api.query(type=ModelType.EVENT, id=eventId).first()

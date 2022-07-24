@@ -6,6 +6,7 @@ import club.speedrun.vods.marathon.ESAMarathon
 import club.speedrun.vods.marathon.GDQMarathon
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.engine.*
 import io.ktor.server.locations.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
@@ -20,6 +21,7 @@ fun Application.configureRouting() {
     }
     install(StatusPages) {
         exception<SerializationException> { call, cause ->
+            logError(call, cause)
             call.respond(HttpStatusCode.InternalServerError, mapOf("error" to ("An internal error occurred: " + (cause.message ?: cause.toString()))))
         }
         // TODO: oauth error stuff? (if not already handled by the oauth plugin ig)

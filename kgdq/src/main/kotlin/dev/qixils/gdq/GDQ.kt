@@ -12,12 +12,14 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
 import java.time.Instant
+import java.util.logging.Logger
 
 /**
  * The central class for performing requests to an instance of the GDQ donation tracker.
  */
 @Suppress("HttpUrlsUsage")
 class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
+    private val logger = Logger.getLogger("GDQ")
     private val apiPath: String
     private val json: Json = Json {
         ignoreUnknownKeys = true
@@ -48,7 +50,10 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
      * @return a list of models matching the query
      */
     suspend fun <M : Model> query(query: String, modelSerializer: KSerializer<M>): List<Wrapper<M>> {
-        val request = HttpRequest.newBuilder(URI.create("$apiPath?$query")).GET().build()
+        val url = "$apiPath?$query"
+        logger.info("Querying $url")
+        val uri = URI.create(url)
+        val request = HttpRequest.newBuilder(uri).GET().build()
         val body = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).await().body()
         val models = json.decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
         models.forEach {
@@ -74,6 +79,7 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         event: Int? = null,
         runner: Int? = null,
         run: Int? = null,
+        offset: Int? = null,
     ): List<Wrapper<M>> {
         // load from cache if possible
         if (id != null) {
@@ -92,6 +98,7 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         if (event != null) params.add("event=${event}")
         if (runner != null) params.add("runner=${runner}")
         if (run != null) params.add("run=${run}")
+        if (offset != null) params.add("offset=${offset}")
         val query = params.joinToString("&")
         // perform query
         return query(query, type.serializer)

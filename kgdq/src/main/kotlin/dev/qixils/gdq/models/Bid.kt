@@ -5,18 +5,19 @@ import dev.qixils.gdq.ModelType
 import dev.qixils.gdq.serializers.InstantSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.time.Instant
 
 @Serializable
 data class Bid(
     @SerialName("event") private val eventId: Int,
-    @SerialName("speedrun") val run: Wrapper<Run>,
+    @SerialName("speedrun") private val runId: Int,
     @SerialName("parent") private val parentId: Int?,
     val name: String,
     val state: BidState,
     val description: String,
     @SerialName("shortdescription") val shortDescription: String,
-    val goal: Int?,
+    val goal: Float?,
     @SerialName("istarget") val isTarget: Boolean,
     @SerialName("allowuseroptions") val allowUserOptions: Boolean,
     @SerialName("option_max_length") val optionMaxLength: Int?,
@@ -29,15 +30,18 @@ data class Bid(
     val public: String,
 ) : Model {
 
-    private var _event: Wrapper<Event>? = null
-    private var _parent: Wrapper<Bid>? = null
+    @Transient private var _event: Wrapper<Event>? = null
+    @Transient private var _run: Wrapper<Run>? = null
+    @Transient private var _parent: Wrapper<Bid>? = null
 
     override suspend fun loadData(api: GDQ) {
         _event = api.query(type=ModelType.EVENT, id=eventId).first()
+        _run = api.query(type=ModelType.RUN, id=runId).first()
         _parent = if (parentId != null) api.query(type=ModelType.BID, id=parentId).first() else null
     }
 
     val event: Wrapper<Event> get() = _event!!
+    val run: Wrapper<Run> get() = _run!!
     val parent: Wrapper<Bid>? get() = _parent
 }
 

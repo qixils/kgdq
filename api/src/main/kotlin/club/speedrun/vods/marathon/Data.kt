@@ -71,7 +71,7 @@ data class BidData(
     val state: BidState,
     val description: String,
     val shortDescription: String,
-    val goal: Int?,
+    val goal: Float?,
     val isTarget: Boolean,
     val allowUserOptions: Boolean,
     val optionMaxLength: Int?,

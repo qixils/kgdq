@@ -11,5 +11,5 @@ data class Wrapper<T : Model>(
     @SerialName("pk") val id: Int,
     @SerialName("fields") val value: T
 ) {
-    @Transient val modelType = ModelType.get(modelName)!!
+    @Transient val modelType = ModelType.get(modelName) ?: throw IllegalArgumentException("Unknown model type: $modelName")
 }

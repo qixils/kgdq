@@ -4,17 +4,32 @@ package club.speedrun.vods.marathon
 
 import dev.qixils.gdq.GDQ
 import dev.qixils.gdq.ModelType
-import dev.qixils.gdq.models.Bid
-import dev.qixils.gdq.models.Event
-import dev.qixils.gdq.models.Run
-import dev.qixils.gdq.models.Wrapper
+import dev.qixils.gdq.models.*
 import io.ktor.server.application.*
 import io.ktor.server.locations.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import java.time.Instant
 
 abstract class Marathon {
     abstract val gdq: GDQ
+    var lastCached: Instant? = null
+
+    private suspend fun cacheRunners() {
+        // only cache runners every few hours
+        val now = Instant.now()
+        if (lastCached != null && lastCached!!.plus(ModelType.RUNNER.cacheFor).isAfter(now))
+            return
+        lastCached = now
+
+        // cache runners
+        var offset = 0
+        var runners: List<Wrapper<Runner>>
+        do {
+            runners = gdq.query(type = ModelType.RUNNER, offset = offset)
+            offset += runners.size
+        } while (runners.isNotEmpty())
+    }
 
     private suspend fun getEvent(id: String): Wrapper<Event>? {
         if (id.toIntOrNull() != null)
@@ -40,7 +55,13 @@ abstract class Marathon {
             }
 
             get<RunList> { query ->
+                // cache runners
+                cacheRunners()
+
                 // do queries
+                // note: I could create a getEventId to reduce queries for the event endpoint,
+                //       but the event endpoint would get queried anyway during run & bid
+                //       deserialization anyway, so I can't be bothered atm
                 val event = query.event?.let { getEvent(it) }
                 val runs: List<Wrapper<Run>> = ArrayList(gdq.query(
                     type=ModelType.RUN,
