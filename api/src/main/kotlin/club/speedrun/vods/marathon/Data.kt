@@ -75,7 +75,7 @@ data class BidData(
     val isTarget: Boolean,
     val allowUserOptions: Boolean,
     val optionMaxLength: Int?,
-    @Serializable(with = InstantSerializer::class) val revealedAt: Instant,
+    @Serializable(with = InstantSerializer::class) val revealedAt: Instant?,
     val donationTotal: Float,
     val donationCount: Int,
     val pinned: Boolean,

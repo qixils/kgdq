@@ -77,13 +77,13 @@ abstract class Marathon {
 
                 // compute bid data
                 val topLevelBidMap = bids
-                    .filter { it.value.parent == null }
+                    .filter { it.value.parent == null && it.value.run != null }
                     .associateWith { mutableListOf<Wrapper<Bid>>() }
                 bids.forEach { if (it.value.parent != null) topLevelBidMap[it.value.parent]?.add(it) }
 
                 // compute run data
                 val runBidMap = runs.associate { it.id to mutableListOf<BidData>() }
-                topLevelBidMap.forEach { runBidMap[it.key.value.run.id]?.add(BidData(it.key.value, it.value.map { value -> BidData(value.value, emptyList()) })) }
+                topLevelBidMap.forEach { runBidMap[it.key.value.run!!.id]?.add(BidData(it.key.value, it.value.map { value -> BidData(value.value, emptyList()) })) }
 
                 // finalize & respond
                 val runData: MutableList<RunData> = ArrayList()

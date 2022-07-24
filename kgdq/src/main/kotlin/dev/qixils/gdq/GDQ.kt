@@ -24,6 +24,7 @@ class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
     private val json: Json = Json {
         ignoreUnknownKeys = true
         isLenient = true
+        coerceInputValues = true
     }
     private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build()
     private val cache: MutableMap<Pair<ModelType<*>, Int>, Pair<Wrapper<*>, Instant>> = mutableMapOf()

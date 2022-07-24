@@ -26,7 +26,7 @@ data class Run(
     @Serializable(with = DurationSerializer::class) @SerialName("run_time") val runTime: Duration,
     @Serializable(with = DurationSerializer::class) @SerialName("setup_time") val setupTime: Duration,
     val coop: Boolean,
-    val category: String,
+    val category: String = "Any%",
     @SerialName("release_year") val releaseYear: Int?,
     @SerialName("runners") private val runnerIds: List<Int>,
     @SerialName("canonical_url") val canonicalUrl: String,
