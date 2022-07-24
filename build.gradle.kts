@@ -1,3 +1,5 @@
+val kotlin_version: String by project
+
 plugins {
     kotlin("jvm") version "1.7.10" apply true
     kotlin("plugin.serialization") version "1.7.10" apply false
@@ -13,7 +15,7 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     dependencies {
-        api("org.jetbrains.kotlin:kotlin-stdlib:1.7.10")
+        api("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
     }
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
