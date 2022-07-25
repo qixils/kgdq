@@ -1,8 +1,5 @@
-@file:OptIn(InternalHoraroApi::class)
-
 package dev.qixils.horaro.models
 
-import dev.qixils.horaro.InternalHoraroApi
 import kotlinx.serialization.Serializable
 
 /**

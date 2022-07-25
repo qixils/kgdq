@@ -10,6 +10,6 @@ data class Runner(
     val youtube: String,
 //    val platform: String?, - this field is always set to "TWITCH" and thus misleading & useless
     val pronouns: String = "",
-//    val donor: Int?,
-    val public: String
+//    @SerialName("donor") private val _donor: Int? = null,
+    val public: String,
 ) : Model

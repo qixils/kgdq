@@ -4,8 +4,10 @@ package club.speedrun.vods.marathon
 
 import dev.qixils.gdq.GDQ
 import dev.qixils.gdq.ModelType
-import dev.qixils.gdq.models.*
-import io.ktor.http.*
+import dev.qixils.gdq.models.Bid
+import dev.qixils.gdq.models.Event
+import dev.qixils.gdq.models.Run
+import dev.qixils.gdq.models.Wrapper
 import io.ktor.server.application.*
 import io.ktor.server.locations.*
 import io.ktor.server.response.*

@@ -62,7 +62,7 @@ open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         val request = HttpRequest.newBuilder(uri).GET().build()
         val body = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).await().body()
 
-        // deserialize
+        // deserialize | TODO: handle deserializing errors (error: String, exception: String)
         val models = json
             .decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
             .toMutableList()

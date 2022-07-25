@@ -20,8 +20,8 @@ data class Run(
     val console: String,
     val commentators: String,
     val description: String,
-    @Serializable(with = InstantAsStringSerializer::class) @SerialName("starttime") val _startTime: Instant? = null,
-    @Serializable(with = InstantAsStringSerializer::class) @SerialName("endtime") val _endTime: Instant? = null,
+    @Serializable(with = InstantAsStringSerializer::class) @SerialName("starttime") private val _startTime: Instant? = null,
+    @Serializable(with = InstantAsStringSerializer::class) @SerialName("endtime") private val _endTime: Instant? = null,
     @SerialName("order") private val _order: Int? = null,
     @Serializable(with = DurationAsStringSerializer::class) @SerialName("run_time") val runTime: Duration,
     @Serializable(with = DurationAsStringSerializer::class) @SerialName("setup_time") val setupTime: Duration,
@@ -30,7 +30,8 @@ data class Run(
     @SerialName("release_year") val releaseYear: Int?,
     @SerialName("runners") private val runnerIds: List<Int>,
     @SerialName("canonical_url") private var _canonicalUrl: String? = null,
-    val public: String
+    val public: String,
+    @SerialName("external_id") val horaroId: String?, // ESA exclusive
 ) : Model {
 
     override fun isValid(): Boolean {

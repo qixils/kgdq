@@ -22,6 +22,8 @@ subprojects {
         kotlinOptions {
             jvmTarget = "17"
         }
+        kotlinOptions.freeCompilerArgs += "-opt-in=dev.qixils.gdq.InternalGdqApi"
+        kotlinOptions.freeCompilerArgs += "-opt-in=dev.qixils.horaro.InternalHoraroApi"
     }
 }
 

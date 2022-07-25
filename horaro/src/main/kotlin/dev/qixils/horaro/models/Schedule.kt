@@ -1,5 +1,3 @@
-@file:OptIn(InternalHoraroApi::class)
-
 package dev.qixils.horaro.models
 
 import dev.qixils.gdq.serializers.DurationAsSecondsSerializer
@@ -7,7 +5,6 @@ import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import dev.qixils.gdq.serializers.OffsetDateTimeSerializer
 import dev.qixils.gdq.serializers.ZoneIdSerializer
 import dev.qixils.horaro.Horaro
-import dev.qixils.horaro.InternalHoraroApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.Duration
@@ -48,10 +45,10 @@ sealed interface BaseSchedule : Identifiable {
     /**
      * The custom data columns of the schedule that are hidden from public view.
      *
-     * This field will be null if `hiddenKey` was not specified when fetching the schedule.
+     * Entries in this list will also appear in the `columns` field;
+     * the two are not mutually exclusive.
      *
-     * Entries in this list will also appear in the `columns` field if the `hiddenKey` was
-     * specified.
+     * If this schedule is not fetched directly, this field may be empty.
      */
     val hiddenColumns: List<String>?
 
@@ -90,7 +87,7 @@ data class PartialSchedule(
     @Serializable(with = DurationAsSecondsSerializer::class) @SerialName("setup_t") override val setup: Duration,
     @Serializable(with = InstantAsStringSerializer::class) override val updated: Instant,
     override val link: String,
-    @SerialName("hidden_columns") override val hiddenColumns: List<String>? = null,
+    @SerialName("hidden_columns") override val hiddenColumns: List<String> = emptyList(),
     override val columns: List<String>,
 ) : BaseSchedule
 
@@ -107,7 +104,7 @@ data class FullSchedule(
     @Serializable(with = DurationAsSecondsSerializer::class) @SerialName("setup_t") override val setup: Duration,
     @Serializable(with = InstantAsStringSerializer::class) override val updated: Instant,
     override val link: String,
-    @SerialName("hidden_columns") override val hiddenColumns: List<String>? = null,
+    @SerialName("hidden_columns") override val hiddenColumns: List<String> = emptyList(),
     override val columns: List<String>,
     /**
      * The list of runs in the schedule.

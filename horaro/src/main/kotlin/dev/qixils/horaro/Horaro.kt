@@ -1,5 +1,3 @@
-@file:OptIn(InternalHoraroApi::class)
-
 package dev.qixils.horaro
 
 import dev.qixils.horaro.models.*
