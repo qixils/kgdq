@@ -8,3 +8,5 @@ rootProject.name = "gdq-discord-schedule-parent"
 include(":discord")
 include(":kgdq")
 include(":api")
+include(":horaro")
+include(":serializers")

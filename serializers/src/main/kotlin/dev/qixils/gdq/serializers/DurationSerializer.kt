@@ -14,8 +14,8 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
-class DurationSerializer : KSerializer<Duration> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Duration", PrimitiveKind.STRING)
+class DurationAsStringSerializer : KSerializer<Duration> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("DurationAsString", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): Duration {
         return decode(decoder.decodeString())
@@ -41,5 +41,29 @@ class DurationSerializer : KSerializer<Duration> {
             val parts = matcher.group(0).split(":")
             return (parts[0].toInt().hours + parts[1].toInt().minutes + parts[2].toInt().seconds).toJavaDuration()
         }
+    }
+}
+
+class DurationAsSecondsSerializer : KSerializer<Duration> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("DurationAsSeconds", PrimitiveKind.LONG)
+
+    override fun deserialize(decoder: Decoder): Duration {
+        return Duration.ofSeconds(decoder.decodeLong())
+    }
+
+    override fun serialize(encoder: Encoder, value: Duration) {
+        encoder.encodeLong(value.toSeconds())
+    }
+}
+
+class DurationAsMillisSerializer : KSerializer<Duration> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("DurationAsMillis", PrimitiveKind.LONG)
+
+    override fun deserialize(decoder: Decoder): Duration {
+        return Duration.ofMillis(decoder.decodeLong())
+    }
+
+    override fun serialize(encoder: Encoder, value: Duration) {
+        encoder.encodeLong(value.toMillis())
     }
 }

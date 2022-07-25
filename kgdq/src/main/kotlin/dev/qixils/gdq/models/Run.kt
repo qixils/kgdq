@@ -2,8 +2,8 @@ package dev.qixils.gdq.models
 
 import dev.qixils.gdq.GDQ
 import dev.qixils.gdq.ModelType
-import dev.qixils.gdq.serializers.DurationSerializer
-import dev.qixils.gdq.serializers.InstantSerializer
+import dev.qixils.gdq.serializers.DurationAsStringSerializer
+import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -20,11 +20,11 @@ data class Run(
     val console: String,
     val commentators: String,
     val description: String,
-    @Serializable(with = InstantSerializer::class) @SerialName("starttime") val _startTime: Instant? = null,
-    @Serializable(with = InstantSerializer::class) @SerialName("endtime") val _endTime: Instant? = null,
+    @Serializable(with = InstantAsStringSerializer::class) @SerialName("starttime") val _startTime: Instant? = null,
+    @Serializable(with = InstantAsStringSerializer::class) @SerialName("endtime") val _endTime: Instant? = null,
     @SerialName("order") private val _order: Int? = null,
-    @Serializable(with = DurationSerializer::class) @SerialName("run_time") val runTime: Duration,
-    @Serializable(with = DurationSerializer::class) @SerialName("setup_time") val setupTime: Duration,
+    @Serializable(with = DurationAsStringSerializer::class) @SerialName("run_time") val runTime: Duration,
+    @Serializable(with = DurationAsStringSerializer::class) @SerialName("setup_time") val setupTime: Duration,
     val coop: Boolean,
     val category: String = "Any%",
     @SerialName("release_year") val releaseYear: Int?,
@@ -41,8 +41,8 @@ data class Run(
     val endTime: Instant get() = _endTime!!
     val order: Int get() = _order!!
 
-    val runTimeText: String get() = DurationSerializer.format(runTime)
-    val setupTimeText: String get() = DurationSerializer.format(setupTime)
+    val runTimeText: String get() = DurationAsStringSerializer.format(runTime)
+    val setupTimeText: String get() = DurationAsStringSerializer.format(setupTime)
 
     @Transient private var api: GDQ? = null
     @Transient private var id: Int? = null

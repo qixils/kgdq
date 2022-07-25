@@ -12,5 +12,5 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
 }
 
-description = "Kotlin library for the GDQ Donation Tracker API"
+description = "Kotlin library for the Horaro API"
 version = "3.0.0"

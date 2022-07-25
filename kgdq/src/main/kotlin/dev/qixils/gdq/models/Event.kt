@@ -2,11 +2,10 @@ package dev.qixils.gdq.models
 
 import dev.qixils.gdq.GDQ
 import dev.qixils.gdq.ModelType
-import dev.qixils.gdq.serializers.InstantSerializer
+import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import dev.qixils.gdq.serializers.ZoneIdSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -22,7 +21,7 @@ data class Event(
     @SerialName("minimumdonation") val minimumDonation: Float,
     @SerialName("paypalemail") val paypalEmail: String,
     @SerialName("paypalcurrency") val paypalCurrency: String,
-    @SerialName("datetime") @Serializable(with = InstantSerializer::class) private var _datetime: Instant? = null,
+    @SerialName("datetime") @Serializable(with = InstantAsStringSerializer::class) private var _datetime: Instant? = null,
     @Serializable(with = ZoneIdSerializer::class) val timezone: ZoneId,
     val locked: Boolean,
     @SerialName("allow_donations") val allowDonations: Boolean = !locked,

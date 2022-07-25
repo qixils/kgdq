@@ -2,7 +2,7 @@ package dev.qixils.gdq.models
 
 import dev.qixils.gdq.GDQ
 import dev.qixils.gdq.ModelType
-import dev.qixils.gdq.serializers.InstantSerializer
+import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -21,7 +21,7 @@ data class Bid(
     @SerialName("istarget") val isTarget: Boolean,
     @SerialName("allowuseroptions") val allowUserOptions: Boolean,
     @SerialName("option_max_length") val optionMaxLength: Int? = null,
-    @Serializable(with = InstantSerializer::class) @SerialName("revealedtime") val revealedAt: Instant?,
+    @Serializable(with = InstantAsStringSerializer::class) @SerialName("revealedtime") val revealedAt: Instant?,
     // @SerialName("biddependency") val bidDependency: ???, (this field is unused; can't be bothered to find what its type is)
     val total: Float,
     val count: Int,

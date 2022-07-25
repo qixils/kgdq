@@ -1,10 +1,9 @@
 package club.speedrun.vods.marathon
 
 import dev.qixils.gdq.models.*
-import dev.qixils.gdq.serializers.DurationSerializer
-import dev.qixils.gdq.serializers.InstantSerializer
+import dev.qixils.gdq.serializers.DurationAsStringSerializer
+import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import dev.qixils.gdq.serializers.ZoneIdSerializer
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import java.time.Duration
@@ -22,11 +21,11 @@ data class RunData(
     val console: String,
     val commentators: String,
     val description: String,
-    @Serializable(with = InstantSerializer::class) val startTime: Instant,
-    @Serializable(with = InstantSerializer::class) val endTime: Instant,
+    @Serializable(with = InstantAsStringSerializer::class) val startTime: Instant,
+    @Serializable(with = InstantAsStringSerializer::class) val endTime: Instant,
     val order: Int,
-    @Serializable(with = DurationSerializer::class) val runTime: Duration,
-    @Serializable(with = DurationSerializer::class) val setupTime: Duration,
+    @Serializable(with = DurationAsStringSerializer::class) val runTime: Duration,
+    @Serializable(with = DurationAsStringSerializer::class) val setupTime: Duration,
     val coop: Boolean,
     val category: String,
     val releaseYear: Int?,
@@ -60,8 +59,8 @@ data class RunData(
         runners.addAll(source!!.runners().map { it.value })
     }
 
-    val runTimeText: String get() = DurationSerializer.format(runTime)
-    val setupTimeText: String get() = DurationSerializer.format(setupTime)
+    val runTimeText: String get() = DurationAsStringSerializer.format(runTime)
+    val setupTimeText: String get() = DurationAsStringSerializer.format(setupTime)
 
     companion object {
         private fun calculateStartTime(currentRun: Wrapper<Run>, previousRun: RunData?): Instant {
@@ -86,7 +85,7 @@ data class BidData(
     val isTarget: Boolean,
     val allowUserOptions: Boolean,
     val optionMaxLength: Int?,
-    @Serializable(with = InstantSerializer::class) val revealedAt: Instant?,
+    @Serializable(with = InstantAsStringSerializer::class) val revealedAt: Instant?,
     val donationTotal: Float,
     val donationCount: Int,
     val pinned: Boolean,
@@ -119,7 +118,7 @@ data class EventData(
     val minimumDonation: Float,
     val paypalEmail: String,
     val paypalCurrency: String,
-    @Serializable(with = InstantSerializer::class) val datetime: Instant,
+    @Serializable(with = InstantAsStringSerializer::class) val datetime: Instant,
     @Serializable(with = ZoneIdSerializer::class) val timezone: ZoneId,
     val locked: Boolean,
     val allowDonations: Boolean,
