@@ -37,11 +37,11 @@ data class Event(
 ) : Model {
 
     override suspend fun loadData(api: GDQ, id: Int) {
-        // datetime fallback
+        // datetime fallback | TODO: cache start time of old events in db
         if (_datetime == null)
             _datetime = api.query(type = ModelType.RUN, event = id)
                 .minByOrNull { it.value.order }?.value?.startTime
-                ?: throw IllegalStateException("Could not find the start time of the event")
+                ?: Instant.EPOCH
 
         // canonical URL fallback
         if (_canonicalUrl == null)
@@ -67,14 +67,15 @@ data class Event(
      */
     val canonicalUrl: String get() = _canonicalUrl!!
 
+    @Transient private val horaroNameSplit = horaroName?.split("/") ?: emptyList()
+
     /**
      * The slug of ESA's Horaro event.
      */
-    @Transient val horaroEvent: String? = horaroName?.split("/")?.get(0)
+    @Transient val horaroEvent: String? = if (horaroNameSplit.size == 2) horaroNameSplit[0] else null
 
     /**
      * The slug of this marathon's Horaro schedule.
      */
-    @Transient val horaroSchedule: String? = horaroName?.split("/")?.get(1)
-
+    @Transient val horaroSchedule: String? = if (horaroNameSplit.size == 2) horaroNameSplit[1] else null
 }

@@ -21,7 +21,7 @@ data class Link(
     /**
      * The link's type.
      */
-    @SerialName("rel") val type: LinkType,
+    @SerialName("rel") val type: LinkType? = null,
 )
 
 /**

@@ -10,7 +10,7 @@ sealed interface VOD {
 @Serializable
 data class TwitchVOD(
     val videoId: Int,
-    val timestamp: String?
+    val timestamp: String? = null
 ) : VOD {
     override fun asURL(): String {
         val sb = StringBuilder("https://www.twitch.tv/videos/").append(videoId)

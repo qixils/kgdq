@@ -29,7 +29,7 @@ open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
     }
     private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(20)).build()
     private val cache: MutableMap<Pair<ModelType<*>, Int>, Pair<Wrapper<*>, Instant>> = mutableMapOf()
-    private var lastCachedRunners: Instant? = null
+    protected var lastCachedRunners: Instant? = null
 
     /**
      * Constructs a new GDQ instance with the provided API path.
@@ -98,6 +98,8 @@ open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         run: Int? = null,
         offset: Int? = null, // TODO: send PR to ESA fixing this param (edit https://github.com/ESAMarathon/donation-tracker/blob/esa/views/api.py#L165-L166 using https://github.com/GamesDoneQuick/donation-tracker/blob/master/tracker/views/api.py#L384-L395)
     ): List<Wrapper<M>> {
+        // TODO: re-introduce Query data class to cache entire query results for a short time
+
         // ensure runners are cached (they're high in quantity but basically fixed)
         if (type == ModelType.RUNNER) cacheRunners()
 

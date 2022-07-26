@@ -67,10 +67,8 @@ data class Run(
     }
 
     suspend fun runners(): List<Wrapper<Runner>> {
-        if (_runners == null) {
-            val allRunners = api!!.query(type = ModelType.RUNNER, run = id!!, event = eventId)
-            _runners = runnerIds.map { runnerId -> allRunners.first { it.id == runnerId } }
-        }
+        if (_runners == null)
+            _runners = runnerIds.map { api!!.query(type = ModelType.RUNNER, id = it ).first() }
         return _runners!!
     }
 }

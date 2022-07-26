@@ -26,7 +26,7 @@ data class ModelType<M : Model>(
         val BID = register(ModelType("bid", Bid::class, Bid.serializer(), Duration.ofMinutes(1), listOf("bid")))
         val EVENT = register(ModelType("event", Event::class, Event.serializer(), Duration.ofMinutes(1)))
         val RUN = register(ModelType("run", Run::class, Run.serializer(), Duration.ofMinutes(1), listOf("speedrun")))
-        val RUNNER = register(ModelType("runner", Runner::class, Runner.serializer(), Duration.ofHours(6)))
+        val RUNNER = register(ModelType("runner", Runner::class, Runner.serializer(), Duration.ofDays(1)))
         // TODO: donations, donors
     }
 }

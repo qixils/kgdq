@@ -28,7 +28,7 @@ data class Run(
      * The scheduled start time of the run.
      */
     @Serializable(with = OffsetDateTimeSerializer::class) val scheduled: OffsetDateTime,
-    @SerialName("data") private val rawData: List<String>,
+    @SerialName("data") private val rawData: List<String?>,
 ) {
     @Transient private var _data: List<Datum>? = null
 
@@ -47,9 +47,19 @@ data class Run(
      * The custom data values.
      */
     val data: List<Datum> get() = _data ?: throw IllegalStateException("Data not initialized")
+
+    /**
+     * Fetches a custom [data] value given its [column] name.
+     *
+     * @param column     the column name
+     * @param ignoreCase whether to ignore case when searching for the column
+     * @return the value or null if not found
+     */
+    fun getValue(column: String, ignoreCase: Boolean = true): String?
+    = data.firstOrNull { column.equals(it.column, ignoreCase) }?.value
 }
 
 data class Datum(
     val column: String,
-    val value: String,
+    val value: String?,
 )
