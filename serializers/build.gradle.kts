@@ -1,7 +1,6 @@
 val kotlin_version: String by project
 
 plugins {
-    application
     kotlin("plugin.serialization") version "1.7.10"
 }
 

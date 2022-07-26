@@ -1,0 +1,61 @@
+---
+# Your Discord bot's token
+token: "INSERT_TOKEN_HERE"
+
+# The IDs of custom emotes to use for displaying social media links (or `null`)
+emotes:
+  #twitch: 745796158839849071
+  twitch: null
+  youtube: null
+  twitter: null
+
+# The list of events to be tracked
+events:
+
+  # The following example event corresponds to the Summer Games Done Quick 2022 event
+
+    # The organization managing the event (either "GDQ" or "ESA")
+  - org: GDQ
+
+    # ID of the event -- can be the event's short name, its internal API ID, or even "latest"
+    id: sgdq2022
+
+    # IDs of the Discord channels to post the event's schedule to
+    # Note: No two events should share the same channel
+    channels:
+      - 12345
+      - 67890
+
+    # Twitch channel hosting the event
+    twitch: GamesDoneQuick
+
+    # Number of upcoming runs to display in the Run Roster
+    upcomingRuns: 5
+
+    # Minutes to wait in between checking the schedule
+    waitMinutes: 5
+
+
+
+  # The following example event corresponds to the European Speedrunner Assembly 2022 Stream 1 event
+
+    # The organization managing the event (either "GDQ" or "ESA")
+  - org: ESA
+
+    # ID of the event -- can be the event's short name, its internal API ID, or even "latest"
+    id: esa2022s1
+
+    # IDs of the Discord channels to post the event's schedule to
+    # Note: No two events should share the same channel
+    channels:
+      - 12345
+      - 67890
+
+    # Twitch channel hosting the event
+    twitch: ESAMarathon
+
+    # Number of upcoming runs to display in the Run Roster
+    upcomingRuns: 5
+
+    # Minutes to wait in between checking the schedule
+    waitMinutes: 5

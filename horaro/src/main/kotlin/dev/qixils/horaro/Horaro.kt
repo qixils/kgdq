@@ -15,33 +15,27 @@ import java.util.logging.Logger
  * The main class of the async Horaro library which fetches read-only data from the
  * [Horaro API](https://horaro.org/-/api).
  */
-sealed class Horaro {
+object Horaro {
 
     /**
-     * The default instance of the library.
+     * Utility method for generating a parameter string.
      */
-    companion object Default : Horaro() {
-
-        /**
-         * Utility method for generating a parameter string.
-         */
-        private fun paramsToString(params: Map<String, String?>): String {
-            val sb = StringBuilder()
-            params.entries.forEach {
-                if (it.value == null) return@forEach
-                if (sb.isEmpty()) sb.append("?") else sb.append("&")
-                sb.append(it.key).append('=').append(it.value)
-            }
-            return sb.toString()
+    private fun paramsToString(params: Map<String, String?>): String {
+        val sb = StringBuilder()
+        params.entries.forEach {
+            if (it.value == null) return@forEach
+            if (sb.isEmpty()) sb.append("?") else sb.append("&")
+            sb.append(it.key).append('=').append(it.value)
         }
+        return sb.toString()
+    }
 
-        /**
-         * Utility method for generating a parameter string.
-         */
-        private fun paramToString(key: String, value: String?): String {
-            if (value == null) return ""
-            return "?$key=$value"
-        }
+    /**
+     * Utility method for generating a parameter string.
+     */
+    private fun paramToString(key: String, value: String?): String {
+        if (value == null) return ""
+        return "?$key=$value"
     }
 
     private val logger = Logger.getLogger("Horaro")

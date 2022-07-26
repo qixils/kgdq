@@ -1,6 +1,7 @@
 package club.speedrun.vods.marathon
 
 import dev.qixils.gdq.GDQ
+import dev.qixils.gdq.InternalGdqApi
 import dev.qixils.gdq.ModelType
 import dev.qixils.gdq.models.*
 import dev.qixils.gdq.serializers.DurationAsStringSerializer
@@ -35,6 +36,7 @@ data class RunData(
     val category: String,
     val releaseYear: Int?,
     val runners: MutableList<Runner>,
+    val runnersAsString: String,
     val bids: List<BidData>,
     val twitchVODs: List<TwitchVOD>,
     val youtubeVODs: List<YouTubeVOD>,
@@ -64,6 +66,7 @@ data class RunData(
         category = run.value.category,
         releaseYear = run.value.releaseYear,
         runners = mutableListOf(),
+        runnersAsString = run.value.deprecatedRunners,
         bids = bids,
         twitchVODs = emptyList(),
         youtubeVODs = emptyList(),
@@ -89,11 +92,13 @@ data class RunData(
         category = trackerRun?.category ?: horaroRun.getValue("Category") ?: "",
         releaseYear = trackerRun?.releaseYear,
         runners = trackerRun?.runners ?: mutableListOf(),
+        runnersAsString = listOf(horaroRun.getValue("Player(s)"), trackerRun?.runnersAsString).firstOrNull { !it.isNullOrEmpty() } ?: "",
         bids = trackerRun?.bids ?: emptyList(),
         twitchVODs = calculateHoraroVODs(horaroRun) ?: trackerRun?.twitchVODs ?: emptyList(),
         youtubeVODs = trackerRun?.youtubeVODs ?: emptyList(),
     )
 
+    @InternalGdqApi
     suspend fun loadRunners(api: GDQ) {
         if (horaroSource != null) {
             if (runners.isNotEmpty())
@@ -108,6 +113,16 @@ data class RunData(
 
     val runTimeText: String get() = DurationAsStringSerializer.format(runTime)
     val setupTimeText: String get() = DurationAsStringSerializer.format(setupTime)
+
+    /**
+     * Whether this is the current run being played at the event.
+     */
+    @Transient val isCurrent: Boolean = run {
+        val now = Instant.now()
+        val start = startTime.minus(setupTime)
+        val end = endTime
+        start <= now && now <= end
+    }
 
     companion object {
         private val HORARO_GAME_MARKDOWN: Pattern = Pattern.compile("\\[(.+)]\\(https://www.twitch.tv/videos/(\\d+)\\)")

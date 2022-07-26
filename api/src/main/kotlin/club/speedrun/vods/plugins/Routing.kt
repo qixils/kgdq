@@ -37,7 +37,7 @@ fun Application.configureRouting() {
 //    }
 
     routing {
-        route("/api") {
+        route("/api/v1") {
             route("/gdq", gdq.route())
             route("/esa", esa.route())
         }

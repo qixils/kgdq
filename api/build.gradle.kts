@@ -20,8 +20,8 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":kgdq"))
-    implementation(project(":horaro"))
+    api(project(":kgdq"))
+    api(project(":horaro"))
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-auth-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-locations-jvm:$ktor_version")
