@@ -85,7 +85,7 @@ data class RunData(
         horaroSource = horaroRun,
         id = trackerRun?.id ?: -1,
         event = event.id,
-        name = trackerRun?.name ?: calculateHoraroName(horaroRun),
+        name = calculateHoraroName(horaroRun),
         displayName = trackerRun?.displayName ?: "",
         twitchName = trackerRun?.twitchName ?: "",
         console = trackerRun?.console ?: horaroRun.getValue("Platform") ?: "",

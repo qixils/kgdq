@@ -2,10 +2,13 @@
 
 package club.speedrun.vods.plugins
 
+import club.speedrun.vods.DiscordUser
 import club.speedrun.vods.marathon.ESAMarathon
 import club.speedrun.vods.marathon.GDQMarathon
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.apache.*
+import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -17,10 +20,20 @@ import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.SerializationException
 
+val httpClient = HttpClient(Apache)
 val gdq = GDQMarathon()
 val esa = ESAMarathon()
 
+suspend fun discordUser(userSession: UserSession?): DiscordUser {
+    if ((userSession?.accessToken ?: "null") == "null")
+        throw AuthenticationException("No access token found")
+    return httpClient.get("https://discord.com/api/v10/users/@me") {
+        header(HttpHeaders.Authorization, "Bearer ${userSession!!.accessToken}")
+    }.body()
+}
+
 fun Application.configureRouting() {
+
     install(Locations) {
     }
     install(StatusPages) {
@@ -31,6 +44,12 @@ fun Application.configureRouting() {
         exception<AuthorizationException> { call, cause ->
             call.respond(HttpStatusCode.Forbidden)
         }
+        exception<AuthenticationException> { call, cause ->
+            call.respondRedirect("/api/auth/login")
+            // TODO: auto-redirect to the page that caused the error? (idk how to do that)
+        }
+    }
+    install (Sessions) {
     }
     authentication {
         oauth("auth-oauth-discord") {
@@ -46,7 +65,7 @@ fun Application.configureRouting() {
                     defaultScopes = listOf("identify"),
                 )
             }
-            client = HttpClient(Apache)
+            client = httpClient
         }
     }
 
@@ -62,7 +81,16 @@ fun Application.configureRouting() {
                     get("/callback") {
                         val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
                         call.sessions.set(UserSession(principal?.accessToken.toString()))
-                        call.respondRedirect("/dashboard")
+                        call.respondRedirect("/api/auth/test")
+                    }
+
+                    get("/test") {
+                        try {
+                            val user = discordUser(call.sessions.get())
+                            call.respond(user)
+                        } catch (e: IllegalStateException) {
+                            call.respondRedirect("/api/auth/login")
+                        }
                     }
                 }
             }
@@ -75,5 +103,6 @@ fun Application.configureRouting() {
     }
 }
 
-class AuthorizationException : RuntimeException()
+class AuthorizationException(message: String? = null) : RuntimeException(message)
+class AuthenticationException(message: String? = null) : RuntimeException(message)
 data class UserSession(val accessToken: String)
