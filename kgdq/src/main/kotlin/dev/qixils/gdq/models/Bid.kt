@@ -14,7 +14,7 @@ data class Bid(
     @SerialName("speedrun") private val runId: Int?,
     @SerialName("parent") private val parentId: Int?,
     val name: String,
-    val state: BidState,
+    val state: BidState? = null, // unfortunately nullable
     val description: String,
     @SerialName("shortdescription") val shortDescription: String,
     val goal: Float?,

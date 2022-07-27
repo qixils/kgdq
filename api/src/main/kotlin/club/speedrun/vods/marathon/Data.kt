@@ -211,10 +211,14 @@ data class BidData(
     val donationCount: Int,
     val pinned: Boolean,
 ) {
-    constructor(bid: Bid, children: List<BidData>) : this(
+    constructor(bid: Bid, children: List<BidData>, run: Wrapper<Run>) : this(
         children = children,
         name = bid.name,
-        state = bid.state,
+        state = when {
+            bid.state != null -> bid.state!!
+            run.value.endTime.isBefore(Instant.now()) -> BidState.CLOSED
+            else -> BidState.OPENED
+        },
         description = bid.description,
         shortDescription = bid.shortDescription,
         goal = bid.goal,

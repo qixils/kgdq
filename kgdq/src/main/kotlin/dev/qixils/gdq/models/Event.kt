@@ -32,7 +32,7 @@ data class Event(
     val count: Int,
     val max: Float,
     val avg: Double,
-    @SerialName("horaro_name") private val horaroName: String?,
+    @SerialName("horaro_name") private val horaroName: String? = null,
     // TODO: prize countries?
 ) : Model {
 

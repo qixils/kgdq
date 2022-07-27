@@ -31,7 +31,7 @@ data class Run(
     @SerialName("runners") private val runnerIds: List<Int>,
     @SerialName("canonical_url") private var _canonicalUrl: String? = null,
     val public: String,
-    @SerialName("external_id") val horaroId: String?, // ESA exclusive
+    @SerialName("external_id") val horaroId: String? = null, // ESA exclusive
 ) : Model {
 
     override fun isValid(): Boolean {

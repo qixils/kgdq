@@ -23,7 +23,8 @@ data class ModelType<M : Model>(
 
         fun get(id: String): ModelType<*>? = types[id.replaceFirst("tracker.", "")]
 
-        val BID = register(ModelType("bid", Bid::class, Bid.serializer(), Duration.ofMinutes(5), listOf("bid")))
+        val BID = register(ModelType("bid", Bid::class, Bid.serializer(), Duration.ofMinutes(5)))
+        val BID_TARGET = register(ModelType("bidtarget", Bid::class, Bid.serializer(), Duration.ofMinutes(5)))
         val EVENT = register(ModelType("event", Event::class, Event.serializer(), Duration.ofMinutes(5)))
         val RUN = register(ModelType("run", Run::class, Run.serializer(), Duration.ofMinutes(5), listOf("speedrun")))
         val RUNNER = register(ModelType("runner", Runner::class, Runner.serializer(), Duration.ofDays(1)))

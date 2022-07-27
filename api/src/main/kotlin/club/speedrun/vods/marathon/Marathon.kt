@@ -55,7 +55,7 @@ abstract class Marathon {
             runner=query.runner
         )).sortedBy { it.value.order }
         val bids = ArrayList(gdq.query(
-            type=ModelType.BID,
+            type=ModelType.BID_TARGET,
             run=query.id,
             event=event.id
         ))
@@ -63,17 +63,27 @@ abstract class Marathon {
         // compute bid data
         val topLevelBidMap = bids
             .filter { it.value.parent() == null && it.value.run() != null }
-            .associateWith { mutableListOf<Wrapper<Bid>>() }
-        bids.forEach { if (it.value.parent() != null) topLevelBidMap[it.value.parent()]?.add(it) }
+            .map { it.id }
+            .associateWith { mutableListOf<Bid>() }
+        bids.forEach { if (it.value.parent() != null) topLevelBidMap[it.value.parent()!!.id]?.add(it.value) }
 
         // compute run data
-        val runBidMap = runs.associate { it.id to mutableListOf<BidData>() }
-        topLevelBidMap.forEach { runBidMap[it.key.value.run()!!.id]?.add(BidData(it.key.value, it.value.map { value -> BidData(value.value, emptyList()) })) }
+        val runBidMap = runs.associate { it.id to mutableListOf<Pair<Bid, MutableList<Bid>>>() }
+        topLevelBidMap.entries
+            // map bid ids to bids
+            .map { entry -> (bids.first { bid -> bid.id == entry.key }).value to entry.value }
+            // add to runBidMap
+            .forEach { runBidMap[it.first.run()!!.id]?.add(it) }
 
         // finalize & respond
         val runData: MutableList<RunData> = ArrayList()
         runs.forEach {
-            val runBids = runBidMap[it.id]!!
+            // get bids
+            val rawRunBids = runBidMap[it.id]!!
+            val runBids = rawRunBids.map { bid ->
+                BidData(bid.first, bid.second.map { value -> BidData(value, emptyList(), it) }, it)
+            }
+            // get other data
             val previousRun = runData.lastOrNull()
             val data = RunData(it, runBids, previousRun)
             if (gdq is ESA) {
