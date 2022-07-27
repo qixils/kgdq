@@ -168,6 +168,7 @@ class ScheduleManager(
                             sb.append('/')
                             children.drop(1).joinTo(sb, "/") { it.name }
                         }
+                        sb.append(')')
                     }
                 }
             }
