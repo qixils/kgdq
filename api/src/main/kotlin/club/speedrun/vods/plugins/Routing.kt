@@ -25,10 +25,11 @@ val gdq = GDQMarathon()
 val esa = ESAMarathon()
 
 suspend fun discordUser(userSession: UserSession?): DiscordUser {
-    if ((userSession?.accessToken ?: "null") == "null")
-        throw AuthenticationException("No access token found")
+    if (userSession == null)
+        throw AuthenticationException("User is not logged in")
+    // TODO: support refreshing tokens?
     return httpClient.get("https://discord.com/api/v10/users/@me") {
-        header(HttpHeaders.Authorization, "Bearer ${userSession!!.accessToken}")
+        header(HttpHeaders.Authorization, "Bearer ${userSession.accessToken}")
     }.body()
 }
 
@@ -50,6 +51,7 @@ fun Application.configureRouting() {
         }
     }
     install (Sessions) {
+        cookie<UserSession>("user_session")
     }
     authentication {
         oauth("auth-oauth-discord") {
@@ -80,7 +82,14 @@ fun Application.configureRouting() {
 
                     get("/callback") {
                         val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
-                        call.sessions.set(UserSession(principal?.accessToken.toString()))
+                        if (principal == null) {
+                            call.respond(HttpStatusCode.Unauthorized)
+                            return@get
+                        }
+                        call.sessions.set(UserSession(
+                            principal.accessToken,
+                            principal.refreshToken,
+                        ))
                         call.respondRedirect("/api/auth/test")
                     }
 
@@ -105,4 +114,4 @@ fun Application.configureRouting() {
 
 class AuthorizationException(message: String? = null) : RuntimeException(message)
 class AuthenticationException(message: String? = null) : RuntimeException(message)
-data class UserSession(val accessToken: String)
+data class UserSession(val accessToken: String, val refreshToken: String?)
