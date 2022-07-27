@@ -102,29 +102,29 @@ class ScheduleManager(
                 runTicker.add(run)
 
             if (run.isCurrent)
-                sb.append((0x25B6).toChar()).append((0xFE0F).toChar())
+                sb.append(">>> \u25B6\uFE0F ")
 
             sb.append(TimeFormat.DATE_SHORT.format(run.startTime)).append(' ')
             sb.append(TimeFormat.TIME_SHORT.format(run.startTime)).append(": ")
 
-            sb.append(run.name).append(' ')
+            sb.append(run.name)
+
             if (run.category.isNotEmpty())// && !"Any%".equals(run.category, true))
-                sb.append('(').append(run.category).append(") ")
+                sb.append(" (").append(run.category).append(')')
 
             if (!run.coop && run.runners.size > 1)
-                sb.append("race ")
+                sb.append(" race")
 
             if (run.runners.isNotEmpty() || run.runnersAsString.isNotEmpty()) {
-                sb.append("by ")
+                sb.append(" by")
                 if (run.runners.isNotEmpty())
                     naturalJoinTo(sb, run.runners.map { it.name })
                 else
                     sb.append(run.runnersAsString)
-                sb.append(' ')
             }
 
             if (run.runTime > Duration.ZERO)
-                sb.append("in ").append(run.runTimeText)
+                sb.append(" in ").append(run.runTimeText)
 
             // Append bids
             run.bids.forEach { bid ->
@@ -170,9 +170,13 @@ class ScheduleManager(
                 }
             }
 
+            // Append VODs
+            val vods = run.twitchVODs + run.youtubeVODs
+            vods.forEach { vod -> sb.append('\n').append(vod.asURL()) }
+
             // Finalize
             messages.add(MessageTransformer(
-                Message(sb.toString().trim()),
+                Message(sb.toString()),
                 pin = run.isCurrent
             ))
         }
