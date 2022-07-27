@@ -79,7 +79,7 @@ abstract class Marathon {
                     gdq.query(type = ModelType.RUNNER, run = data.id)
                 }
             }
-            data.loadRunners(gdq)
+            data.loadRunners()
             runData.add(data)
         }
         return runData
@@ -95,10 +95,10 @@ abstract class Marathon {
         val horaroRuns = ArrayList<RunData>(schedule.items.size)
         schedule.items.forEach {  horaroRun ->
             val order = horaroRuns.size + 1
-            val horaroId = horaroRun.data.first { "ID".equals(it.column, true) }
-            val trackerRun = trackerRuns.firstOrNull { it.trackerSource?.horaroId == horaroId.value }
+            val horaroId = horaroRun.data.first { "ID".equals(it.column, true) }.value
+            val trackerRun = trackerRuns.firstOrNull { it.trackerSource?.horaroId == horaroId }
             val data = RunData(horaroRun, trackerRun, horaroRuns.lastOrNull(), event, order)
-            data.loadRunners(gdq)
+            data.loadRunners()
             horaroRuns.add(data)
         }
         return horaroRuns

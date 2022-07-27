@@ -1,8 +1,7 @@
 package club.speedrun.vods.marathon
 
-import dev.qixils.gdq.GDQ
+import club.speedrun.vods.naturalJoinToString
 import dev.qixils.gdq.InternalGdqApi
-import dev.qixils.gdq.ModelType
 import dev.qixils.gdq.models.*
 import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
@@ -61,18 +60,27 @@ data class RunData(
         endTime = run.value.startTime + run.value.runTime,
         order = run.value.order,
         runTime = run.value.runTime,
-        setupTime = if (previousRun != null) Duration.between(previousRun.endTime, run.value.startTime) else run.value.setupTime,
+        setupTime = if (previousRun != null) Duration.between(
+            previousRun.endTime,
+            run.value.startTime
+        ) else run.value.setupTime,
         coop = run.value.coop,
         category = run.value.category,
         releaseYear = run.value.releaseYear,
         runners = mutableListOf(),
-        runnersAsString = run.value.deprecatedRunners,
+        runnersAsString = run.value.deprecatedRunners.split(", ").naturalJoinToString(),
         bids = bids,
         twitchVODs = emptyList(),
         youtubeVODs = emptyList(),
     )
 
-    constructor(horaroRun: dev.qixils.horaro.models.Run, trackerRun: RunData?, previousRun: RunData?, event: Wrapper<Event>, order: Int) : this(
+    constructor(
+        horaroRun: dev.qixils.horaro.models.Run,
+        trackerRun: RunData?,
+        previousRun: RunData?,
+        event: Wrapper<Event>,
+        order: Int
+    ) : this(
         trackerSource = trackerRun?.trackerSource,
         horaroSource = horaroRun,
         id = trackerRun?.id ?: -1,
@@ -87,25 +95,33 @@ data class RunData(
         endTime = horaroRun.scheduled.toInstant().plus(horaroRun.length),
         order = order,
         runTime = horaroRun.length,
-        setupTime = if (previousRun != null) Duration.between(previousRun.endTime, horaroRun.scheduled.toInstant()) else trackerRun?.setupTime ?: Duration.ZERO,
+        setupTime = if (previousRun != null) Duration.between(
+            previousRun.endTime,
+            horaroRun.scheduled.toInstant()
+        ) else trackerRun?.setupTime ?: Duration.ZERO,
         coop = trackerRun?.coop ?: false,
         category = trackerRun?.category ?: horaroRun.getValue("Category") ?: "",
         releaseYear = trackerRun?.releaseYear,
         runners = trackerRun?.runners ?: mutableListOf(),
-        runnersAsString = listOf(horaroRun.getValue("Player(s)"), trackerRun?.runnersAsString).firstOrNull { !it.isNullOrEmpty() } ?: "",
+        runnersAsString = listOf(
+            calculateHoraroRunnerNames(horaroRun)?.naturalJoinToString(),
+            trackerRun?.runnersAsString
+        ).firstOrNull { !it.isNullOrEmpty() } ?: "",
         bids = trackerRun?.bids ?: emptyList(),
         twitchVODs = calculateHoraroVODs(horaroRun) ?: trackerRun?.twitchVODs ?: emptyList(),
         youtubeVODs = trackerRun?.youtubeVODs ?: emptyList(),
     )
 
     @InternalGdqApi
-    suspend fun loadRunners(api: GDQ) {
+    suspend fun loadRunners() {
         if (horaroSource != null) {
             if (runners.isNotEmpty())
                 return
             Logger.getLogger("RunData").fine("Loading runners for $name")
-            val ids = horaroSource.getValue("UserIDs")?.split(",") ?: emptyList()
-            runners.addAll(ids.map { api.query(type = ModelType.RUNNER, id = it.toInt()).first().value })
+            // The Horaro schedule has a "UserIDs" column, but they don't seem to align with the
+            // donation tracker API, so I'm falling back to their "Player(s)" column instead
+            runners.addAll(horaroSource.getValue("Player(s)")?.split(", ")
+                ?.map { calculateHoraroFakeRunner(it) } ?: emptyList())
         } else {
             runners.addAll(trackerSource!!.runners().map { it.value })
         }
@@ -117,7 +133,8 @@ data class RunData(
     /**
      * Whether this is the current run being played at the event.
      */
-    @Transient val isCurrent: Boolean = run {
+    @Transient
+    val isCurrent: Boolean = run {
         val now = Instant.now()
         val start = startTime.minus(setupTime)
         val end = endTime
@@ -125,7 +142,9 @@ data class RunData(
     }
 
     companion object {
-        private val HORARO_GAME_MARKDOWN: Pattern = Pattern.compile("\\[(.+)]\\(https://www.twitch.tv/videos/(\\d+)\\)")
+        private val HORARO_GAME_MARKDOWN: Pattern =
+            Pattern.compile("\\[(.+)]\\(https://www.twitch.tv/videos/(\\d+)\\)")
+        private val NAME_REGEX: Pattern = Pattern.compile("\\[(.+)]\\((.+)\\)")
 
         private fun calculateHoraroName(run: dev.qixils.horaro.models.Run): String {
             val rawName = run.getValue("Game")!!.trim()
@@ -145,6 +164,32 @@ data class RunData(
             } else {
                 null
             }
+        }
+
+        private fun calculateHoraroRunnerNames(run: dev.qixils.horaro.models.Run): List<String>? {
+            val names = run.getValue("Player(s)")?.split(", ") ?: return null
+            return names.map {
+                val matcher = NAME_REGEX.matcher(it)
+                if (matcher.matches()) {
+                    matcher.group(1)
+                } else {
+                    it
+                }
+            }
+        }
+
+        private fun calculateHoraroFakeRunner(rawName: String): Runner {
+            val matcher = NAME_REGEX.matcher(rawName)
+            val name: String
+            val stream: String
+            if (matcher.matches()) {
+                name = matcher.group(1)
+                stream = matcher.group(2)
+            } else {
+                name = rawName
+                stream = ""
+            }
+            return Runner(name, stream, "", "", "", name)
         }
     }
 }

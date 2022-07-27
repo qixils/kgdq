@@ -2,6 +2,7 @@ package dev.qixils.discord
 
 import club.speedrun.vods.marathon.EventData
 import club.speedrun.vods.marathon.RunData
+import club.speedrun.vods.naturalJoinTo
 import dev.minn.jda.ktx.coroutines.await
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.Message
@@ -47,20 +48,6 @@ class ScheduleManager(
         private val dateHeaderFormat = DateTimeFormatter.ofPattern("_ _\n**EEEE** MMM d\n_ _\n", Locale.ENGLISH)
         private val twitchRegex = Pattern.compile("https?://(?:www\\.)?twitch\\.tv/(.+)")
         private val urlRegex = Pattern.compile("https?://.+")
-
-        private fun <A : Appendable> naturalJoinTo(buffer: A, content: List<String>): A {
-            if (content.isEmpty()) return buffer
-            if (content.size == 1) {
-                buffer.append(content.first())
-                return buffer
-            }
-
-            for (i in 0 until content.size - 1)
-                buffer.append(content[i])
-            buffer.append(" and ")
-            buffer.append(content.last())
-            return buffer
-        }
     }
 
     init {
@@ -209,7 +196,7 @@ class ScheduleManager(
                 } else if (runTicker.isNotEmpty()) {
                     runTicker.forEachIndexed { index, run ->
                         field {
-                            name = if (index == 0) "Current Run"
+                            name = if (index == 0) "Current Game"
                             else TimeFormat.RELATIVE.format(run.startTime)
 
                             val sb = StringBuilder(run.name)
@@ -219,7 +206,6 @@ class ScheduleManager(
                                 sb.append(" by ")
                                 naturalJoinTo(sb, run.runners.map { runner ->
                                     // TODO: re-add emotes when Discord releases the React Native port for Android
-
                                     // Find one of the runner's social media profiles
                                     val url: String? = if (runner.stream.isNotEmpty()) {
                                         val twitchMatcher = twitchRegex.matcher(runner.stream)
@@ -309,6 +295,8 @@ class ScheduleManager(
             }
             // Send new messages
             newMessagesCopy.forEach { it.send(channel) }
+            // Log
+            logger.info("Updated schedule for ${config.org.name}'s ${event.short.uppercase()} in #${channel.name} ($channelId)")
         }
     }
 }

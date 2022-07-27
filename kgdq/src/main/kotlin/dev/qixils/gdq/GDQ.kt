@@ -28,7 +28,8 @@ open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         coerceInputValues = true
     }
     private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(20)).build()
-    private val cache: MutableMap<Pair<ModelType<*>, Int>, Pair<Wrapper<*>, Instant>> = mutableMapOf()
+    private val modelCache: MutableMap<Pair<ModelType<*>, Int>, Pair<Wrapper<*>, Instant>> = mutableMapOf()
+    private val responseCache: MutableMap<String, Pair<List<Wrapper<*>>, Instant>> = mutableMapOf()
     protected var lastCachedRunners: Instant? = null
 
     /**
@@ -49,10 +50,20 @@ open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
      * Performs a search on the GDQ tracker for the provided [query].
      *
      * @param query           the query to search for
+     * @param modelType       the type of model to return
      * @param modelSerializer the serializer of model being queried for
      * @return a list of models matching the query
      */
-    suspend fun <M : Model> query(query: String, modelSerializer: KSerializer<M>): List<Wrapper<M>> {
+    private suspend fun <M : Model> query(query: String, modelType: ModelType<M>, modelSerializer: KSerializer<M>): List<Wrapper<M>> {
+        // look in the cache first
+        if (responseCache.containsKey(query)) {
+            val (wrappers, cachedAt) = responseCache[query]!!
+            if (cachedAt.plus(modelType.cacheFor).isAfter(Instant.now())) {
+                @Suppress("UNCHECKED_CAST") // the type is correct it's ok
+                return wrappers as List<Wrapper<M>>
+            }
+        }
+
         // logging
         val url = "$apiPath?$query"
         logger.info("Querying $url")
@@ -74,10 +85,40 @@ open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         models.removeIf{ !it.value.isValid() }
 
         // cache models
-        models.forEach { cache[it.modelType to it.id] = it to Instant.now() }
+        val now = Instant.now()
+        models.forEach { modelCache[it.modelType to it.id] = it to now }
+        responseCache[query] = models to now
 
         // return
         return models
+    }
+
+    /**
+     * Performs a search on the GDQ tracker for the provided [query].
+     *
+     * @param query the query to search for
+     * @return a list of models matching the query
+     */
+    suspend fun <M : Model> query(query: Query<M>): List<Wrapper<M>> {
+        // TODO: cache entire query results for a short time
+
+        // ensure runners are cached (they're high in quantity but basically fixed)
+        if (query.type == ModelType.RUNNER) cacheRunners()
+
+        // load from cache if possible
+        if (query.id != null) {
+            val pair = query.type to query.id
+            if (modelCache.containsKey(pair)) {
+                val (wrapper, cachedAt) = modelCache[pair]!!
+                if (cachedAt.plus(query.type.cacheFor).isAfter(Instant.now())) {
+                    @Suppress("UNCHECKED_CAST") // the type is correct it's ok
+                    return listOf(wrapper) as List<Wrapper<M>>
+                }
+            }
+        }
+
+        // perform query
+        return query(query.asQueryString(), query.type, query.type.serializer)
     }
 
     /**
@@ -96,39 +137,12 @@ open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         event: Int? = null,
         runner: Int? = null,
         run: Int? = null,
-        offset: Int? = null, // TODO: send PR to ESA fixing this param (edit https://github.com/ESAMarathon/donation-tracker/blob/esa/views/api.py#L165-L166 using https://github.com/GamesDoneQuick/donation-tracker/blob/master/tracker/views/api.py#L384-L395)
+        offset: Int? = null,
     ): List<Wrapper<M>> {
-        // TODO: re-introduce Query data class to cache entire query results for a short time
-
-        // ensure runners are cached (they're high in quantity but basically fixed)
-        if (type == ModelType.RUNNER) cacheRunners()
-
-        // load from cache if possible
-        if (id != null) {
-            val pair = type to id
-            if (cache.containsKey(pair)) {
-                val (wrapper, cachedAt) = cache[pair]!!
-                if (cachedAt.plus(type.cacheFor).isAfter(Instant.now())) {
-                    @Suppress("UNCHECKED_CAST") // the type is correct it's ok
-                    return listOf(wrapper) as List<Wrapper<M>>
-                }
-            }
-        }
-
-        // create query string
-        val params = mutableListOf("type=${type.id}")
-        if (id != null) params.add("id=${id}")
-        if (event != null) params.add("event=${event}")
-        if (runner != null) params.add("runner=${runner}")
-        if (run != null) params.add("run=${run}")
-        if (offset != null) params.add("offset=${offset}")
-        val query = params.joinToString("&")
-
-        // perform query
-        return query(query, type.serializer)
+        return query(Query(type, id, event, runner, run, offset))
     }
 
-    protected open suspend fun cacheRunners() { // TODO: remove `open` when ESA fixes their API bug
+    protected open suspend fun cacheRunners() { // TODO: remove `protected open` when ESA fixes their API bug
         // only cache runners every few hours
         val now = Instant.now()
         if (lastCachedRunners != null && lastCachedRunners!!.plus(ModelType.RUNNER.cacheFor).isAfter(now))

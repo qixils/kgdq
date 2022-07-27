@@ -33,7 +33,7 @@ events:
     upcomingRuns: 5
 
     # Minutes to wait in between checking the schedule
-    waitMinutes: 5
+    waitMinutes: 10
 
 
 
@@ -58,4 +58,4 @@ events:
     upcomingRuns: 5
 
     # Minutes to wait in between checking the schedule
-    waitMinutes: 5
+    waitMinutes: 10
