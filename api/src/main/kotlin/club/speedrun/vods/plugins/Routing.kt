@@ -4,13 +4,17 @@ package club.speedrun.vods.plugins
 
 import club.speedrun.vods.marathon.ESAMarathon
 import club.speedrun.vods.marathon.GDQMarathon
+import io.ktor.client.*
+import io.ktor.client.engine.apache.*
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.locations.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
 import kotlinx.serialization.SerializationException
 
 val gdq = GDQMarathon()
@@ -24,57 +28,52 @@ fun Application.configureRouting() {
             logError(call, cause)
             call.respond(HttpStatusCode.InternalServerError, mapOf("error" to ("An internal error occurred: " + (cause.message ?: cause.toString()))))
         }
-        // TODO: oauth error stuff? (if not already handled by the oauth plugin ig)
-//        exception<AuthenticationException> { call, cause ->
-//            call.respond(HttpStatusCode.Unauthorized)
-//        }
         exception<AuthorizationException> { call, cause ->
             call.respond(HttpStatusCode.Forbidden)
         }
     }
-//    install(Webjars) {
-//        path = "/webjars" //defaults to /webjars
-//    }
+    authentication {
+        oauth("auth-oauth-discord") {
+            urlProvider = { "https://vods.speedrun.club/api/auth/callback" }
+            providerLookup = {
+                OAuthServerSettings.OAuth2ServerSettings(
+                    name = "discord",
+                    authorizeUrl = "https://discord.com/api/oauth2/authorize",
+                    accessTokenUrl = "https://discord.com/api/oauth2/token",
+                    requestMethod = HttpMethod.Post,
+                    clientId = System.getenv("DISCORD_CLIENT_ID"),
+                    clientSecret = System.getenv("DISCORD_CLIENT_SECRET"),
+                    defaultScopes = listOf("identify"),
+                )
+            }
+            client = HttpClient(Apache)
+        }
+    }
+
 
     routing {
-        route("/api/v1") {
-            route("/gdq", gdq.route())
-            route("/esa", esa.route())
-        }
+        route("/api") {
+            route("/auth") {
+                authenticate("auth-oauth-discord") {
+                    get("/login") {
+                        // Redirects to 'authorizeUrl' automatically
+                    }
 
-        // TODO remove all this sample stuff
-        get("/") {
-            call.respondText("Hello World!")
-        }
-        get<MyLocation> {
-            call.respondText("Location: name=${it.name}, arg1=${it.arg1}, arg2=${it.arg2}")
-        }
-        // Register nested routes
-        get<Type.Edit> {
-            call.respondText("Inside $it")
-        }
-        get<Type.List> {
-            call.respondText("Inside $it")
-        }
-        get("/webjars") {
-            call.respondText(
-                "<script src='/webjars/jquery/jquery.js'></script>",
-                ContentType.Text.Html
-            )
+                    get("/callback") {
+                        val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
+                        call.sessions.set(UserSession(principal?.accessToken.toString()))
+                        call.respondRedirect("/dashboard")
+                    }
+                }
+            }
+
+            route("/v1") {
+                route("/gdq", gdq.route())
+                route("/esa", esa.route())
+            }
         }
     }
 }
 
-@Location("/location/{name}")
-class MyLocation(val name: String, val arg1: Int = 42, val arg2: String = "default")
-@Location("/type/{name}")
-data class Type(val name: String) {
-    @Location("/edit")
-    data class Edit(val type: Type)
-
-    @Location("/list/{page}")
-    data class List(val type: Type, val page: Int)
-}
-
-//class AuthenticationException : RuntimeException()
 class AuthorizationException : RuntimeException()
+data class UserSession(val accessToken: String)
