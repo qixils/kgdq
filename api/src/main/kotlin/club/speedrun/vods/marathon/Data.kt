@@ -143,7 +143,7 @@ data class RunData(
 
     companion object {
         private val HORARO_GAME_MARKDOWN: Pattern =
-            Pattern.compile("\\[([^\\[\\]()]+)]\\(https?://(?:www.)?twitch.tv/videos/(\\d+)\\)")
+            Pattern.compile("\\[([^\\[\\]]+)]\\(https?://(?:www.)?twitch.tv/videos/(\\d+)\\)")
         private val NAME_REGEX: Pattern = Pattern.compile("\\[(.+)]\\((.+)\\)")
 
         private fun calculateHoraroName(run: dev.qixils.horaro.models.Run): String {
