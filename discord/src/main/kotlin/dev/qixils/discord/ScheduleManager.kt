@@ -13,6 +13,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.MessageType
 import net.dv8tion.jda.api.utils.TimeFormat
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -36,7 +37,7 @@ class ScheduleManager(
 ) {
     private val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
     private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(60)).build()
-    private val apiRoot = "https://vods.speedrun.club/api/v1/${config.org.name.lowercase(Locale.ENGLISH)}/"
+    private val apiRoot = "https://vods.speedrun.club/api/v1/${config.organization.name.lowercase(Locale.ENGLISH)}/"
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
@@ -45,26 +46,30 @@ class ScheduleManager(
 
     companion object {
         private val logger = LoggerFactory.getLogger(ScheduleManager::class.java)
-        private val dateHeaderFormat = DateTimeFormatter.ofPattern("_ _\n**EEEE** MMM d\n_ _\n", Locale.ENGLISH)
+        private val dateHeaderFormat = DateTimeFormatter.ofPattern("_ _\n> **EEEE** MMM d\n_ _\n", Locale.ENGLISH)
         private val twitchRegex = Pattern.compile("https?://(?:www\\.)?twitch\\.tv/(.+)")
         private val urlRegex = Pattern.compile("https?://.+")
     }
 
     init {
+        logger.debug("Starting schedule manager for ${config.organization.name}'s ${config.id}...")
         scheduler.scheduleAtFixedRate(this::run, 0, config.waitMinutes, TimeUnit.MINUTES)
     }
 
     private fun <M> get(query: String, serializer: KSerializer<M>): M {
         val uri = URI(apiRoot + query)
+        logger.debug("GET $uri")
         val request = HttpRequest.newBuilder(uri).GET().build()
         val response = client.send(request, HttpResponse.BodyHandlers.ofString())
         return json.decodeFromString(serializer, response.body())
     }
 
     private fun run() = runBlocking {
+        logger.info("Started schedule manager for ${config.organization.name}'s ${config.id}")
+
         // Get event and run data
         val event = get("events?id=${config.id}", ListSerializer(EventData.serializer()))
-            .firstOrNull() ?: throw IllegalStateException("Event ${config.id} by ${config.org.name} not found")
+            .firstOrNull() ?: throw IllegalStateException("Event ${config.id} by ${config.organization.name} not found")
         val runs = get("runs?event=${config.id}", ListSerializer(RunData.serializer()))
 
         // Initialize misc utility vals
@@ -128,11 +133,11 @@ class ScheduleManager(
                     val percent = bid.donationTotal / bid.goal!!
                     // emoji
                     if (percent >= 1)
-                        sb.append((0x2705).toChar())
+                        sb.append("\u2705")
                     else if (bid.state == BidState.OPENED)
-                        sb.append((0x26A0).toChar()).append((0xFE0F).toChar())
+                        sb.append("\u26A0\uFE0F")
                     else
-                        sb.append((0x274C).toChar())
+                        sb.append("\u274C")
 
                     // text
                     sb.append(' ').append(bid.name)
@@ -147,9 +152,9 @@ class ScheduleManager(
                 } else {
                     // emoji
                     if (bid.state == BidState.OPENED)
-                        sb.append((0x23F2).toChar()).append((0xFE0F).toChar())
+                        sb.append("\u23F2\uFE0F")
                     else
-                        sb.append((0x1F4B0).toChar())
+                        sb.append("\uD83D\uDCB0")
 
                     // text
                     sb.append(' ').append(bid.name)
@@ -288,6 +293,10 @@ class ScheduleManager(
             // Edit existing messages
             while (oldMessages.isNotEmpty()) {
                 val oldMessage = oldMessages.removeFirst()
+                if (oldMessage.type != MessageType.DEFAULT) {
+                    oldMessage.delete().queue()
+                    continue
+                }
                 if (newMessagesCopy.isNotEmpty())
                     newMessagesCopy.removeFirst().edit(oldMessage)
                 else
@@ -296,7 +305,7 @@ class ScheduleManager(
             // Send new messages
             newMessagesCopy.forEach { it.send(channel) }
             // Log
-            logger.info("Updated schedule for ${config.org.name}'s ${event.short.uppercase()} in #${channel.name} ($channelId)")
+            logger.info("Updated schedule for ${config.organization.name}'s ${event.short} in #${channel.name} ($channelId)")
         }
     }
 }

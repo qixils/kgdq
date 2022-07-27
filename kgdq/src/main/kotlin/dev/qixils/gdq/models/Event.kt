@@ -38,10 +38,13 @@ data class Event(
 
     override suspend fun loadData(api: GDQ, id: Int) {
         // datetime fallback | TODO: cache start time of old events in db
-        if (_datetime == null)
-            _datetime = api.query(type = ModelType.RUN, event = id)
-                .minByOrNull { it.value.order }?.value?.startTime
-                ?: Instant.EPOCH
+        if (_datetime == null) {
+            if (!api.eventStartedAt.containsKey(id))
+                api.eventStartedAt[id] = api.query(type = ModelType.RUN, event = id)
+                    .minByOrNull { it.value.order }?.value?.startTime
+                    ?: Instant.EPOCH
+            _datetime = api.eventStartedAt[id]
+        }
 
         // canonical URL fallback
         if (_canonicalUrl == null)

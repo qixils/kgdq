@@ -17,7 +17,7 @@ events:
     # The organization managing the event (either "GDQ" or "ESA")
   - org: GDQ
 
-    # ID of the event -- can be the event's short name, its internal API ID, or even "latest"
+    # ID of the event -- can be the event's short name or its internal API ID
     id: sgdq2022
 
     # IDs of the Discord channels to post the event's schedule to
@@ -32,7 +32,7 @@ events:
     # Number of upcoming runs to display in the Run Roster
     upcomingRuns: 5
 
-    # Minutes to wait in between checking the schedule
+    # Minutes to wait in between checking the schedule (should be at least 10 minutes)
     waitMinutes: 10
 
 
@@ -42,7 +42,7 @@ events:
     # The organization managing the event (either "GDQ" or "ESA")
   - org: ESA
 
-    # ID of the event -- can be the event's short name, its internal API ID, or even "latest"
+    # ID of the event -- can be the event's short name or its internal API ID
     id: esa2022s1
 
     # IDs of the Discord channels to post the event's schedule to
@@ -57,5 +57,5 @@ events:
     # Number of upcoming runs to display in the Run Roster
     upcomingRuns: 5
 
-    # Minutes to wait in between checking the schedule
+    # Minutes to wait in between checking the schedule (should be at least 10 minutes)
     waitMinutes: 10

@@ -19,20 +19,27 @@ import java.time.Instant
 
 abstract class Marathon {
     abstract val gdq: GDQ
+    private val eventIdCache = mutableMapOf<String, Int>()
 
     private suspend fun getEvent(id: String): Wrapper<Event>? {
-        if (id.toIntOrNull() != null)
-            return gdq.query(ModelType.EVENT, id=id.toInt()).firstOrNull()
+        val eventId = id.toIntOrNull() ?: eventIdCache[id]
+        if (eventId != null) {
+            if (eventId == -1) return null
+            return gdq.query(ModelType.EVENT, id = eventId).firstOrNull()
+        }
 
         val events = ArrayList(gdq.query(type=ModelType.EVENT))
-        if (id.equals("latest", true))
-            return events.maxByOrNull { it.id }
-        return events.firstOrNull { it.value.short.equals(id, true) }
+        events.forEach { eventIdCache[it.value.short] = it.id }
+
+        val event = events.firstOrNull { it.value.short.equals(id, true) }
+        if (event != null)
+            eventIdCache[id] = event.id
+        return event
     }
 
     private suspend fun getEventId(id: String): Int? {
-        if (id.toIntOrNull() != null)
-            return id.toInt()
+        val eventId = id.toIntOrNull() ?: eventIdCache[id]
+        if (eventId != null) return eventId
         return getEvent(id)?.id
     }
 

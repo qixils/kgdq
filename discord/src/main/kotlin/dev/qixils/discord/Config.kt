@@ -20,13 +20,15 @@ data class EmotesConfig(
 
 @ConfigSerializable
 data class EventConfig(
-    val org: Organization = Organization.GDQ,
-    val id: String = "latest",
+    private val org: String = "GDQ",
+    val id: String,
     val channels: List<Long>,
     val twitch: String = "GamesDoneQuick",
     val upcomingRuns: Int = 5,
     val waitMinutes: Long = 10,
-)
+) {
+    @Transient val organization: Organization = Organization.valueOf(org)
+}
 
 @ConfigSerializable
 enum class Organization {

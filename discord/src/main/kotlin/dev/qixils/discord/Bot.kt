@@ -32,6 +32,8 @@ class Bot {
     private val schedules: MutableList<ScheduleManager> = mutableListOf()
 
     init {
+        logger.debug("Starting bot...")
+
         // get config file and create it if it doesn't exist
         val path = Paths.get("discord-schedule-bot.yml")
         if (path.notExists()) {
@@ -78,6 +80,7 @@ class Bot {
 
         // register event listeners
         jda.listener<ReadyEvent> {
+            logger.info("Loading schedules...")
             schedules.addAll(config.events.map { event -> ScheduleManager(this@Bot, event) })
         }
 

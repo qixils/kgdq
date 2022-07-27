@@ -31,6 +31,7 @@ open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
     private val modelCache: MutableMap<Pair<ModelType<*>, Int>, Pair<Wrapper<*>, Instant>> = mutableMapOf()
     private val responseCache: MutableMap<String, Pair<List<Wrapper<*>>, Instant>> = mutableMapOf()
     protected var lastCachedRunners: Instant? = null
+    public val eventStartedAt = mutableMapOf<Int, Instant>()
 
     /**
      * Constructs a new GDQ instance with the provided API path.

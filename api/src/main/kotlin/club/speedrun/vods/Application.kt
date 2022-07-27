@@ -10,7 +10,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
+    embeddedServer(Netty, port = 4010, host = "0.0.0.0") {
         configureHTTP()
         configureMonitoring()
         install(ContentNegotiation) { json() }
