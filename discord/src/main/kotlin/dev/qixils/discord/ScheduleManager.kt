@@ -5,7 +5,6 @@ import club.speedrun.vods.marathon.RunData
 import club.speedrun.vods.naturalJoinTo
 import dev.minn.jda.ktx.coroutines.await
 import dev.minn.jda.ktx.messages.EmbedBuilder
-import dev.minn.jda.ktx.messages.Message
 import dev.qixils.gdq.models.BidState
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.KSerializer
@@ -81,15 +80,17 @@ class ScheduleManager(
         val runTicker = mutableListOf<RunData>()
 
         // Add header message
-        messages.add(MessageTransformer(
-            Message("**${event.name}**\n" +
-                    "Date headers are in the ${event.timezone.id} timezone.\n" +
-                    "Join the ${event.count} donators who have raised " +
-                    "${moneyFormatter.format(event.amount)} for ${event.charityName}" +
-                    "at ${event.canonicalUrl}." +
-                    "(Minimum Donation: ${moneyFormatter.format(event.minimumDonation)})"),
-            pin = true
-        ))
+        messages.add(
+            MessageTransformer(
+                "**${event.name}**\n" +
+                        "Date headers are in the ${event.timezone.id} timezone.\n" +
+                        "Join the ${event.count} donators who have raised " +
+                        "${moneyFormatter.format(event.amount)} for ${event.charityName}" +
+                        "at ${event.canonicalUrl}." +
+                        "(Minimum Donation: ${moneyFormatter.format(event.minimumDonation)})",
+                pin = true
+            )
+        )
 
         // Add message for each run
         runs.forEachIndexed { index, run ->
@@ -116,7 +117,7 @@ class ScheduleManager(
                 sb.append(" race")
 
             if (run.runners.isNotEmpty() || run.runnersAsString.isNotEmpty()) {
-                sb.append(" by")
+                sb.append(" by ")
                 if (run.runners.isNotEmpty())
                     naturalJoinTo(sb, run.runners.map { it.name })
                 else
@@ -172,18 +173,18 @@ class ScheduleManager(
 
             // Append VODs
             val vods = run.twitchVODs + run.youtubeVODs
-            vods.forEach { vod -> sb.append('\n').append(vod.asURL()) }
+            vods.forEach { vod -> sb.append("\n<").append(vod.asURL()).append('>') }
 
             // Finalize
             messages.add(MessageTransformer(
-                Message(sb.toString()),
+                sb.toString(),
                 pin = run.isCurrent
             ))
         }
 
         // Add ticker
         messages.add(MessageTransformer(
-            Message(embed = EmbedBuilder {
+            embed = EmbedBuilder {
                 title = event.name + " Ticker"
                 description = """
                     Bot created by [qixils](https://qixils.dev).
@@ -259,7 +260,7 @@ class ScheduleManager(
                         inline = false
                     }
                 }
-            }.build()),
+            },
             pin = false
         ))
 
