@@ -143,27 +143,27 @@ data class RunData(
 
     companion object {
         private val HORARO_GAME_MARKDOWN: Pattern =
-            Pattern.compile("\\[(.+)]\\(https://www.twitch.tv/videos/(\\d+)\\)")
+            Pattern.compile("\\[(.+)]\\(https?://(?:www.)?twitch.tv/videos/(\\d+)\\)")
         private val NAME_REGEX: Pattern = Pattern.compile("\\[(.+)]\\((.+)\\)")
 
         private fun calculateHoraroName(run: dev.qixils.horaro.models.Run): String {
             val rawName = run.getValue("Game")!!.trim()
             val matcher = HORARO_GAME_MARKDOWN.matcher(rawName)
-            return if (matcher.matches()) {
-                matcher.group(1)
-            } else {
-                rawName
-            }
+            val names = mutableListOf<String>()
+            while (matcher.find())
+                names += matcher.group(1)
+            if (names.isEmpty())
+                return rawName
+            return names.naturalJoinToString()
         }
 
         private fun calculateHoraroVODs(run: dev.qixils.horaro.models.Run): List<TwitchVOD>? {
             val rawName = run.getValue("Game")!!.trim()
             val matcher = HORARO_GAME_MARKDOWN.matcher(rawName)
-            return if (matcher.matches()) {
-                listOf(TwitchVOD(matcher.group(2).toInt()))
-            } else {
-                null
-            }
+            val vods = mutableListOf<TwitchVOD>()
+            while (matcher.find())
+                vods += TwitchVOD(matcher.group(2).toInt())
+            return if (vods.isEmpty()) null else vods
         }
 
         private fun calculateHoraroRunnerNames(run: dev.qixils.horaro.models.Run): List<String>? {
