@@ -14,7 +14,7 @@ import java.time.Instant
 
 @Serializable
 data class RunOverrides(
-    @Contextual val _id: Id<RunOverrides>,
+    @Contextual val _id: Id<RunOverrides> = newId(),
     var runId: Int? = null,
     var horaroId: String? = null,
     val twitchVODs: MutableList<TwitchVOD> = mutableListOf(),
@@ -23,14 +23,12 @@ data class RunOverrides(
     @Serializable(with = DurationAsStringSerializer::class) var runTime: Duration? = null,
 ) {
     constructor(run: Wrapper<Run>) : this(
-        _id = newId<RunOverrides>(),
         runId = run.id,
         horaroId = run.value.horaroId
     )
 
     constructor(run: dev.qixils.horaro.models.Run) : this(
-        _id = newId<RunOverrides>(),
-        horaroId = run.getValue("ID", true)
+        horaroId = run.getValue("ID")
     )
 
     fun mergeIn(other: RunOverrides) {

@@ -4,12 +4,12 @@ import dev.qixils.horaro.models.*
 import kotlinx.coroutines.future.await
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
+import org.slf4j.LoggerFactory
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
-import java.util.logging.Logger
 
 /**
  * The main class of the async Horaro library which fetches read-only data from the
@@ -38,7 +38,7 @@ object Horaro {
         return "?$key=$value"
     }
 
-    private val logger = Logger.getLogger("Horaro")
+    private val logger = LoggerFactory.getLogger(Horaro::class.java)
     private val json: Json = Json {
         ignoreUnknownKeys = true
         isLenient = true

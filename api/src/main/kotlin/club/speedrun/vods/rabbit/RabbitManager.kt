@@ -1,20 +1,18 @@
 package club.speedrun.vods.rabbit
 
 import club.speedrun.vods.marathon.DatabaseManager
-import club.speedrun.vods.marathon.RunOverrides
 import club.speedrun.vods.marathon.TwitchVOD
 import com.github.twitch4j.helix.TwitchHelix
 import com.github.twitch4j.helix.TwitchHelixBuilder
 import com.github.twitch4j.helix.domain.StreamList
+import com.github.twitch4j.helix.domain.VideoList
 import com.netflix.hystrix.HystrixCommand
 import com.rabbitmq.client.*
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import org.litote.kmongo.coroutine.replaceOne
-import org.litote.kmongo.eq
-import org.litote.kmongo.push
-import org.litote.kmongo.setValue
+import org.litote.kmongo.coroutine.updateOne
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.charset.StandardCharsets
@@ -83,7 +81,7 @@ class DeliverHandler(
 
     init {
         val runnable = Runnable { runBlocking {
-            db.statuses.replaceOne(status)
+            db.statuses.updateOne(status)
             logger.info("Updated MongoDB with run ${status.currentRun} and game scene ${status.usingGameScene}")
         } }
         executor.schedule(runnable, minDuration.toSeconds(), TimeUnit.SECONDS)
@@ -95,62 +93,68 @@ class DeliverHandler(
             status.currentRun = runChanged.run?.horaroId
             // update db
             if (Duration.between(loadedAt, Instant.now()) > minDuration)
-                db.statuses.updateOneById(
-                    status._id,
-                    setValue(ScheduleStatus::currentRun, status.currentRun)
-                )
+                db.statuses.updateOne(status)
             // log
             logger.info("Run is now ${status.currentRun}")
         }
     }
 
     private suspend fun handleSceneChanged(sceneChanged: OBSSceneChanged) = coroutineScope {
+        // sceneChanged.gameScene is not reliable (seemingly always true)
+        // so here's some workaround magic to try to get it to work
+        val isGameScene: Boolean = if (!sceneChanged.gameScene)
+            false
+        else if (sceneChanged.scene != "Game Layout")
+            return@coroutineScope
+        else if (sceneChanged.action == Action.END)
+            false
+        else if (sceneChanged.action == Action.START)
+            true
+        else
+            return@coroutineScope
+
         val updateDb = Duration.between(loadedAt, Instant.now()) > minDuration
         val updateRunDb = updateDb
                 && status.usingGameScene == false
-                && sceneChanged.gameScene
+                && isGameScene
                 && status.currentRun != null
         if (updateRunDb) {
             // Updating start time of run
             val runStart = sceneChanged.time.instant
             logger.info("Updating start time of run ${status.currentRun} to ${sceneChanged.time.iso}")
-            db.runs.updateOne(
-                RunOverrides::horaroId eq status.currentRun,
-                setValue(RunOverrides::startTime, runStart)
-            )
-            // Fetching current stream to add VOD link
-            // | URL to grab an auth token:
-            // | https://id.twitch.tv/oauth2/authorize?client_id=CLIENT_ID&response_type=code&redirect_uri=https://vods.speedrun.club/api/auth/twitch_callback&scope=
-            val streams = twitch.streams(System.getenv("TWITCH_AUTH_TOKEN"), userLogins = listOf(stream)).execute()
-            val stream = streams.streams.firstOrNull() ?: return@coroutineScope
-            val vod = TwitchVOD(stream.id, Duration.between(stream.startedAtInstant, runStart))
+            val overrides = db.getOrCreateRunOverrides(null, status.currentRun)
+            overrides.startTime = runStart
+            db.runs.updateOne(overrides)
+            // Fetching current stream for VOD link timestamp
+            val streams = async { twitch.streams(userLogins = listOf(stream)).execute() }
+            val stream = streams.await().streams.firstOrNull() ?: return@coroutineScope
+            // Fetching stream's video (should always be the latest video)
+            val videos = async { twitch.videos(userId = stream.userId, type = "archive", limit = 1).execute() }
+            val video = videos.await().videos.firstOrNull() ?: return@coroutineScope
+            // Create VOD object
+            val vod = TwitchVOD(video.id, Duration.between(stream.startedAtInstant, runStart))
             // Adding VOD link to run
             logger.info("Adding VOD link ${vod.asURL()} to run ${status.currentRun}")
-            db.runs.updateOne(
-                RunOverrides::horaroId eq status.currentRun,
-                push(RunOverrides::twitchVODs, vod)
-            )
+            overrides.twitchVODs.add(vod)
+            db.runs.updateOne(overrides)
         }
 
-        if (status.usingGameScene != sceneChanged.gameScene) {
+        if (status.usingGameScene != isGameScene) {
             // update instance
-            status.usingGameScene = sceneChanged.gameScene
+            status.usingGameScene = isGameScene
             // update db
             if (updateDb)
-                db.statuses.updateOneById(
-                    status._id,
-                    setValue(ScheduleStatus::usingGameScene, status.usingGameScene)
-                )
+                db.statuses.updateOne(status)
+            // log
+            logger.info("Scene is now ${status.usingGameScene}")
         }
-        // log
-        logger.info("Scene is now ${status.usingGameScene} (${sceneChanged.scene})")
     }
 
     override fun handle(consumerTag: String, delivery: Delivery) = runBlocking {
         val message = String(delivery.body, StandardCharsets.UTF_8)
         val routingKey = delivery.envelope.routingKey
-        logger.info("Received message from $routingKey")
-        logger.debug(message)
+        logger.debug("Received message from $routingKey")
+        logger.trace(message)
 
         try {
             when {
@@ -167,7 +171,7 @@ class DeliverHandler(
 }
 
 fun TwitchHelix.streams(
-    authToken: String,
+    authToken: String? = null,
     after: String? = null,
     before: String? = null,
     limit: Int? = null,
@@ -185,5 +189,33 @@ fun TwitchHelix.streams(
         language,
         userIds,
         userLogins
+    )
+}
+
+fun TwitchHelix.videos(
+    authToken: String? = null,
+    id: String? = null,
+    userId: String? = null,
+    gameId: String? = null,
+    language: String? = null,
+    period: String? = null,
+    sort: String? = null,
+    type: String? = null,
+    after: String? = null,
+    before: String? = null,
+    limit: Int? = null
+): HystrixCommand<VideoList> {
+    return getVideos(
+        authToken,
+        id,
+        userId,
+        gameId,
+        language,
+        period,
+        sort,
+        type,
+        after,
+        before,
+        limit
     )
 }

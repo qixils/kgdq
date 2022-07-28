@@ -7,13 +7,13 @@ import kotlinx.coroutines.future.await
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import org.slf4j.LoggerFactory
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
 import java.time.Instant
-import java.util.logging.Logger
 
 /**
  * The central class for performing requests to an instance of the GDQ donation tracker.
@@ -23,7 +23,7 @@ open class GDQ(
     apiPath: String = "https://gamesdonequick.com/tracker/search/",
     val organization: String = "gdq",
 ) {
-    private val logger = Logger.getLogger("GDQ")
+    private val logger = LoggerFactory.getLogger(GDQ::class.java)
     val apiPath: String
     private val json: Json = Json {
         ignoreUnknownKeys = true

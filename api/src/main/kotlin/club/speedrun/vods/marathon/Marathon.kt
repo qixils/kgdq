@@ -3,6 +3,7 @@
 package club.speedrun.vods.marathon
 
 import club.speedrun.vods.db
+import club.speedrun.vods.plugins.UserError
 import dev.qixils.gdq.GDQ
 import dev.qixils.gdq.Hook
 import dev.qixils.gdq.ModelType
@@ -18,7 +19,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import org.litote.kmongo.setValue
+import org.litote.kmongo.coroutine.updateOne
 import java.time.Duration
 import java.time.Instant
 
@@ -62,7 +63,7 @@ abstract class Marathon(val api: GDQ) {
             event=event.id,
             runner=query.runner
         )).sortedBy { it.value.order }
-        val bids = ArrayList(api.query(
+        val bids = ArrayList(api.query( // TODO: pagination (if not ESA...)
             type=ModelType.BID_TARGET,
             run=query.id?.toInt(),
             event=event.id
@@ -95,12 +96,12 @@ abstract class Marathon(val api: GDQ) {
             val overrides = api.db.getOrCreateRunOverrides(run)
             val previousRun = runData.lastOrNull()
             val data = RunData(run, runBids, previousRun, overrides)
-            if (api is ESA) {
+            if (api is ESA && data.id != null) {
                 // TODO: remove this god forsaken hack
-                val cachedAt = api.runCachedAt[data.id] ?: Instant.EPOCH
+                val cachedAt = api.runCachedAt[data.id!!] ?: Instant.EPOCH
                 val now = Instant.now()
                 if (Duration.between(cachedAt, now) > ModelType.RUNNER.cacheFor) {
-                    api.runCachedAt[data.id] = now
+                    api.runCachedAt[data.id!!] = now
                     api.query(type = ModelType.RUNNER, run = data.id)
                 }
             }
@@ -121,14 +122,18 @@ abstract class Marathon(val api: GDQ) {
         schedule.items.forEach {  horaroRun ->
             val order = horaroRuns.size + 1
             val overrides = api.db.getOrCreateRunOverrides(horaroRun)
-            val horaroId = horaroRun.getValue("ID", true)
+            val horaroId = horaroRun.getValue("ID")
             val trackerRun = if (horaroId == null) null
             else trackerRuns.firstOrNull { it.trackerSource?.horaroId == horaroId }
             val data = RunData(horaroRun, trackerRun, horaroRuns.lastOrNull(), event, order, overrides)
             data.loadRunners()
             horaroRuns.add(data)
         }
-        return horaroRuns // TODO: filter based on query param
+        return horaroRuns.filter {
+            query.id == null || (it.id ?: -1) == query.id.toIntOrNull() || it.horaroId == query.id
+                    //|| query.runner == null || it.runners.any { it.id == query.runner } TODO create RunnerData with added id field
+                    || query.event == null || it.event == getEventId(query.event)
+        }
     }
 
     fun route(): Route.() -> Unit {
@@ -146,6 +151,9 @@ abstract class Marathon(val api: GDQ) {
             }
 
             get<RunList> { query ->
+                if (query.id == null && query.event == null && query.runner == null)
+                    throw UserError("A search parameter (id, event, or runner) is required.")
+
                 // get event id and ensure it exists
                 val event: Wrapper<Event>? = query.event?.let { getEvent(it) }
                 if (event == null) {
@@ -171,7 +179,7 @@ abstract class Marathon(val api: GDQ) {
 @Location("/events")
 data class EventList(val id: String? = null)
 @Location("/runs")
-data class RunList(val id: String? = null, val event: String? = null, val runner: Int? = null, val bid: Int? = null)
+data class RunList(val id: String? = null, val event: String? = null, val runner: Int? = null)
 
 class GDQMarathon : Marathon(GDQ())
 class ESAMarathon : Marathon(ESA())
@@ -193,7 +201,7 @@ suspend fun Event.horaroSchedule(): FullSchedule? {
     return Horaro.getSchedule(horaroEvent!!, horaroSchedule!!)
 }
 
-class EventDataCacher(val api: GDQ) : Hook<Event> {
+class EventDataCacher(private val api: GDQ) : Hook<Event> {
     override suspend fun handle(item: Wrapper<Event>) {
         if (!api.eventStartedAt.containsKey(item.id)) {
             val overrides: EventOverrides = api.db.getOrCreateEventOverrides(item.value)
@@ -203,16 +211,13 @@ class EventDataCacher(val api: GDQ) : Hook<Event> {
     }
 }
 
-class EventOverrideUpdater(val api: GDQ) : Hook<Event> {
+class EventOverrideUpdater(private val api: GDQ) : Hook<Event> {
     override suspend fun handle(item: Wrapper<Event>) = coroutineScope {
         val overrides = api.db.getOrCreateEventOverrides(item.value)
         if (overrides.datetime == null) {
             overrides.datetime = item.value.datetime
             // update db asynchronously
-            launch { api.db.events.updateOneById(
-                overrides._id,
-                setValue(EventOverrides::datetime, overrides.datetime)
-            ) }
+            launch { api.db.events.updateOne(overrides) }
         }
     }
 }

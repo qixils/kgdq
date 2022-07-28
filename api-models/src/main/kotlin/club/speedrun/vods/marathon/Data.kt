@@ -18,7 +18,8 @@ import java.util.regex.Pattern
 data class RunData(
     @Transient val trackerSource: Run? = null,
     @Transient val horaroSource: dev.qixils.horaro.models.Run? = null,
-    val id: Int,
+    val id: Int? = null,
+    val horaroId: String? = null,
     val event: Int,
     val name: String,
     val displayName: String,
@@ -49,6 +50,7 @@ data class RunData(
         trackerSource = run.value,
         horaroSource = null,
         id = run.id,
+        horaroId = run.value.horaroId,
         event = run.value.eventId,
         name = run.value.name,
         displayName = run.value.displayName,
@@ -89,7 +91,8 @@ data class RunData(
     ) : this(
         trackerSource = trackerRun?.trackerSource,
         horaroSource = horaroRun,
-        id = trackerRun?.id ?: -1,
+        id = trackerRun?.id,
+        horaroId = horaroRun.getValue("ID"),
         event = event.id,
         name = calculateHoraroName(horaroRun),
         displayName = trackerRun?.displayName ?: "",

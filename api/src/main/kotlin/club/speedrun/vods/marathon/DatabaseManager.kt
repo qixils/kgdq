@@ -5,7 +5,7 @@ import dev.qixils.gdq.models.Event
 import dev.qixils.gdq.models.Run
 import dev.qixils.gdq.models.Wrapper
 import org.litote.kmongo.coroutine.coroutine
-import org.litote.kmongo.coroutine.replaceOne
+import org.litote.kmongo.coroutine.updateOne
 import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.setValue
@@ -42,7 +42,7 @@ class DatabaseManager(organization: String) {
             val oldOverrides = runs.findOneAndDelete(RunOverrides::horaroId eq run.value.horaroId)
             if (oldOverrides != null) {
                 overrides.mergeIn(oldOverrides)
-                runs.replaceOne(overrides)
+                runs.updateOne(overrides)
             } else {
                 overrides.horaroId = run.value.horaroId
                 runs.updateOneById(
@@ -57,12 +57,36 @@ class DatabaseManager(organization: String) {
 
     suspend fun getOrCreateRunOverrides(run: dev.qixils.horaro.models.Run): RunOverrides? {
         // get
-        val horaroId = run.getValue("ID", true) ?: return null
+        val horaroId = run.getValue("ID") ?: return null
         var overrides: RunOverrides? = runs.findOne(RunOverrides::horaroId eq horaroId)
         // create
         if (overrides == null) {
             overrides = RunOverrides(run)
             runs.insertOne(overrides)
+        }
+        // return
+        return overrides
+    }
+
+    suspend fun getOrCreateRunOverrides(gdqId: Int?, horaroId: String?): RunOverrides {
+        if (gdqId == null && horaroId == null)
+            throw IllegalArgumentException("At least one argument must be non-null")
+        // get
+        var overrides: RunOverrides? = runs.findOne(RunOverrides::runId eq gdqId)
+        if (overrides == null)
+            overrides = runs.findOne(RunOverrides::horaroId eq horaroId)
+        // create
+        if (overrides == null) {
+            overrides = RunOverrides(runId = gdqId, horaroId = horaroId)
+            runs.insertOne(overrides)
+        }
+        // update
+        if (overrides.runId == null && gdqId != null) {
+            overrides.runId = gdqId
+            runs.updateOneById(overrides._id, setValue(RunOverrides::runId, gdqId))
+        } else if (overrides.horaroId == null && horaroId != null) {
+            overrides.horaroId = horaroId
+            runs.updateOneById(overrides._id, setValue(RunOverrides::horaroId, horaroId))
         }
         // return
         return overrides

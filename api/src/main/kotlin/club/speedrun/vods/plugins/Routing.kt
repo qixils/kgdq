@@ -35,6 +35,9 @@ fun Application.configureRouting() {
                 call.respond(HttpStatusCode.Unauthorized)
             }
         }
+        exception<UserError> { call, cause ->
+            call.respond(HttpStatusCode.BadRequest, mapOf("error" to cause.message))
+        }
     }
 
 
@@ -66,3 +69,8 @@ class AuthorizationException : RuntimeException()
  * Thrown when a user has attempted to access an authenticated endpoint without logging in.
  */
 class AuthenticationException(val redirect: Boolean) : RuntimeException()
+
+/**
+ * Thrown when a user enters some invalid input.
+ */
+class UserError(message: String) : RuntimeException(message)
