@@ -33,11 +33,10 @@ data class Event(
     val max: Float,
     val avg: Double,
     @SerialName("horaro_name") private val horaroName: String? = null,
-    // TODO: prize countries?
 ) : Model {
 
     override suspend fun loadData(api: GDQ, id: Int) {
-        // datetime fallback | TODO: cache start time of old events in db
+        // datetime fallback
         if (_datetime == null) {
             if (!api.eventStartedAt.containsKey(id))
                 api.eventStartedAt[id] = api.query(type = ModelType.RUN, event = id)

@@ -27,9 +27,17 @@ class DurationAsStringSerializer : KSerializer<Duration> {
 
     companion object {
         private val pattern: Pattern = Pattern.compile("\\d+:\\d{2}:\\d{2}")
-        private const val format: String = "%d:%02d:%02d"
+        private const val gdqFormat: String = "%d:%02d:%02d"
 
-        fun format(duration: Duration): String = format.format(duration.toHours().toInt(), duration.toMinutesPart(), duration.toSecondsPart())
+        fun format(duration: Duration, format: String = gdqFormat): String {
+            if (duration.isNegative)
+                throw SerializationException("Duration cannot be negative")
+            return format.format(
+                duration.toHours().toInt(),
+                duration.toMinutesPart(),
+                duration.toSecondsPart()
+            )
+        }
         fun decode(input: String): Duration {
             // fix for GDQ API returning "0" instead of "0:00:00" for 0 duration
             if (input == "0")

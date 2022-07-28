@@ -78,5 +78,7 @@ data class UserSession(
     val expiresIn: Long,
     val createdAt: String,
 ) {
-    val expiresAt: Instant get() = Instant.parse(createdAt).plusSeconds(expiresIn)
+    fun expiresAt(): Instant {
+        return Instant.parse(createdAt).plusSeconds(expiresIn)
+    }
 }

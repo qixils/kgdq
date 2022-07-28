@@ -40,12 +40,12 @@ data class RunData(
     val twitchVODs: List<TwitchVOD>,
     val youtubeVODs: List<YouTubeVOD>,
 ) {
-    // TODO: add parameter for RunOverrides; class should have overrides for:
-    //  - startTime (to be used by startTime, endTime, and setupTime)
-    //  - runTime (to be used by runTime, endTime)
-    //  - twitchVODs
-    //  - youtubeVODs
-    constructor(run: Wrapper<Run>, bids: List<BidData>, previousRun: RunData?) : this(
+    constructor(
+        run: Wrapper<Run>,
+        bids: List<BidData>,
+        previousRun: RunData?,
+        overrides: RunOverrides,
+    ) : this(
         trackerSource = run.value,
         horaroSource = null,
         id = run.id,
@@ -56,22 +56,27 @@ data class RunData(
         console = run.value.console,
         commentators = run.value.commentators,
         description = run.value.description,
-        startTime = run.value.startTime,
-        endTime = run.value.startTime + run.value.runTime,
+        startTime = overrides.startTime ?: run.value.startTime,
+        endTime = (overrides.startTime ?: run.value.startTime) + (overrides.runTime ?: run.value.runTime),
         order = run.value.order,
-        runTime = run.value.runTime,
-        setupTime = if (previousRun != null) Duration.between(
-            previousRun.endTime,
-            run.value.startTime
-        ) else run.value.setupTime,
+        runTime = overrides.runTime ?: run.value.runTime,
+        setupTime = if (previousRun != null) {
+            var duration = Duration.between(
+                previousRun.endTime,
+                overrides.startTime ?: run.value.startTime
+            )
+            if (duration.isNegative)
+                duration = Duration.ZERO
+            duration
+        } else run.value.setupTime,
         coop = run.value.coop,
         category = run.value.category,
         releaseYear = run.value.releaseYear,
         runners = mutableListOf(),
         runnersAsString = run.value.deprecatedRunners.split(", ").naturalJoinToString(),
         bids = bids,
-        twitchVODs = emptyList(),
-        youtubeVODs = emptyList(),
+        twitchVODs = overrides.twitchVODs,
+        youtubeVODs = overrides.youtubeVODs,
     )
 
     constructor(
@@ -79,7 +84,8 @@ data class RunData(
         trackerRun: RunData?,
         previousRun: RunData?,
         event: Wrapper<Event>,
-        order: Int
+        order: Int,
+        overrides: RunOverrides?,
     ) : this(
         trackerSource = trackerRun?.trackerSource,
         horaroSource = horaroRun,
@@ -91,14 +97,19 @@ data class RunData(
         console = trackerRun?.console ?: horaroRun.getValue("Platform") ?: "",
         commentators = trackerRun?.commentators ?: "",
         description = trackerRun?.description ?: "",
-        startTime = horaroRun.scheduled.toInstant(),
-        endTime = horaroRun.scheduled.toInstant().plus(horaroRun.length),
+        startTime = overrides?.startTime ?: horaroRun.scheduled.toInstant(),
+        endTime = (overrides?.startTime ?: horaroRun.scheduled.toInstant()).plus(overrides?.runTime ?: horaroRun.length),
         order = order,
-        runTime = horaroRun.length,
-        setupTime = if (previousRun != null) Duration.between(
-            previousRun.endTime,
-            horaroRun.scheduled.toInstant()
-        ) else trackerRun?.setupTime ?: Duration.ZERO,
+        runTime = overrides?.runTime ?: horaroRun.length,
+        setupTime = if (previousRun != null) {
+            var duration = Duration.between(
+                previousRun.endTime,
+                overrides?.startTime ?: horaroRun.scheduled.toInstant()
+            )
+            if (duration.isNegative)
+                duration = Duration.ZERO
+            duration
+        } else trackerRun?.setupTime ?: Duration.ZERO,
         coop = trackerRun?.coop ?: false,
         category = trackerRun?.category ?: horaroRun.getValue("Category") ?: "",
         releaseYear = trackerRun?.releaseYear,
@@ -108,8 +119,8 @@ data class RunData(
             trackerRun?.runnersAsString
         ).firstOrNull { !it.isNullOrEmpty() } ?: "",
         bids = trackerRun?.bids ?: emptyList(),
-        twitchVODs = calculateHoraroVODs(horaroRun) ?: trackerRun?.twitchVODs ?: emptyList(),
-        youtubeVODs = trackerRun?.youtubeVODs ?: emptyList(),
+        twitchVODs = calculateHoraroVODs(horaroRun) ?: overrides?.twitchVODs ?: emptyList(),
+        youtubeVODs = trackerRun?.youtubeVODs ?: overrides?.youtubeVODs ?: emptyList(),
     )
 
     @InternalGdqApi
@@ -162,7 +173,7 @@ data class RunData(
             val matcher = HORARO_GAME_MARKDOWN.matcher(rawName)
             val vods = mutableListOf<TwitchVOD>()
             while (matcher.find())
-                vods += TwitchVOD(matcher.group(2).toInt())
+                vods += TwitchVOD(matcher.group(2))
             return if (vods.isEmpty()) null else vods
         }
 

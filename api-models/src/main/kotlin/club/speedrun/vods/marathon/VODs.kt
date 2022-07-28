@@ -1,6 +1,8 @@
 package club.speedrun.vods.marathon
 
+import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import kotlinx.serialization.Serializable
+import java.time.Duration
 
 @Serializable
 sealed interface VOD {
@@ -9,13 +11,22 @@ sealed interface VOD {
 
 @Serializable
 data class TwitchVOD(
-    val videoId: Int,
+    val videoId: String,
     val timestamp: String? = null
 ) : VOD {
+    constructor(videoId: String, duration: Duration) : this(
+        videoId,
+        DurationAsStringSerializer.format(duration, format)
+    )
+
     override fun asURL(): String {
         val sb = StringBuilder("https://www.twitch.tv/videos/").append(videoId)
         if (timestamp != null) sb.append("?t=").append(timestamp)
         return sb.toString()
+    }
+
+    companion object {
+        private const val format = "%dh%dm%ds"
     }
 }
 

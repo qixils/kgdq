@@ -19,7 +19,10 @@ import java.util.logging.Logger
  * The central class for performing requests to an instance of the GDQ donation tracker.
  */
 @Suppress("HttpUrlsUsage")
-open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
+open class GDQ(
+    apiPath: String = "https://gamesdonequick.com/tracker/search/",
+    val organization: String = "gdq",
+) {
     private val logger = Logger.getLogger("GDQ")
     val apiPath: String
     private val json: Json = Json {
@@ -31,7 +34,7 @@ open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
     private val modelCache: MutableMap<Pair<ModelType<*>, Int>, Pair<Wrapper<*>, Instant>> = mutableMapOf()
     private val responseCache: MutableMap<String, Pair<List<Wrapper<*>>, Instant>> = mutableMapOf()
     protected var lastCachedRunners: Instant? = null
-    public val eventStartedAt = mutableMapOf<Int, Instant>()
+    val eventStartedAt = mutableMapOf<Int, Instant>()
 
     /**
      * Constructs a new GDQ instance with the provided API path.
@@ -53,9 +56,17 @@ open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
      * @param query           the query to search for
      * @param modelType       the type of model to return
      * @param modelSerializer the serializer of model being queried for
+     * @param preLoad         a hook to run before a model is loaded
+     * @param postLoad        a hook to run after a model is loaded
      * @return a list of models matching the query
      */
-    private suspend fun <M : Model> query(query: String, modelType: ModelType<M>, modelSerializer: KSerializer<M>): List<Wrapper<M>> {
+    private suspend fun <M : Model> query(
+        query: String,
+        modelType: ModelType<M>,
+        modelSerializer: KSerializer<M>,
+        preLoad: Hook<M>? = null,
+        postLoad: Hook<M>? = null,
+    ): List<Wrapper<M>> {
         // look in the cache first
         if (responseCache.containsKey(query)) {
             val (wrappers, cachedAt) = responseCache[query]!!
@@ -80,7 +91,11 @@ open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
             .toMutableList()
 
         // load data
-        models.forEach { it.value.loadData(this, it.id) }
+        models.forEach {
+            preLoad?.handle(it)
+            it.value.loadData(this, it.id)
+            postLoad?.handle(it)
+        }
 
         // remove invalid models
         models.removeIf{ !it.value.isValid() }
@@ -97,12 +112,16 @@ open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
     /**
      * Performs a search on the GDQ tracker for the provided [query].
      *
-     * @param query the query to search for
+     * @param query    the query to search for
+     * @param preLoad  a hook to run before a model is loaded
+     * @param postLoad a hook to run after a model is loaded
      * @return a list of models matching the query
      */
-    suspend fun <M : Model> query(query: Query<M>): List<Wrapper<M>> {
-        // TODO: cache entire query results for a short time
-
+    suspend fun <M : Model> query(
+        query: Query<M>,
+        preLoad: Hook<M>? = null,
+        postLoad: Hook<M>? = null,
+    ): List<Wrapper<M>> {
         // ensure runners are cached (they're high in quantity but basically fixed)
         if (query.type == ModelType.RUNNER) cacheRunners()
 
@@ -119,17 +138,19 @@ open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         }
 
         // perform query
-        return query(query.asQueryString(), query.type, query.type.serializer)
+        return query(query.asQueryString(), query.type, query.type.serializer, preLoad, postLoad)
     }
 
     /**
      * Performs a search on the GDQ tracker for the provided query
      *
-     * @param type   the type of model being queried for
-     * @param id     optional: the id of the model to get
-     * @param event  optional: the event to query from
-     * @param runner optional: the runner to query from
-     * @param run    optional: the run to query from
+     * @param type     the type of model being queried for
+     * @param id       optional: the id of the model to get
+     * @param event    optional: the event to query from
+     * @param runner   optional: the runner to query from
+     * @param run      optional: the run to query from
+     * @param preLoad  a hook to run before a model is loaded
+     * @param postLoad a hook to run after a model is loaded
      * @return a list of models matching the query
      */
     suspend fun <M : Model> query(
@@ -139,8 +160,10 @@ open class GDQ(apiPath: String = "https://gamesdonequick.com/tracker/search/") {
         runner: Int? = null,
         run: Int? = null,
         offset: Int? = null,
+        preLoad: Hook<M>? = null,
+        postLoad: Hook<M>? = null,
     ): List<Wrapper<M>> {
-        return query(Query(type, id, event, runner, run, offset))
+        return query(Query(type, id, event, runner, run, offset), preLoad, postLoad)
     }
 
     protected open suspend fun cacheRunners() { // TODO: remove `protected open` when ESA fixes their API bug

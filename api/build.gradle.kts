@@ -1,6 +1,9 @@
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
+val kmongo_version: String by project
+val amqp_version: String by project
+val twitch4j_version: String by project
 
 plugins {
     application
@@ -20,8 +23,7 @@ repositories {
 }
 
 dependencies {
-    api(project(":kgdq"))
-    api(project(":horaro"))
+    implementation(project(":api-models"))
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-auth-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-locations-jvm:$ktor_version")
@@ -39,6 +41,9 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("org.litote.kmongo:kmongo-coroutine-serialization:$kmongo_version")
+    implementation("com.rabbitmq:amqp-client:$amqp_version")
+    implementation("com.github.twitch4j:twitch4j-helix:$twitch4j_version")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

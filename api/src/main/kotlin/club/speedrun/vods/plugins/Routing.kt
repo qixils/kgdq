@@ -2,8 +2,8 @@
 
 package club.speedrun.vods.plugins
 
-import club.speedrun.vods.marathon.ESAMarathon
-import club.speedrun.vods.marathon.GDQMarathon
+import club.speedrun.vods.esa
+import club.speedrun.vods.gdq
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -13,9 +13,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.SerializationException
-
-val gdq = GDQMarathon()
-val esa = ESAMarathon()
 
 fun Application.configureRouting() {
 

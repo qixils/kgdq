@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":api"))
+    implementation(project(":api-models"))
     implementation("net.dv8tion:JDA:5.0.0-alpha.17")
     implementation("com.github.minndevelopment:jda-ktx:03b07e7d17")
     implementation("org.spongepowered:configurate-yaml:$configurate_version")
