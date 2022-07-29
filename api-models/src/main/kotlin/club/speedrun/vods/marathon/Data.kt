@@ -15,71 +15,72 @@ import java.util.logging.Logger
 import java.util.regex.Pattern
 
 @Serializable
-data class RunData(
-    @Transient val trackerSource: Run? = null,
-    @Transient val horaroSource: dev.qixils.horaro.models.Run? = null,
-    val id: Int? = null,
-    val horaroId: String? = null,
-    val event: Int,
-    val name: String,
-    val displayName: String,
-    val twitchName: String,
-    val console: String,
-    val commentators: String,
-    val description: String,
-    @Serializable(with = InstantAsStringSerializer::class) val startTime: Instant,
-    @Serializable(with = InstantAsStringSerializer::class) val endTime: Instant,
-    val order: Int,
-    @Serializable(with = DurationAsStringSerializer::class) val runTime: Duration,
-    @Serializable(with = DurationAsStringSerializer::class) val setupTime: Duration,
-    val coop: Boolean,
-    val category: String,
-    val releaseYear: Int?,
-    val runners: MutableList<Runner>,
-    val runnersAsString: String,
-    val bids: List<BidData>,
-    val twitchVODs: List<TwitchVOD>,
-    val youtubeVODs: List<YouTubeVOD>,
-) {
+class RunData{
+    @Transient var trackerSource: Run? = null
+    @Transient var horaroSource: dev.qixils.horaro.models.Run? = null
+    var id: Int? = null
+    var horaroId: String? = null
+    val event: Int
+    val name: String
+    val displayName: String
+    val twitchName: String
+    val console: String
+    val commentators: String
+    val description: String
+    @Serializable(with = InstantAsStringSerializer::class) val startTime: Instant
+    @Serializable(with = InstantAsStringSerializer::class) val endTime: Instant
+    val order: Int
+    @Serializable(with = DurationAsStringSerializer::class) val runTime: Duration
+    @Serializable(with = DurationAsStringSerializer::class) val setupTime: Duration
+    val coop: Boolean
+    val category: String
+    var releaseYear: Int? = null
+    val runners: MutableList<Runner>
+    val runnersAsString: String
+    val bids: MutableList<BidData>
+    val twitchVODs: MutableList<TwitchVOD>
+    val youtubeVODs: MutableList<YouTubeVOD>
+
     constructor(
         run: Wrapper<Run>,
         bids: List<BidData>,
         previousRun: RunData?,
         overrides: RunOverrides,
-    ) : this(
-        trackerSource = run.value,
-        horaroSource = null,
-        id = run.id,
-        horaroId = run.value.horaroId,
-        event = run.value.eventId,
-        name = run.value.name,
-        displayName = run.value.displayName,
-        twitchName = run.value.twitchName,
-        console = run.value.console,
-        commentators = run.value.commentators,
-        description = run.value.description,
-        startTime = overrides.startTime ?: run.value.startTime,
-        endTime = (overrides.startTime ?: run.value.startTime) + (overrides.runTime ?: run.value.runTime),
-        order = run.value.order,
-        runTime = overrides.runTime ?: run.value.runTime,
-        setupTime = if (previousRun != null) {
-            var duration = Duration.between(
-                previousRun.endTime,
-                overrides.startTime ?: run.value.startTime
-            )
+    ) {
+        trackerSource = run.value
+        horaroSource = null
+        id = run.id
+        horaroId = run.value.horaroId
+        event = run.value.eventId
+        name = run.value.name
+        displayName = run.value.displayName
+        twitchName = run.value.twitchName
+        console = run.value.console
+        commentators = run.value.commentators
+        description = run.value.description
+        order = run.value.order
+        coop = run.value.coop
+        category = run.value.category
+        releaseYear = run.value.releaseYear
+        runners = mutableListOf()
+        runnersAsString = run.value.deprecatedRunners.split(", ").naturalJoinToString()
+        this.bids = bids.toMutableList()
+        twitchVODs = overrides.twitchVODs
+        youtubeVODs = overrides.youtubeVODs
+        startTime = overrides.startTime
+            ?: previousRun?.endTime?.plus(run.value.setupTime)
+            ?: run.value.startTime
+        runTime = overrides.runTime ?: run.value.runTime
+        endTime = startTime + runTime
+        if (previousRun != null) {
+            var duration = Duration.between(previousRun.endTime, startTime)
             if (duration.isNegative)
                 duration = Duration.ZERO
-            duration
-        } else run.value.setupTime,
-        coop = run.value.coop,
-        category = run.value.category,
-        releaseYear = run.value.releaseYear,
-        runners = mutableListOf(),
-        runnersAsString = run.value.deprecatedRunners.split(", ").naturalJoinToString(),
-        bids = bids,
-        twitchVODs = overrides.twitchVODs,
-        youtubeVODs = overrides.youtubeVODs,
-    )
+            setupTime = duration
+        } else {
+            setupTime = run.value.setupTime
+        }
+    }
 
     constructor(
         horaroRun: dev.qixils.horaro.models.Run,
@@ -88,43 +89,44 @@ data class RunData(
         event: Wrapper<Event>,
         order: Int,
         overrides: RunOverrides?,
-    ) : this(
-        trackerSource = trackerRun?.trackerSource,
-        horaroSource = horaroRun,
-        id = trackerRun?.id,
-        horaroId = horaroRun.getValue("ID"),
-        event = event.id,
-        name = calculateHoraroName(horaroRun),
-        displayName = trackerRun?.displayName ?: "",
-        twitchName = trackerRun?.twitchName ?: "",
-        console = trackerRun?.console ?: horaroRun.getValue("Platform") ?: "",
-        commentators = trackerRun?.commentators ?: "",
-        description = trackerRun?.description ?: "",
-        startTime = overrides?.startTime ?: horaroRun.scheduled.toInstant(),
-        endTime = (overrides?.startTime ?: horaroRun.scheduled.toInstant()).plus(overrides?.runTime ?: horaroRun.length),
-        order = order,
-        runTime = overrides?.runTime ?: horaroRun.length,
-        setupTime = if (previousRun != null) {
-            var duration = Duration.between(
-                previousRun.endTime,
-                overrides?.startTime ?: horaroRun.scheduled.toInstant()
-            )
-            if (duration.isNegative)
-                duration = Duration.ZERO
-            duration
-        } else trackerRun?.setupTime ?: Duration.ZERO,
-        coop = trackerRun?.coop ?: false,
-        category = trackerRun?.category ?: horaroRun.getValue("Category") ?: "",
-        releaseYear = trackerRun?.releaseYear,
-        runners = trackerRun?.runners ?: mutableListOf(),
+    ) {
+        trackerSource = trackerRun?.trackerSource
+        horaroSource = horaroRun
+        id = trackerRun?.id
+        horaroId = horaroRun.getValue("ID")
+        this.event = event.id
+        name = calculateHoraroName(horaroRun)
+        displayName = trackerRun?.displayName ?: ""
+        twitchName = trackerRun?.twitchName ?: "" // this could be stored from RabbitMQ, but I can't be bothered
+        console = trackerRun?.console ?: horaroRun.getValue("Platform") ?: ""
+        commentators = trackerRun?.commentators ?: ""
+        description = trackerRun?.description ?: ""
+        this.order = order
+        coop = trackerRun?.coop ?: false
+        category = trackerRun?.category ?: horaroRun.getValue("Category") ?: ""
+        releaseYear = trackerRun?.releaseYear
+        runners = trackerRun?.runners ?: mutableListOf()
         runnersAsString = listOf(
             calculateHoraroRunnerNames(horaroRun)?.naturalJoinToString(),
             trackerRun?.runnersAsString
-        ).firstOrNull { !it.isNullOrEmpty() } ?: "",
-        bids = trackerRun?.bids ?: emptyList(),
-        twitchVODs = calculateHoraroVODs(horaroRun) ?: overrides?.twitchVODs ?: emptyList(),
-        youtubeVODs = trackerRun?.youtubeVODs ?: overrides?.youtubeVODs ?: emptyList(),
-    )
+        ).firstOrNull { !it.isNullOrEmpty() } ?: ""
+        bids = trackerRun?.bids ?: mutableListOf()
+        twitchVODs = calculateHoraroVODs(horaroRun) ?: overrides?.twitchVODs ?: mutableListOf()
+        youtubeVODs = trackerRun?.youtubeVODs ?: overrides?.youtubeVODs ?: mutableListOf()
+        startTime = overrides?.startTime
+            ?: previousRun?.endTime?.plus(calculateHoraroRawSetupTime(horaroRun, previousRun))
+            ?: horaroRun.scheduled.toInstant()
+        runTime = overrides?.runTime ?: horaroRun.length
+        endTime = startTime + runTime
+        if (previousRun != null) {
+            var duration = Duration.between(previousRun.endTime, startTime)
+            if (duration.isNegative)
+                duration = Duration.ZERO
+            setupTime = duration
+        } else {
+            setupTime = trackerRun?.setupTime ?: Duration.ZERO
+        }
+    }
 
     @InternalGdqApi
     suspend fun loadRunners() {
@@ -134,7 +136,7 @@ data class RunData(
             Logger.getLogger("RunData").fine("Loading runners for $name")
             // The Horaro schedule has a "UserIDs" column, but they don't seem to align with the
             // donation tracker API, so I'm falling back to their "Player(s)" column instead
-            runners.addAll(horaroSource.getValue("Player(s)")?.split(", ")
+            runners.addAll(horaroSource!!.getValue("Player(s)")?.split(", ")
                 ?.map { calculateHoraroFakeRunner(it) } ?: emptyList())
         } else {
             runners.addAll(trackerSource!!.runners().map { it.value })
@@ -147,12 +149,11 @@ data class RunData(
     /**
      * Whether this is the current run being played at the event.
      */
-    @Transient
-    val isCurrent: Boolean = run {
+    val isCurrent: Boolean get() {
         val now = Instant.now()
         val start = startTime.minus(setupTime)
         val end = endTime
-        start <= now && now <= end
+        return start <= now && now <= end
     }
 
     companion object {
@@ -171,7 +172,7 @@ data class RunData(
             return names.naturalJoinToString()
         }
 
-        private fun calculateHoraroVODs(run: dev.qixils.horaro.models.Run): List<TwitchVOD>? {
+        private fun calculateHoraroVODs(run: dev.qixils.horaro.models.Run): MutableList<TwitchVOD>? {
             val rawName = run.getValue("Game")!!.trim()
             val matcher = HORARO_GAME_MARKDOWN.matcher(rawName)
             val vods = mutableListOf<TwitchVOD>()
@@ -204,6 +205,12 @@ data class RunData(
                 stream = ""
             }
             return Runner(name, stream, "", "", "", name)
+        }
+
+        private fun calculateHoraroRawSetupTime(run: dev.qixils.horaro.models.Run, previousRun: RunData): Duration {
+            val previousEnd = previousRun.horaroSource!!.scheduled + previousRun.horaroSource!!.length
+            val currentStart = run.scheduled
+            return Duration.between(previousEnd, currentStart)
         }
     }
 }

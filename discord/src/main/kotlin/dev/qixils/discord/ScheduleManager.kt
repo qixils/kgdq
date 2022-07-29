@@ -63,6 +63,7 @@ class ScheduleManager(
         return json.decodeFromString(serializer, response.body())
     }
 
+    // TODO split out a lot of this stuff into functions
     private fun run() = runBlocking {
         logger.info("Started schedule manager for ${config.organization.name}'s ${config.id}")
 
@@ -85,8 +86,8 @@ class ScheduleManager(
                 "**${event.name}**\n" +
                         "Date headers are in the ${event.timezone.id} timezone.\n" +
                         "Join the ${event.count} donators who have raised " +
-                        "${moneyFormatter.format(event.amount)} for ${event.charityName}" +
-                        "at ${event.canonicalUrl}." +
+                        "${moneyFormatter.format(event.amount)} for ${event.charityName} " +
+                        "at ${event.canonicalUrl}. " +
                         "(Minimum Donation: ${moneyFormatter.format(event.minimumDonation)})",
                 pin = true
             )
@@ -301,13 +302,13 @@ class ScheduleManager(
             while (oldMessages.isNotEmpty()) {
                 val oldMessage = oldMessages.removeFirst()
                 if (oldMessage.type != MessageType.DEFAULT) {
-                    oldMessage.delete().queue()
+                    oldMessage.delete().await()
                     continue
                 }
                 if (newMessagesCopy.isNotEmpty())
                     newMessagesCopy.removeFirst().edit(oldMessage)
                 else
-                    oldMessage.delete().queue()
+                    oldMessage.delete().await()
             }
             // Send new messages
             newMessagesCopy.forEach { it.send(channel) }

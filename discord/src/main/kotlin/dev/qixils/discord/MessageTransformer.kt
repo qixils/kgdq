@@ -30,12 +30,12 @@ data class MessageTransformer(
     suspend fun send(channel: MessageChannel) {
         val sentMessage = channel.send(content, embeds = embeds).await()
         if (pin)
-            sentMessage.pin().queue()
+            sentMessage.pin().await()
     }
 
-    fun edit(toEdit: Message) {
+    suspend fun edit(toEdit: Message) {
         if (content != toEdit.contentRaw || toEdit.embeds.isNotEmpty() || embeds.isNotEmpty())
-            toEdit.edit(content, embeds = embeds, replace = true).queue()
+            toEdit.edit(content, embeds = embeds, replace = true).await()
 
         if (!toEdit.guild.selfMember.hasPermission(toEdit.guildChannel, Permission.MESSAGE_MANAGE)) {
             if (!pinWarnings.contains(toEdit.guildChannel.idLong)) {
@@ -47,9 +47,9 @@ data class MessageTransformer(
             }
         } else if (pin) {
             if (!toEdit.isPinned)
-                toEdit.pin().queue()
+                toEdit.pin().await()
         } else if (toEdit.isPinned) {
-            toEdit.unpin().queue()
+            toEdit.unpin().await()
         }
     }
 }

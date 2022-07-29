@@ -4,8 +4,8 @@ import club.speedrun.vods.rabbit.ScheduleStatus
 import dev.qixils.gdq.models.Event
 import dev.qixils.gdq.models.Run
 import dev.qixils.gdq.models.Wrapper
+import org.litote.kmongo.combine
 import org.litote.kmongo.coroutine.coroutine
-import org.litote.kmongo.coroutine.updateOne
 import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.setValue
@@ -42,7 +42,14 @@ class DatabaseManager(organization: String) {
             val oldOverrides = runs.findOneAndDelete(RunOverrides::horaroId eq run.value.horaroId)
             if (oldOverrides != null) {
                 overrides.mergeIn(oldOverrides)
-                runs.updateOne(overrides)
+                runs.updateOneById(overrides._id, combine(
+                    setValue(RunOverrides::runId, overrides.runId),
+                    setValue(RunOverrides::horaroId, overrides.horaroId),
+                    setValue(RunOverrides::twitchVODs, overrides.twitchVODs),
+                    setValue(RunOverrides::youtubeVODs, overrides.youtubeVODs),
+                    setValue(RunOverrides::startTime, overrides.startTime),
+                    setValue(RunOverrides::runTime, overrides.runTime),
+                ))
             } else {
                 overrides.horaroId = run.value.horaroId
                 runs.updateOneById(

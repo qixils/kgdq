@@ -1,11 +1,13 @@
 package club.speedrun.vods.rabbit
 
 import club.speedrun.vods.marathon.DatabaseManager
+import club.speedrun.vods.marathon.RunOverrides
 import club.speedrun.vods.marathon.TwitchVOD
 import com.github.twitch4j.helix.TwitchHelix
 import com.github.twitch4j.helix.TwitchHelixBuilder
 import com.github.twitch4j.helix.domain.StreamList
 import com.github.twitch4j.helix.domain.VideoList
+import com.mongodb.client.model.Updates
 import com.netflix.hystrix.HystrixCommand
 import com.rabbitmq.client.*
 import kotlinx.coroutines.async
@@ -13,6 +15,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.litote.kmongo.coroutine.updateOne
+import org.litote.kmongo.eq
+import org.litote.kmongo.push
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.charset.StandardCharsets
@@ -124,7 +128,7 @@ class DeliverHandler(
             logger.info("Updating start time of run ${status.currentRun} to ${sceneChanged.time.iso}")
             val overrides = db.getOrCreateRunOverrides(null, status.currentRun)
             overrides.startTime = runStart
-            db.runs.updateOne(overrides)
+            db.runs.updateOne(RunOverrides::horaroId eq status.currentRun, Updates.set("startTime", runStart.toString()))
             // Fetching current stream for VOD link timestamp
             val streams = async { twitch.streams(userLogins = listOf(stream)).execute() }
             val stream = streams.await().streams.firstOrNull() ?: return@coroutineScope
@@ -136,7 +140,7 @@ class DeliverHandler(
             // Adding VOD link to run
             logger.info("Adding VOD link ${vod.asURL()} to run ${status.currentRun}")
             overrides.twitchVODs.add(vod)
-            db.runs.updateOne(overrides)
+            db.runs.updateOne(RunOverrides::horaroId eq status.currentRun, push(RunOverrides::twitchVODs, vod))
         }
 
         if (status.usingGameScene != isGameScene) {

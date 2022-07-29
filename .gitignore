@@ -1,4 +1,5 @@
-/discord-schedule-bot.yml
+/discord-schedule-bot*.yml
+/discord/discord-schedule-bot*.yml
 
 .gradle
 build/
