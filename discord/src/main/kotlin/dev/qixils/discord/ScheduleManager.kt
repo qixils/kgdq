@@ -87,7 +87,7 @@ class ScheduleManager(
                         "Date headers are in the ${event.timezone.id} timezone.\n" +
                         "Join the ${event.count} donators who have raised " +
                         "${moneyFormatter.format(event.amount)} for ${event.charityName} " +
-                        "at ${event.canonicalUrl}. " +
+                        "at <${event.canonicalUrl}>. " +
                         "(Minimum Donation: ${moneyFormatter.format(event.minimumDonation)})",
                 pin = true
             )
