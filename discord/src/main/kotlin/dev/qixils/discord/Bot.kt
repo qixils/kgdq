@@ -35,9 +35,9 @@ class Bot {
         logger.debug("Starting bot...")
 
         // get config file and create it if it doesn't exist
-        val path = Paths.get("discord-schedule-bot.yml")
+        val path = Paths.get("vodchat.yml")
         if (path.notExists()) {
-            val defaultConfig = Bot::class.java.getResourceAsStream("/discord-schedule-bot.yml")!!
+            val defaultConfig = Bot::class.java.getResourceAsStream("/vodchat.yml")!!
             path.writeLines(defaultConfig.bufferedReader().readLines())
         }
 

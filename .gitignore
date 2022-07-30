@@ -1,5 +1,5 @@
-/discord-schedule-bot*.yml
-/discord/discord-schedule-bot*.yml
+/vodchat*.yml
+/discord/vodchat*.yml
 
 .gradle
 build/

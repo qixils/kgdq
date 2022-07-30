@@ -68,7 +68,7 @@ class RunData{
         twitchVODs = overrides.twitchVODs
         youtubeVODs = overrides.youtubeVODs
         startTime = overrides.startTime
-            ?: previousRun?.endTime?.plus(run.value.setupTime)
+            ?: calculateOffsetTime(previousRun?.endTime, run.value.setupTime)
             ?: run.value.startTime
         runTime = overrides.runTime ?: run.value.runTime
         endTime = startTime + runTime
@@ -114,7 +114,7 @@ class RunData{
         twitchVODs = calculateHoraroVODs(horaroRun) ?: overrides?.twitchVODs ?: mutableListOf()
         youtubeVODs = trackerRun?.youtubeVODs ?: overrides?.youtubeVODs ?: mutableListOf()
         startTime = overrides?.startTime
-            ?: previousRun?.endTime?.plus(calculateHoraroRawSetupTime(horaroRun, previousRun))
+            ?: calculateOffsetTime(previousRun?.endTime, calculateHoraroRawSetupTime(horaroRun, previousRun))
             ?: horaroRun.scheduled.toInstant()
         runTime = overrides?.runTime ?: horaroRun.length
         endTime = startTime + runTime
@@ -158,8 +158,9 @@ class RunData{
 
     companion object {
         private val HORARO_GAME_MARKDOWN: Pattern =
-            Pattern.compile("\\[([^\\[\\]]+)]\\(https?://(?:www.)?twitch.tv/videos/(\\d+)\\)")
+            Pattern.compile("\\[([^\\[\\]]+)]\\(https?://(?:www.)?(?:twitch.tv/videos/(\\d+))?\\)")
         private val NAME_REGEX: Pattern = Pattern.compile("\\[(.+)]\\((.+)\\)")
+        private val MAX_RAW_SETUP_TIME = Duration.ofMinutes(30)
 
         private fun calculateHoraroName(run: dev.qixils.horaro.models.Run): String {
             val rawName = run.getValue("Game")!!.trim()
@@ -176,8 +177,11 @@ class RunData{
             val rawName = run.getValue("Game")!!.trim()
             val matcher = HORARO_GAME_MARKDOWN.matcher(rawName)
             val vods = mutableListOf<TwitchVOD>()
-            while (matcher.find())
-                vods += TwitchVOD(matcher.group(2))
+            while (matcher.find()) {
+                val videoId = matcher.group(2)
+                if (videoId != null)
+                    vods += TwitchVOD(videoId)
+            }
             return if (vods.isEmpty()) null else vods
         }
 
@@ -207,10 +211,25 @@ class RunData{
             return Runner(name, stream, "", "", "", name)
         }
 
-        private fun calculateHoraroRawSetupTime(run: dev.qixils.horaro.models.Run, previousRun: RunData): Duration {
+        private fun calculateHoraroRawSetupTime(run: dev.qixils.horaro.models.Run, previousRun: RunData?): Duration? {
+            if (previousRun == null)
+                return null
             val previousEnd = previousRun.horaroSource!!.scheduled + previousRun.horaroSource!!.length
             val currentStart = run.scheduled
             return Duration.between(previousEnd, currentStart)
+        }
+
+        private fun calculateOffsetTime(previousRunTime: Instant?, setupTime: Duration?): Instant? {
+            if (previousRunTime == null)
+                return null
+            if (setupTime == null)
+                return null
+            // if the setup time is longer than half an hour then the run is probably scheduled for
+            // the next day of programming, so we'd rather return null to fall back to its
+            // officially scheduled start time.
+            if (setupTime > MAX_RAW_SETUP_TIME)
+                return null
+            return previousRunTime + setupTime
         }
     }
 }

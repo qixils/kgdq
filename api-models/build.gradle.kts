@@ -11,5 +11,5 @@ repositories {
 dependencies {
     api(project(":kgdq"))
     api(project(":horaro"))
-    api("org.litote.kmongo:kmongo-id:${kmongo_version}")
+    api("org.litote.kmongo:kmongo-id:$kmongo_version")
 }

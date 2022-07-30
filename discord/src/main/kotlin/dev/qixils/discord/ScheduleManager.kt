@@ -6,6 +6,7 @@ import club.speedrun.vods.naturalJoinTo
 import dev.minn.jda.ktx.coroutines.await
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.qixils.gdq.models.BidState
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -52,7 +53,7 @@ class ScheduleManager(
 
     init {
         logger.debug("Starting schedule manager for ${config.organization.name}'s ${config.id}...")
-        scheduler.scheduleAtFixedRate(this::run, 0, config.waitMinutes, TimeUnit.MINUTES)
+        scheduler.scheduleAtFixedRate(this::runWrapper, 0, config.waitMinutes, TimeUnit.MINUTES)
     }
 
     private fun <M> get(query: String, serializer: KSerializer<M>): M {
@@ -63,8 +64,18 @@ class ScheduleManager(
         return json.decodeFromString(serializer, response.body())
     }
 
+    private fun runWrapper() {
+        try {
+            runBlocking {
+                run()
+            }
+        } catch (e: Exception) {
+            logger.error("Error in schedule manager", e)
+        }
+    }
+
     // TODO split out a lot of this stuff into functions
-    private fun run() = runBlocking {
+    private suspend fun run() = coroutineScope {
         logger.info("Started schedule manager for ${config.organization.name}'s ${config.id}")
 
         // Get event and run data
@@ -78,7 +89,7 @@ class ScheduleManager(
 
         // Create list of messages
         val messages = mutableListOf<MessageTransformer>()
-        val runTicker = mutableListOf<RunData>()
+        val runTicker = mutableListOf<RunData?>()
 
         // Add header message
         messages.add(
@@ -100,11 +111,15 @@ class ScheduleManager(
             if (index == 0 || runs[index-1].startTime.atZone(tz).dayOfWeek != run.startTime.atZone(tz).dayOfWeek)
                 sb.append(dateHeaderFormat.format(run.startTime.atZone(tz)))
 
-            if (run.isCurrent || (runTicker.isNotEmpty() && runTicker.size < config.upcomingRuns))
-                runTicker.add(run)
-
-            if (run.isCurrent)
+            if (run.isCurrent) {
                 sb.append(">>> \u25B6\uFE0F ")
+
+                if (Instant.now() < run.startTime)
+                    runTicker.add(null)
+                runTicker.add(run)
+            }
+            else if (runTicker.isNotEmpty() && runTicker.size < config.upcomingRuns)
+                runTicker.add(run)
 
             sb.append(TimeFormat.DATE_SHORT.format(run.startTime)).append(' ')
             sb.append(TimeFormat.TIME_SHORT.format(run.startTime)).append(": ")
@@ -209,8 +224,16 @@ class ScheduleManager(
                 } else if (runTicker.isNotEmpty()) {
                     runTicker.forEachIndexed { index, run ->
                         field {
-                            name = if (index == 0) "Current Game"
-                            else TimeFormat.RELATIVE.format(run.startTime)
+                            inline = false
+                            if (run == null || index == 0) {
+                                name = "Current Game"
+                                if (run == null) {
+                                    value = "The event is currently in-between runs. Stay tuned for more!"
+                                    return@field
+                                }
+                            } else if (index != 0) {
+                                name = TimeFormat.RELATIVE.format(run.startTime)
+                            }
 
                             val sb = StringBuilder(run.name)
                             if (run.category.isNotEmpty())// && !"Any%".equals(run.category, true))
@@ -253,7 +276,6 @@ class ScheduleManager(
                                 })
                             }
                             value = sb.toString()
-                            inline = false
                         }
                     }
                 } else {
