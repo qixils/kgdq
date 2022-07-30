@@ -158,12 +158,14 @@ class RunData{
 
     companion object {
         private val HORARO_GAME_MARKDOWN: Pattern =
-            Pattern.compile("\\[([^\\[\\]]+)]\\(https?://(?:www.)?(?:twitch.tv/videos/(\\d+))?\\)")
+            Pattern.compile("\\[([^\\[\\]]+)]\\(https?://(?:www.)?twitch.tv/videos/(\\d+)\\)")
         private val NAME_REGEX: Pattern = Pattern.compile("\\[(.+)]\\((.+)\\)")
         private val MAX_RAW_SETUP_TIME = Duration.ofMinutes(30)
 
         private fun calculateHoraroName(run: dev.qixils.horaro.models.Run): String {
             val rawName = run.getValue("Game")!!.trim()
+            // TODO: incorporate an actual markdown parser here to strip the Game field
+            //  of markdown formatting (namely links)
             val matcher = HORARO_GAME_MARKDOWN.matcher(rawName)
             val names = mutableListOf<String>()
             while (matcher.find())
@@ -177,11 +179,8 @@ class RunData{
             val rawName = run.getValue("Game")!!.trim()
             val matcher = HORARO_GAME_MARKDOWN.matcher(rawName)
             val vods = mutableListOf<TwitchVOD>()
-            while (matcher.find()) {
-                val videoId = matcher.group(2)
-                if (videoId != null)
-                    vods += TwitchVOD(videoId)
-            }
+            while (matcher.find())
+                vods += TwitchVOD(matcher.group(2))
             return if (vods.isEmpty()) null else vods
         }
 
