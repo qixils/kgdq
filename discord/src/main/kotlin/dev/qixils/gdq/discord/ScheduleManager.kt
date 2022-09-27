@@ -1,4 +1,4 @@
-package dev.qixils.discord
+package dev.qixils.gdq.discord
 
 import club.speedrun.vods.marathon.EventData
 import club.speedrun.vods.marathon.RunData
@@ -47,8 +47,6 @@ class ScheduleManager(
     companion object {
         private val logger = LoggerFactory.getLogger(ScheduleManager::class.java)
         private val dateHeaderFormat = DateTimeFormatter.ofPattern("_ _\n> **EEEE** MMM d\n_ _\n", Locale.ENGLISH)
-        private val twitchRegex = Pattern.compile("https?://(?:www\\.)?twitch\\.tv/(.+)")
-        private val urlRegex = Pattern.compile("https?://.+")
     }
 
     init {
@@ -135,7 +133,7 @@ class ScheduleManager(
             if (run.runners.isNotEmpty() || run.runnersAsString.isNotEmpty()) {
                 sb.append(" by ")
                 if (run.runners.isNotEmpty())
-                    naturalJoinTo(sb, run.runners.map { it.name })
+                    naturalJoinTo(sb, run.runners) { it.name }
                 else
                     sb.append(run.runnersAsString)
             }
@@ -194,14 +192,17 @@ class ScheduleManager(
             vods.forEach { vod -> sb.append("\n<").append(vod.asURL()).append('>') }
 
             // Finalize
-            messages.add(MessageTransformer(
+            messages.add(
+                MessageTransformer(
                 sb.toString(),
                 pin = run.isCurrent
-            ))
+            )
+            )
         }
 
         // Add ticker
-        messages.add(MessageTransformer(
+        messages.add(
+            MessageTransformer(
             embed = EmbedBuilder {
                 title = event.name + " Ticker"
                 description = """
@@ -240,40 +241,10 @@ class ScheduleManager(
                                 sb.append(" (").append(run.category).append(')')
                             if (run.runners.isNotEmpty()) {
                                 sb.append(" by ")
-                                naturalJoinTo(sb, run.runners.map { runner ->
+                                naturalJoinTo(sb, run.runners) { runner ->
                                     // TODO: re-add emotes when Discord releases the React Native port for Android
-                                    // Find one of the runner's social media profiles
-                                    val url: String? = if (runner.stream.isNotEmpty()) {
-                                        val twitchMatcher = twitchRegex.matcher(runner.stream)
-                                        val urlMatcher = urlRegex.matcher(runner.stream)
-                                        if (twitchMatcher.matches())
-                                            "https://twitch.tv/${twitchMatcher.group(1)}"
-                                        else if (!urlMatcher.matches())
-                                            "https://twitch.tv/${runner.stream}"
-                                        else
-                                            runner.stream
-                                    } else if (runner.youtube.isNotEmpty()) {
-                                        if (runner.youtube.contains("youtube.com"))
-                                            runner.youtube
-                                        else if (runner.youtube.startsWith("UC", false))
-                                            "https://youtube.com/channel/${runner.youtube}"
-                                        else
-                                            "https://youtube.com/c/${runner.youtube}"
-                                    } else if (runner.twitter.isNotEmpty()) {
-                                        if (runner.twitter.contains("twitter.com"))
-                                            runner.twitter
-                                        else
-                                            "https://twitter.com/${runner.twitter}"
-                                    } else {
-                                        null
-                                    }
-
-                                    // Return markdown-formatted name with link if available
-                                    if (url != null)
-                                        "[${runner.name}]($url)"
-                                    else
-                                        runner.name
-                                })
+                                    runner.url()?.let { "[${runner.name}]($it)" } ?: runner.name
+                                }
                             }
                             value = sb.toString()
                         }
@@ -287,7 +258,8 @@ class ScheduleManager(
                 }
             },
             pin = false
-        ))
+        )
+        )
 
         // Send/edit messages
         config.channels.forEach { channelId ->

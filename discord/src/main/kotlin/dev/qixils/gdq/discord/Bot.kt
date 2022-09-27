@@ -1,4 +1,4 @@
-package dev.qixils.discord
+package dev.qixils.gdq.discord
 
 import dev.minn.jda.ktx.events.listener
 import dev.minn.jda.ktx.jdabuilder.intents
@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.entities.MessageType
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.requests.GatewayIntent
-import net.dv8tion.jda.api.utils.AllowedMentions
+import net.dv8tion.jda.api.utils.messages.MessageRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.spongepowered.configurate.CommentedConfigurationNode
@@ -21,11 +21,7 @@ import kotlin.io.path.notExists
 import kotlin.io.path.writeLines
 import kotlin.system.exitProcess
 
-fun main() { //args: Array<String>
-    Bot()
-}
-
-class Bot {
+object Bot {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
     private val config: Config
     val jda: JDA
@@ -72,7 +68,7 @@ class Bot {
         }
 
         // init jda
-        AllowedMentions.setDefaultMentions(emptySet())
+        MessageRequest.setDefaultMentions(emptySet())
 
         jda = light(config.token, enableCoroutines=true) {
             intents += listOf(GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT)
@@ -90,6 +86,11 @@ class Bot {
             if (config.events.any { event -> event.channels.contains(it.messageIdLong) }) return@listener
             it.message.delete().queue()
         }
+    }
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        // no-op
     }
 }
 

@@ -12,7 +12,7 @@ plugins {
 }
 
 application {
-    mainClass.set("dev.qixils.discord.BotKt")
+    mainClass.set("dev.qixils.gdq.discord.Bot")
 }
 
 repositories {

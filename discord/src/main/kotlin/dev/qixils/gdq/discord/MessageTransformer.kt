@@ -1,18 +1,18 @@
-package dev.qixils.discord
+package dev.qixils.gdq.discord
 
 import dev.minn.jda.ktx.coroutines.await
-import dev.minn.jda.ktx.messages.Embeds
 import dev.minn.jda.ktx.messages.InlineEmbed
 import dev.minn.jda.ktx.messages.edit
 import dev.minn.jda.ktx.messages.send
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Message
-import net.dv8tion.jda.api.entities.MessageChannel
+import net.dv8tion.jda.api.entities.MessageEmbed
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import org.slf4j.LoggerFactory
 
 data class MessageTransformer(
     val content: String = "",
-    val embeds: Embeds = emptyList(),
+    val embeds: Collection<MessageEmbed> = emptyList(),
     val pin: Boolean = false,
 ) {
     companion object {

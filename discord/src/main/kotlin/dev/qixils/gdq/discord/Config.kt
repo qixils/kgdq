@@ -1,4 +1,4 @@
-package dev.qixils.discord
+package dev.qixils.gdq.discord
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 
