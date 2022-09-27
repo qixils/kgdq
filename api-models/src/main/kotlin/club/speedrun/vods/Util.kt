@@ -1,5 +1,9 @@
 package club.speedrun.vods
 
+import java.util.concurrent.CompletableFuture
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+
 fun <T> Appendable.appendElement(element: T, transform: ((T) -> CharSequence)?) {
     when {
         transform != null -> append(transform(element))
@@ -40,3 +44,5 @@ fun <T> List<T>.naturalJoinToString(prefix: CharSequence = "", postfix: CharSequ
     naturalJoinTo(buffer, prefix, postfix, transform)
     return buffer.toString()
 }
+
+

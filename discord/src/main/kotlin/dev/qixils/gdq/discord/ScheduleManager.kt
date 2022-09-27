@@ -29,14 +29,13 @@ import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
-import java.util.regex.Pattern
 
 class ScheduleManager(
     private val bot: Bot,
     private val config: EventConfig,
 ) {
     private val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
-    private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(60)).build()
+    private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(240)).build()
     private val apiRoot = "https://vods.speedrun.club/api/v1/${config.organization.name.lowercase(Locale.ENGLISH)}/"
     private val json = Json {
         ignoreUnknownKeys = true
@@ -54,12 +53,15 @@ class ScheduleManager(
         scheduler.scheduleAtFixedRate(this::runWrapper, 0, config.waitMinutes, TimeUnit.MINUTES)
     }
 
-    private fun <M> get(query: String, serializer: KSerializer<M>): M {
+    private suspend fun <M> get(query: String, serializer: KSerializer<M>): M {
+        // TODO: i should really have a module for using the vods.speedrun.club API.
+        //  and while I'm at it, I should consider sorta rewriting the GDQ API module to actually provide dedicated
+        //  functions and response objects for each endpoint instead of just a generic "get" function.
         val uri = URI(apiRoot + query)
         logger.debug("GET $uri")
         val request = HttpRequest.newBuilder(uri).GET().build()
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-        return json.decodeFromString(serializer, response.body())
+        val response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+        return json.decodeFromString(serializer, response.await().body())
     }
 
     private fun runWrapper() {

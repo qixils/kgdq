@@ -15,7 +15,7 @@ events:
   # The following example event corresponds to the Summer Games Done Quick 2022 event
 
     # The organization managing the event (either "GDQ" or "ESA")
-  - org: GDQ
+  - org: "GDQ"
 
     # ID of the event -- can be the event's short name or its internal API ID
     id: sgdq2022
@@ -27,20 +27,20 @@ events:
       - 67890
 
     # Twitch channel hosting the event
-    twitch: GamesDoneQuick
+    twitch: "GamesDoneQuick"
 
     # Number of upcoming runs to display in the Run Roster
-    upcomingRuns: 5
+    upcoming_runs: 5
 
     # Minutes to wait in between checking the schedule (should be at least 10 minutes)
-    waitMinutes: 10
+    wait_minutes: 10
 
 
 
   # The following example event corresponds to the European Speedrunner Assembly 2022 Stream 1 event
 
     # The organization managing the event (either "GDQ" or "ESA")
-  - org: ESA
+  - org: "ESA"
 
     # ID of the event -- can be the event's short name or its internal API ID
     id: esa2022s1
@@ -52,10 +52,10 @@ events:
       - 67890
 
     # Twitch channel hosting the event
-    twitch: ESAMarathon
+    twitch: "ESAMarathon"
 
     # Number of upcoming runs to display in the Run Roster
-    upcomingRuns: 5
+    upcoming_runs: 5
 
     # Minutes to wait in between checking the schedule (should be at least 10 minutes)
-    waitMinutes: 10
+    wait_minutes: 10

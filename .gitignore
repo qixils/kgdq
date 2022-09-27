@@ -1,5 +1,4 @@
-/vodchat*.yml
-/discord/vodchat*.yml
+/run/
 
 .gradle
 build/

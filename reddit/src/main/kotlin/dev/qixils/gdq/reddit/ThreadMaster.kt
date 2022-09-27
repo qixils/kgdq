@@ -1,15 +1,12 @@
-package dev.qixils.gdq.discord
+package dev.qixils.gdq.reddit
 
-import dev.minn.jda.ktx.events.listener
-import dev.minn.jda.ktx.jdabuilder.intents
-import dev.minn.jda.ktx.jdabuilder.light
-import net.dv8tion.jda.api.JDA
-import net.dv8tion.jda.api.entities.MessageType
-import net.dv8tion.jda.api.events.ReadyEvent
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import net.dv8tion.jda.api.requests.GatewayIntent
-import net.dv8tion.jda.api.utils.messages.MessageRequest
-import org.slf4j.Logger
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import net.dean.jraw.RedditClient
+import net.dean.jraw.http.OkHttpNetworkAdapter
+import net.dean.jraw.http.UserAgent
+import net.dean.jraw.oauth.Credentials
+import net.dean.jraw.oauth.OAuthHelper
 import org.slf4j.LoggerFactory
 import org.spongepowered.configurate.CommentedConfigurationNode
 import org.spongepowered.configurate.ConfigurateException
@@ -17,23 +14,26 @@ import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
 import org.spongepowered.configurate.objectmapping.ObjectMapper
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader
 import java.nio.file.Paths
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import kotlin.io.path.notExists
 import kotlin.io.path.writeLines
 import kotlin.system.exitProcess
 
-object Bot {
-    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+object ThreadMaster {
+    private val logger = LoggerFactory.getLogger(ThreadMaster::class.java)
     private val config: Config
-    val jda: JDA
-    private val schedules: MutableList<ScheduleManager> = mutableListOf()
+    private val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
+    private val reddit: RedditClient
 
     init {
-        logger.debug("Starting bot...")
+        logger.info("Starting bot...")
 
         // get config file and create it if it doesn't exist
-        val path = Paths.get("vodchat.yml")
+        val path = Paths.get("vodthread.yml")
         if (path.notExists()) {
-            val defaultConfig = Bot::class.java.getResourceAsStream("/vodchat.yml")!!
+            val defaultConfig = ThreadMaster::class.java.getResourceAsStream("/vodthread.yml")!!
             path.writeLines(defaultConfig.bufferedReader().readLines())
             logger.info("Created default config file at ${path.toAbsolutePath()}; please edit it and restart the bot.")
             exitProcess(0)
@@ -69,30 +69,18 @@ object Bot {
             exitProcess(1)
         }
 
-        // init jda
-        MessageRequest.setDefaultMentions(emptySet())
-
-        jda = light(config.token, enableCoroutines=true) {
-            intents += listOf(GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT)
-        }
-
-        // register event listeners
-        jda.listener<ReadyEvent> {
-            logger.info("Loading schedules...")
-            schedules.addAll(config.events.map { event -> ScheduleManager(this@Bot, event) })
-        }
-
-        jda.listener<MessageReceivedEvent> {
-            if (it.author.id != jda.selfUser.id) return@listener
-            if (it.message.type != MessageType.CHANNEL_PINNED_ADD) return@listener
-            if (config.events.any { event -> event.channels.contains(it.messageIdLong) }) return@listener
-            it.message.delete().queue()
-        }
+        // init reddit
+        val userAgent = UserAgent("bot", "dev.qixils.gdq", "1.0.0", "noellekiq")
+        reddit = OAuthHelper.automatic(OkHttpNetworkAdapter(userAgent), config.credentials.toCredentials())
     }
 
     @JvmStatic
     fun main(args: Array<String>) {
-        // no-op
+        // load schedules
+        logger.info("Loading threads...")
+        val managers = config.threads.map { ThreadManager(reddit, it) }
+        scheduler.scheduleAtFixedRate({
+            runBlocking { managers.forEach { launch { it.run() } } }
+        }, 0, config.waitMinutes, TimeUnit.MINUTES)
     }
 }
-
