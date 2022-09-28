@@ -4,6 +4,7 @@ package club.speedrun.vods.marathon
 
 import club.speedrun.vods.db
 import club.speedrun.vods.plugins.UserError
+import club.speedrun.vods.srcDb
 import dev.qixils.gdq.GDQ
 import dev.qixils.gdq.Hook
 import dev.qixils.gdq.ModelType
@@ -17,6 +18,7 @@ import io.ktor.server.application.*
 import io.ktor.server.locations.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.litote.kmongo.coroutine.updateOne
@@ -94,8 +96,10 @@ abstract class Marathon(val api: GDQ) {
             // get other data
             val overrides = api.db.getOrCreateRunOverrides(run)
             val previousRun = runData.lastOrNull()
+            // create run data
             val data = RunData(run, runBids, previousRun, overrides)
-            data.loadRunners()
+            data.loadData()
+            data.loadSrcGame(overrides)
             runData.add(data)
         }
         return runData
@@ -115,8 +119,10 @@ abstract class Marathon(val api: GDQ) {
             val horaroId = horaroRun.getValue("ID")
             val trackerRun = if (horaroId == null) null
             else trackerRuns.firstOrNull { it.trackerSource?.horaroId == horaroId }
+            // create run data
             val data = RunData(horaroRun, trackerRun, horaroRuns.lastOrNull(), event, order, overrides)
-            data.loadRunners()
+            data.loadData()
+            data.loadSrcGame(overrides)
             horaroRuns.add(data)
         }
         return horaroRuns.filter {
@@ -190,6 +196,25 @@ suspend fun Event.horaroSchedule(): FullSchedule? {
     return Horaro.getSchedule(horaroEvent!!, horaroSchedule!!)
 }
 
+val excludedGameTitles = listOf("bonus game", "daily recap", "tasbot plays")
+
+suspend fun RunData.loadSrcGame(overrides: RunOverrides?) {
+    src = if (overrides?.src == "")
+        null
+    else if (overrides?.src != null)
+        overrides.src
+    else
+        run {
+            val gameName = when {
+                twitchName.isNotEmpty() -> twitchName
+                displayName.isNotEmpty() -> displayName
+                else -> name
+            }
+            excludedGameTitles.forEach { if (gameName.contains(it, true)) return@run null }
+            return@run srcDb.getOrCreateGame(gameName).srcId // TODO: schedule creation to be done in background to avoid blocking
+        }
+}
+
 class EventDataCacher(private val api: GDQ) : Hook<Event> {
     override suspend fun handle(item: Wrapper<Event>) {
         if (!api.eventStartedAt.containsKey(item.id)) {
@@ -206,7 +231,7 @@ class EventOverrideUpdater(private val api: GDQ) : Hook<Event> {
         if (overrides.datetime == null) {
             overrides.datetime = item.value.datetime
             // update db asynchronously
-            launch { api.db.events.updateOne(overrides) }
+            launch(Job()) { api.db.events.updateOne(overrides) }
         }
     }
 }

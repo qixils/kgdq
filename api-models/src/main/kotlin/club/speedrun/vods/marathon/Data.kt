@@ -40,6 +40,7 @@ class RunData{
     val bids: MutableList<BidData>
     val twitchVODs: MutableList<TwitchVOD>
     val youtubeVODs: MutableList<YouTubeVOD>
+    var src: String? = null
 
     constructor(
         run: Wrapper<Run>,
@@ -129,7 +130,7 @@ class RunData{
     }
 
     @InternalGdqApi
-    suspend fun loadRunners() {
+    suspend fun loadData() {
         if (horaroSource != null) {
             if (runners.isNotEmpty())
                 return
@@ -160,7 +161,7 @@ class RunData{
         private val MARKDOWN_LINK: Pattern = Pattern.compile("\\[([^]]+)]\\(([^)]+)\\)")
         private val MAX_RAW_SETUP_TIME = Duration.ofMinutes(30)
 
-        private fun calculateHoraroName(run: dev.qixils.horaro.models.Run): String {
+        fun calculateHoraroName(run: dev.qixils.horaro.models.Run): String {
             val rawName = run.getValue("Game")!!.trim()
             // TODO: incorporate an actual markdown parser here to strip the Game field
             //  of markdown formatting (namely links)

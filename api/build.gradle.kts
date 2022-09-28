@@ -24,6 +24,7 @@ repositories {
 
 dependencies {
     implementation(project(":api-models"))
+    implementation(project(":srcom"))
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-auth-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-locations-jvm:$ktor_version")

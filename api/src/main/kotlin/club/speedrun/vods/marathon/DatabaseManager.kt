@@ -10,16 +10,21 @@ import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.setValue
 
-class DatabaseManager(organization: String) {
+open class DatabaseManager(dbName: String) {
     companion object {
-        private val dbClient = KMongo.createClient("mongodb+srv://" +
-                System.getenv("MONGO_USERNAME") +
-                ":${System.getenv("MONGO_PASSWORD")}" +
-                "@${System.getenv("MONGO_URL")}" +
-                "/?retryWrites=true&w=majority").coroutine
+        private val dbClient = KMongo.createClient(
+            "mongodb+srv://" +
+                    System.getenv("MONGO_USERNAME") +
+                    ":${System.getenv("MONGO_PASSWORD")}" +
+                    "@${System.getenv("MONGO_URL")}" +
+                    "/?retryWrites=true&w=majority"
+        ).coroutine
     }
 
-    private val db = dbClient.getDatabase("kgdq-api-$organization")
+    protected val db = dbClient.getDatabase(dbName)
+}
+
+class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$organization") {
     val runs = db.getCollection<RunOverrides>(RunOverrides.COLLECTION_NAME)
     val events = db.getCollection<EventOverrides>(EventOverrides.COLLECTION_NAME)
     val statuses = db.getCollection<ScheduleStatus>(ScheduleStatus.COLLECTION_NAME)
@@ -49,6 +54,7 @@ class DatabaseManager(organization: String) {
                     setValue(RunOverrides::youtubeVODs, overrides.youtubeVODs),
                     setValue(RunOverrides::startTime, overrides.startTime),
                     setValue(RunOverrides::runTime, overrides.runTime),
+                    setValue(RunOverrides::src, overrides.src),
                 ))
             } else {
                 overrides.horaroId = run.value.horaroId

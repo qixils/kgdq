@@ -1,8 +1,8 @@
 package club.speedrun.vods
 
-import club.speedrun.vods.marathon.DatabaseManager
 import club.speedrun.vods.marathon.ESAMarathon
 import club.speedrun.vods.marathon.GDQMarathon
+import club.speedrun.vods.marathon.GdqDatabaseManager
 import club.speedrun.vods.plugins.configureHTTP
 import club.speedrun.vods.plugins.configureMonitoring
 import club.speedrun.vods.plugins.configureOAuth
@@ -18,6 +18,7 @@ import io.ktor.server.plugins.contentnegotiation.*
 
 val gdq = GDQMarathon()
 val esa = ESAMarathon()
+val srcDb = SrcDatabaseManager()
 val httpClient = HttpClient(Apache)
 
 fun main() {
@@ -32,10 +33,10 @@ fun main() {
     }.start(wait = true)
 }
 
-private val databaseManagers = mutableMapOf<String, DatabaseManager>()
+private val databaseManagers = mutableMapOf<String, GdqDatabaseManager>()
 
-fun getDB(organization: String): DatabaseManager {
-    return databaseManagers.getOrPut(organization) { DatabaseManager(organization) }
+fun getDB(organization: String): GdqDatabaseManager {
+    return databaseManagers.getOrPut(organization) { GdqDatabaseManager(organization) }
 }
 
-val GDQ.db: DatabaseManager get() = getDB(organization)
+val GDQ.db: GdqDatabaseManager get() = getDB(organization)

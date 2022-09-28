@@ -30,6 +30,7 @@ data class RunOverrides(
     val youtubeVODs: MutableList<YouTubeVOD> = mutableListOf(),
     @Serializable(with = InstantAsStringSerializer::class) var startTime: Instant? = null,
     @Serializable(with = DurationAsStringSerializer::class) var runTime: Duration? = null,
+    var src: String? = null,
 ) {
     constructor(runId: Int?, horaroId: String?) : this(
         _id = newId(),
@@ -53,6 +54,7 @@ data class RunOverrides(
         if (horaroId == null) horaroId = other.horaroId
         if (startTime == null) startTime = other.startTime
         if (runTime == null) runTime = other.runTime
+        if (src == null) src = other.src
         twitchVODs.addAll(other.twitchVODs)
         youtubeVODs.addAll(other.youtubeVODs)
     }
