@@ -4,9 +4,8 @@ import club.speedrun.vods.marathon.EventData
 import club.speedrun.vods.marathon.RunData
 import club.speedrun.vods.naturalJoinTo
 import dev.qixils.gdq.models.Runner
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -17,6 +16,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
+import java.time.Instant
 import java.util.*
 
 class ThreadManager(
@@ -34,6 +34,10 @@ class ThreadManager(
 
     init {
         logger.debug("Loaded thread manager for ${config.displayName}")
+    }
+
+    companion object {
+        private var lastUpdate = Instant.MIN
     }
 
     private fun generateBody(event: EventData, runs: List<RunData>): CharSequence {
@@ -102,9 +106,10 @@ class ThreadManager(
         // add twitch VODs if available
         if (run.twitchVODs.isNotEmpty()) {
             run.twitchVODs.forEachIndexed { index, vod ->
-                time.append('[')
-                if (index == 0) time.append(run.runTimeText)
-                else time.append(index + 1)
+                if (index == 0)
+                    time.append('[').append(run.runTimeText)
+                else
+                    time.append(" [\\[").append(index + 1).append("\\]")
                 time.append("](").append(vod.asURL()).append(')')
             }
         } else {
@@ -131,7 +136,7 @@ class ThreadManager(
         return json.decodeFromString(serializer, response.await().body())
     }
 
-    suspend fun run() = coroutineScope {
+    suspend fun run() {
         logger.info("Running thread manager for ${config.displayName}")
 
         // Get event and run data
@@ -144,13 +149,17 @@ class ThreadManager(
         val body = generateBody(event, runs).toString()
 
         // Update thread
-        launch {
-            try {
-                reddit.submission(config.threadId).edit(body)
-                logger.info("Updated thread ${config.threadId} for ${config.displayName}")
-            } catch (e: Exception) {
-                logger.error("Failed to update thread ${config.threadId} for ${config.displayName}", e)
+        try {
+            // Wait until 3 seconds have elapsed since the last update to avoid rate limiting
+            while (lastUpdate.isAfter(Instant.now().minusSeconds(3))) {
+                delay(1000)
             }
+            // Perform update
+            lastUpdate = Instant.now()
+            reddit.submission(config.threadId).edit(body)
+            logger.info("Updated thread ${config.threadId} for ${config.displayName}")
+        } catch (e: Exception) {
+            logger.error("Failed to update thread ${config.threadId} for ${config.displayName}", e)
         }
     }
 }
