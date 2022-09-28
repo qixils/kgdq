@@ -96,15 +96,6 @@ abstract class Marathon(val api: GDQ) {
             val overrides = api.db.getOrCreateRunOverrides(run)
             val previousRun = runData.lastOrNull()
             val data = RunData(run, runBids, previousRun, overrides)
-            if (api is ESA && data.id != null) {
-                // TODO: remove this god forsaken hack
-                val cachedAt = api.runCachedAt[data.id!!] ?: Instant.EPOCH
-                val now = Instant.now()
-                if (Duration.between(cachedAt, now) > ModelType.RUNNER.cacheFor) {
-                    api.runCachedAt[data.id!!] = now
-                    api.query(type = ModelType.RUNNER, run = data.id)
-                }
-            }
             data.loadRunners()
             runData.add(data)
         }
@@ -185,7 +176,6 @@ class GDQMarathon : Marathon(GDQ())
 class ESAMarathon : Marathon(ESA())
 
 class ESA : GDQ("https://donations.esamarathon.com/search/", "esa") {
-    val runCachedAt = mutableMapOf<Int, Instant>()
     override suspend fun cacheRunners() {
         // TODO: remove this method (and this whole subclass TBH) when ESA fixes their API
         val now = Instant.now()

@@ -10,7 +10,8 @@ data class ModelType<M : Model>(
     val kClass: KClass<M>,
     val serializer: KSerializer<M>,
     val cacheFor: Duration,
-    val aliases: List<String> = emptyList()
+    val strictCache: Boolean = true,
+    val aliases: List<String> = emptyList(),
 ) {
     val allIds = aliases + id
 
@@ -26,8 +27,8 @@ data class ModelType<M : Model>(
         val BID = register(ModelType("bid", Bid::class, Bid.serializer(), Duration.ofMinutes(5)))
         val BID_TARGET = register(ModelType("bidtarget", Bid::class, Bid.serializer(), Duration.ofMinutes(5)))
         val EVENT = register(ModelType("event", Event::class, Event.serializer(), Duration.ofMinutes(5)))
-        val RUN = register(ModelType("run", Run::class, Run.serializer(), Duration.ofMinutes(5), listOf("speedrun")))
-        val RUNNER = register(ModelType("runner", Runner::class, Runner.serializer(), Duration.ofDays(1)))
+        val RUN = register(ModelType("run", Run::class, Run.serializer(), Duration.ofMinutes(5), aliases = listOf("speedrun")))
+        val RUNNER = register(ModelType("runner", Runner::class, Runner.serializer(), Duration.ofDays(1), strictCache = false))
         // TODO: donations, donors
     }
 }

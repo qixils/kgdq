@@ -3,7 +3,11 @@ package dev.qixils.gdq
 import dev.qixils.gdq.models.Model
 import dev.qixils.gdq.models.Runner
 import dev.qixils.gdq.models.Wrapper
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.future.await
+import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -14,6 +18,7 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
 import java.time.Instant
+import kotlin.coroutines.coroutineContext
 
 /**
  * The central class for performing requests to an instance of the GDQ donation tracker.
@@ -121,24 +126,42 @@ open class GDQ(
         query: Query<M>,
         preLoad: Hook<M>? = null,
         postLoad: Hook<M>? = null,
-    ): List<Wrapper<M>> {
+    ): List<Wrapper<M>> = coroutineScope {
         // ensure runners are cached (they're high in quantity but basically fixed)
-        if (query.type == ModelType.RUNNER) cacheRunners()
+        if (query.type == ModelType.RUNNER) launch { cacheRunners() }
+
+        // create lazy query
+        val queryResult = async(start = CoroutineStart.LAZY) {
+            query(query.asQueryString(), query.type, query.type.serializer, preLoad, postLoad)
+        }
+        var output: List<Wrapper<M>> = emptyList()
 
         // load from cache if possible
         if (query.id != null) {
             val pair = query.type to query.id
             if (modelCache.containsKey(pair)) {
                 val (wrapper, cachedAt) = modelCache[pair]!!
+                @Suppress("UNCHECKED_CAST") // the type is correct it's ok
+                output = listOf(wrapper) as List<Wrapper<M>>
+
+                // return cached data if it hasn't expired, otherwise clear the output variable if strict caching is enabled
                 if (cachedAt.plus(query.type.cacheFor).isAfter(Instant.now())) {
-                    @Suppress("UNCHECKED_CAST") // the type is correct it's ok
-                    return listOf(wrapper) as List<Wrapper<M>>
+                    return@coroutineScope output
+                } else if (query.type.strictCache) {
+                    output = emptyList()
                 }
             }
         }
 
-        // perform query
-        return query(query.asQueryString(), query.type, query.type.serializer, preLoad, postLoad)
+        // begin load from API
+        queryResult.start()
+
+        // if output is not empty, then return it and allow cache to update in the background
+        if (output.isNotEmpty())
+            return@coroutineScope output
+
+        // return the result of the query
+        return@coroutineScope queryResult.await()
     }
 
     /**
