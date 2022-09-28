@@ -111,8 +111,8 @@ class RunData{
             trackerRun?.runnersAsString
         ).firstOrNull { !it.isNullOrEmpty() } ?: ""
         bids = trackerRun?.bids ?: mutableListOf()
-        twitchVODs = calculateHoraroVODs(horaroRun) ?: overrides?.twitchVODs ?: mutableListOf()
-        youtubeVODs = trackerRun?.youtubeVODs ?: overrides?.youtubeVODs ?: mutableListOf()
+        twitchVODs = calculateHoraroVODs(horaroRun)?.filterIsInstance<TwitchVOD>()?.toMutableList() ?: overrides?.twitchVODs ?: mutableListOf()
+        youtubeVODs = calculateHoraroVODs(horaroRun)?.filterIsInstance<YouTubeVOD>()?.toMutableList() ?: overrides?.youtubeVODs ?: mutableListOf()
         startTime = overrides?.startTime
             ?: calculateOffsetTime(previousRun?.endTime, calculateHoraroRawSetupTime(horaroRun, previousRun))
             ?: horaroRun.scheduled.toInstant()
@@ -157,16 +157,14 @@ class RunData{
     }
 
     companion object {
-        private val HORARO_GAME_MARKDOWN: Pattern =
-            Pattern.compile("\\[([^\\[\\]]+)]\\(https?://(?:www.)?twitch.tv/videos/(\\d+)\\)")
-        private val NAME_REGEX: Pattern = Pattern.compile("\\[(.+)]\\((.+)\\)")
+        private val MARKDOWN_LINK: Pattern = Pattern.compile("\\[([^]]+)]\\(([^)]+)\\)")
         private val MAX_RAW_SETUP_TIME = Duration.ofMinutes(30)
 
         private fun calculateHoraroName(run: dev.qixils.horaro.models.Run): String {
             val rawName = run.getValue("Game")!!.trim()
             // TODO: incorporate an actual markdown parser here to strip the Game field
             //  of markdown formatting (namely links)
-            val matcher = HORARO_GAME_MARKDOWN.matcher(rawName)
+            val matcher = MARKDOWN_LINK.matcher(rawName)
             val names = mutableListOf<String>()
             while (matcher.find())
                 names += matcher.group(1)
@@ -175,19 +173,19 @@ class RunData{
             return names.naturalJoinToString()
         }
 
-        private fun calculateHoraroVODs(run: dev.qixils.horaro.models.Run): MutableList<TwitchVOD>? {
+        private fun calculateHoraroVODs(run: dev.qixils.horaro.models.Run): MutableList<VOD>? {
             val rawName = run.getValue("Game")!!.trim()
-            val matcher = HORARO_GAME_MARKDOWN.matcher(rawName)
-            val vods = mutableListOf<TwitchVOD>()
+            val matcher = MARKDOWN_LINK.matcher(rawName)
+            val vods = mutableListOf<VOD>()
             while (matcher.find())
-                vods += TwitchVOD(matcher.group(2))
+                vods += VOD.fromURL(matcher.group(2))
             return if (vods.isEmpty()) null else vods
         }
 
         private fun calculateHoraroRunnerNames(run: dev.qixils.horaro.models.Run): List<String>? {
             val names = run.getValue("Player(s)")?.split(", ") ?: return null
             return names.map {
-                val matcher = NAME_REGEX.matcher(it)
+                val matcher = MARKDOWN_LINK.matcher(it)
                 if (matcher.matches()) {
                     matcher.group(1)
                 } else {
@@ -197,7 +195,7 @@ class RunData{
         }
 
         private fun calculateHoraroFakeRunner(rawName: String): Runner {
-            val matcher = NAME_REGEX.matcher(rawName)
+            val matcher = MARKDOWN_LINK.matcher(rawName)
             val name: String
             val stream: String
             if (matcher.matches()) {

@@ -7,7 +7,6 @@ import club.speedrun.vods.plugins.configureHTTP
 import club.speedrun.vods.plugins.configureMonitoring
 import club.speedrun.vods.plugins.configureOAuth
 import club.speedrun.vods.plugins.configureRouting
-import club.speedrun.vods.rabbit.RabbitManager
 import dev.qixils.gdq.GDQ
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
@@ -28,8 +27,8 @@ fun main() {
         install(ContentNegotiation) { json() }
         configureOAuth()
         configureRouting()
-        RabbitManager.declareQueue("cg_events_reddit_esa2022s1", "ESAMarathon", esa.api.db)
-        RabbitManager.declareQueue("cg_events_reddit_esa2022s2", "ESAMarathon2", esa.api.db)
+//        RabbitManager.declareQueue("cg_events_reddit_esaw2023s1", "ESAMarathon", esa.api.db)
+//        RabbitManager.declareQueue("cg_events_reddit_esaw2023s2", "ESAMarathon2", esa.api.db)
     }.start(wait = true)
 }
 
