@@ -77,7 +77,8 @@ class ThreadManager(
         body.append(run.name)
         if (run.category.isNotEmpty())
             body.append(" (").append(run.category).append(")")
-        // TODO: SRC data
+        if (run.src != null)
+            body.append("^[+](https://www.speedrun.com/").append(run.src).append(")")
         body.append(" | ")
 
         //// runners
