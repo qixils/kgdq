@@ -35,7 +35,7 @@ class ScheduleManager(
     private val config: EventConfig,
 ) {
     private val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
-    private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(240)).build()
+    private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build()
     private val apiRoot = "https://vods.speedrun.club/api/v1/${config.organization.name.lowercase(Locale.ENGLISH)}/"
     private val json = Json {
         ignoreUnknownKeys = true

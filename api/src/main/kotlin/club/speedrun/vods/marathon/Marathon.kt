@@ -20,7 +20,6 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.litote.kmongo.coroutine.updateOne
-import java.time.Duration
 import java.time.Instant
 
 abstract class Marathon(val api: GDQ) {

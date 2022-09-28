@@ -3,11 +3,8 @@ package dev.qixils.gdq
 import dev.qixils.gdq.models.Model
 import dev.qixils.gdq.models.Runner
 import dev.qixils.gdq.models.Wrapper
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -18,7 +15,6 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
 import java.time.Instant
-import kotlin.coroutines.coroutineContext
 
 /**
  * The central class for performing requests to an instance of the GDQ donation tracker.
@@ -103,7 +99,7 @@ open class GDQ(
         }
 
         // remove invalid models
-        models.removeIf{ !it.value.isValid() }
+        models.removeIf { !it.value.isValid() }
 
         // cache models
         val now = Instant.now()
@@ -128,10 +124,11 @@ open class GDQ(
         postLoad: Hook<M>? = null,
     ): List<Wrapper<M>> = coroutineScope {
         // ensure runners are cached (they're high in quantity but basically fixed)
-        if (query.type == ModelType.RUNNER) launch { cacheRunners() }
+        val runnerCacheJob = launch { if (query.type == ModelType.RUNNER) cacheRunners() }
 
         // create lazy query
-        val queryResult = async(start = CoroutineStart.LAZY) {
+        val queryResult = async(Job(), start = CoroutineStart.LAZY) {
+            runnerCacheJob.join() // wait for runners to be cached
             query(query.asQueryString(), query.type, query.type.serializer, preLoad, postLoad)
         }
         var output: List<Wrapper<M>> = emptyList()
@@ -146,6 +143,7 @@ open class GDQ(
 
                 // return cached data if it hasn't expired, otherwise clear the output variable if strict caching is enabled
                 if (cachedAt.plus(query.type.cacheFor).isAfter(Instant.now())) {
+                    queryResult.cancel()
                     return@coroutineScope output
                 } else if (query.type.strictCache) {
                     output = emptyList()
