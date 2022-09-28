@@ -211,7 +211,7 @@ suspend fun RunData.loadSrcGame(overrides: RunOverrides?) {
                 else -> name
             }
             excludedGameTitles.forEach { if (gameName.contains(it, true)) return@run null }
-            return@run srcDb.getOrCreateGame(gameName).srcId // TODO: schedule creation to be done in background to avoid blocking
+            return@run srcDb.getGame(gameName).srcId
         }
 }
 
