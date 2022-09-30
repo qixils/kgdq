@@ -16,7 +16,14 @@
         return res;
     }
 
-    let date_header = new Intl.DateTimeFormat(undefined, { dateStyle: 'full' }).format;
+    let date_header_format = new Intl.DateTimeFormat(undefined, { dateStyle: 'full' });
+    function date_header(dt: string) {
+        return date_header_format.format(new Date(dt));
+    }
+    let date_hero_format = new Intl.DateTimeFormat(undefined, { dateStyle: 'long' });
+    function date_hero(dt: string) {
+        return date_hero_format.format(new Date(dt));
+    }
 </script>
 
 <svelte:head>
@@ -29,10 +36,17 @@
     {:then event}
         <div class="hero bg-base-200 mt-2">
             <div class="hero-content text-center">
-                <div class="max-w-md">
-                    <h1 class="text-5xl font-bold">{event.name}</h1>
-                    <!-- TODO: display end date after runs load -->
-                    <p class="pt-6">{event.short} began on {event.datetime} and raised {money(event.amount)} for {event.charityName}.</p>
+                <div class="max-w-lg">
+                    <h1 class="text-4xl font-bold">{event.name}</h1>
+                    <p class="pt-6">
+                        {event.short.toUpperCase()} <!-- TODO: this looks bad for some events (namely ESA) -->
+                        {#await runs_promise}
+                            began on {date_hero(event.datetime)}
+                        {:then runs}
+                            ran from {date_hero(event.datetime)} to {date_hero(runs[runs.length - 1].endTime)}
+                        {/await}
+                        and raised {money(event.amount)} for {event.charityName}.
+                    </p>
                 </div>
             </div>
         </div>
@@ -42,15 +56,14 @@
         {:then runs}
             <ul class="steps steps-vertical block w-full max-w-screen-lg mx-auto">
                 {#each runs as run, run_index}
-                    <!-- TODO: line separator/divider? -->
                     <!-- TODO: only use step-secondary if run has passed; if up next, use step-primary; else, use nothing -->
                     <li data-content="" class="step step-secondary">
-                        <div class="text-left p-2 bg-neutral text-neutral-content w-full block">
+                        <div class="text-left p-2 bg-base-300 text-base-content w-full block">
                             {#if run_index === 0 || new Date(run.startTime).getDay() !== new Date(runs[run_index - 1].startTime).getDay()}
                                 {#if run_index > 0}
-                                    <hr class="border-base-300" style="position: relative; top:-.6rem;">
+                                    <hr class="border-neutral/50" style="position: relative; top:-.6rem;">
                                 {/if}
-                                <p class="text-lg bg-primary text-primary-content p-2 pl-4 rounded-t font-semibold">{date_header(new Date(run.startTime))}</p>
+                                <p class="text-lg bg-primary text-primary-content p-2 pl-4 rounded-t font-semibold">{date_header(run.startTime)}</p>
                                 <hr class="border-primary/70 border-2 mb-3">
                             {/if}
                             <p>
@@ -74,9 +87,15 @@
                                     </div>
                                 {/if}
                                 <span style="position: relative; top:-.1em;">
-                                    <b>{run.name}</b>
-                                    &nbsp;
-                                    <span class="text-neutral-content/80">{run.category}</span>
+                                    <b>{run.name}</b
+                                    >{#if run.src !== null}
+                                        <sup>
+                                            <a href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer">[src]</a>
+                                        </sup>
+                                    {/if}
+                                    {#if run.category !== ""}
+                                        <span class="text-base-content/80">&nbsp; {run.category}</span>
+                                    {/if}
                                 </span>
                             </p>
                             <p>
@@ -117,19 +136,19 @@
                                         <div class="bid-body">
                                             <p>
                                                 <span class="font-semibold">{bid.name}&nbsp;</span>
-                                                <span class="text-neutral-content/50">{money(bid.donationTotal)} / {money(bid.goal)}</span>
+                                                <span class="text-base-content/50">{money(bid.donationTotal)} / {money(bid.goal)}</span>
                                             </p>
                                             <p>{bid.description}</p>
                                         </div>
                                     {:else}
-                                        <p class="block my-auto"><span class="radial-progress text-[.65rem] text-primary bg-primary/20" style="--value:100; --size:2.2rem;"></span></p>
+                                        <p class="block my-auto"><span class="radial-progress text-[.65rem] text-primary bg-primary/30" style="--value:100; --size:2.2rem;"></span></p>
                                         <div class="bid-body">
                                             <p>
                                                 <span class="font-semibold">{bid.name}&nbsp;</span>
-                                                <span class="text-neutral-content/50">{money(bid.donationTotal)}</span>
+                                                <span class="text-base-content/50">{money(bid.donationTotal)}</span>
                                             </p>
                                             <p>{bid.description}</p>
-                                            <p class="text-neutral-content/80">
+                                            <p class="text-base-content/80">
                                                 <!-- TODO: these are sorted by descending donationTotal... right? -->
                                                 <span class="font-semibold">Top Options:</span>
                                                 {#each bid.children.slice(0,3) as child, index}
@@ -154,6 +173,10 @@
 <style>
     a {
         @apply text-accent;
+    }
+
+    a:hover {
+        @apply text-accent-focus;
     }
 
     .post-icon {
