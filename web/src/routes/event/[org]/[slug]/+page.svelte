@@ -46,21 +46,31 @@
                     <!-- TODO: only use step-secondary if run has passed; if up next, use step-primary; else, use nothing -->
                     <li data-content="" class="step step-secondary">
                         <div class="text-left p-2 bg-neutral text-neutral-content w-full block">
-                            <!-- TODO
-                            {#if run.twitchVODs.length > 0 || run.youtubeVODs.length > 0}
-                                <div class="dropdown dropdown-hover">
-                                    <label tabindex="0" class="btn">A</label>
-                                    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                                        <li><a>Item 1</a></li>
-                                        <li><a>Item 2</a></li>
-                                    </ul>
-                                </div>
-                            {/if}
-                            -->
                             <p>
-                                <b>{run.name}</b>
-                                &nbsp;
-                                <span class="text-neutral-content/80">{run.category}</span>
+                                {#if run.twitchVODs.length > 0 || run.youtubeVODs.length > 0}
+                                    <div class="dropdown">
+                                        <label tabindex="0"><span class="hover:bg-info-content rounded-box material-symbols-rounded text-sm text-info">play_circle</span></label>
+                                        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                                            {#each run.youtubeVODs as vod, index}
+                                                <li><a href={vod.url} target="_blank" rel="noopener noreferrer">
+                                                    Watch on YouTube
+                                                    {#if index > 0}(Part {index + 1}){/if}
+                                                </a></li>
+                                            {/each}
+                                            {#each run.twitchVODs as vod, index}
+                                                <li><a href={vod.url} target="_blank" rel="noopener noreferrer">
+                                                    Watch on Twitch
+                                                    {#if index > 0}(Part {index + 1}){/if}
+                                                </a></li>
+                                            {/each}
+                                        </ul>
+                                    </div>
+                                {/if}
+                                <span style="position: relative; top:-.1em;">
+                                    <b>{run.name}</b>
+                                    &nbsp;
+                                    <span class="text-neutral-content/80">{run.category}</span>
+                                </span>
                             </p>
                             <p>
                                 <span class="material-symbols-rounded text-sm">timer</span
