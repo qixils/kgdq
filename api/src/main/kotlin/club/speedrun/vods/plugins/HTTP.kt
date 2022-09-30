@@ -1,6 +1,5 @@
 package club.speedrun.vods.plugins
 
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.conditionalheaders.*
@@ -18,7 +17,7 @@ fun Application.configureHTTP() {
         }
     }
     install(CORS) {
-        allowMethod(HttpMethod.Get)
+        anyHost()
     }
     install(DefaultHeaders) {
         header("X-Engine", "Ktor") // will send this header with each response

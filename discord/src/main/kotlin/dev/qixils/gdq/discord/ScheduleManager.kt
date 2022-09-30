@@ -245,7 +245,7 @@ class ScheduleManager(
                                 sb.append(" by ")
                                 naturalJoinTo(sb, run.runners) { runner ->
                                     // TODO: re-add emotes when Discord releases the React Native port for Android
-                                    runner.url()?.let { "[${runner.name}]($it)" } ?: runner.name
+                                    runner.url?.let { "[${runner.name}]($it)" } ?: runner.name
                                 }
                             }
                             value = sb.toString()

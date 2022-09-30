@@ -98,7 +98,7 @@ class ThreadManager(
 
     private fun generateRunner(runner: Runner): String {
         // Return markdown-formatted name with link if available
-        return runner.url()?.let { "[${runner.name}]($it)" } ?: runner.name
+        return runner.url?.let { "[${runner.name}]($it)" } ?: runner.name
     }
 
     private fun generateTime(run: RunData): CharSequence {

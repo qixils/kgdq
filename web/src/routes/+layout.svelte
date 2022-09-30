@@ -3,7 +3,7 @@
   import "../app.postcss";
 </script>
 
-<header />
+<Header />
 
 <main>
   <slot />
@@ -16,6 +16,7 @@
 </footer>
 
 <style>
+  /*
   main {
     flex: 1;
     display: flex;
@@ -44,4 +45,5 @@
       padding: 40px 0;
     }
   }
+  */
 </style>
