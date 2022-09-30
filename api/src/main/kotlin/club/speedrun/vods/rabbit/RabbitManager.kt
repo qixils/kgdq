@@ -138,7 +138,7 @@ class DeliverHandler(
             // Create VOD object
             val vod = TwitchVOD(video.id, Duration.between(stream.startedAtInstant, runStart))
             // Adding VOD link to run
-            logger.info("Adding VOD link ${vod.asURL()} to run ${status.currentRun}")
+            logger.info("Adding VOD link ${vod.url} to run ${status.currentRun}")
             overrides.twitchVODs.add(vod)
             db.runs.updateOne(RunOverrides::horaroId eq status.currentRun, push(RunOverrides::twitchVODs, vod))
         }

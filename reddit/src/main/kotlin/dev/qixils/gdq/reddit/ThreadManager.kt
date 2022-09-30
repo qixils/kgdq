@@ -110,7 +110,7 @@ class ThreadManager(
                     time.append('[').append(run.runTimeText)
                 else
                     time.append(" [\\[").append(index + 1).append("\\]")
-                time.append("](").append(vod.asURL()).append(')')
+                time.append("](").append(vod.url).append(')')
             }
         } else {
             // otherwise, add run time with no link
@@ -120,7 +120,7 @@ class ThreadManager(
         run.youtubeVODs.forEachIndexed { index, vod ->
             time.append(" [YT")
             if (index > 0) time.append(index + 1)
-            time.append("](").append(vod.asURL()).append(")")
+            time.append("](").append(vod.url).append(")")
         }
         // add italics if the run is ongoing
         if (run.isCurrent)

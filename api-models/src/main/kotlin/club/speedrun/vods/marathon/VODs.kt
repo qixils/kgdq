@@ -7,7 +7,7 @@ import java.util.regex.Pattern
 
 @Serializable
 sealed interface VOD {
-    fun asURL(): String
+    val url: String
 
     companion object {
         fun fromURL(url: String): VOD {
@@ -28,10 +28,10 @@ data class TwitchVOD(
         DurationAsStringSerializer.format(duration, format)
     )
 
-    override fun asURL(): String {
+    override val url: String = run {
         val sb = StringBuilder("https://www.twitch.tv/videos/").append(videoId)
         if (timestamp != null) sb.append("?t=").append(timestamp)
-        return sb.toString()
+        sb.toString()
     }
 
     companion object {
@@ -53,10 +53,10 @@ data class YouTubeVOD(
     val videoId: String,
     val timestamp: String?
 ) : VOD {
-    override fun asURL(): String {
+    override val url: String = run {
         val sb = StringBuilder("https://youtu.be/").append(videoId)
         if (timestamp != null) sb.append("?t=").append(timestamp)
-        return sb.toString()
+        sb.toString()
     }
 
     companion object {
@@ -74,7 +74,5 @@ data class YouTubeVOD(
 
 @Serializable
 data class GenericVOD(
-    val url: String
-) : VOD {
-    override fun asURL(): String = url
-}
+    override val url: String
+) : VOD

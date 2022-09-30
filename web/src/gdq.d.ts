@@ -74,4 +74,5 @@ export interface Bid {
 export interface VOD {
     videoId: string, // the ID of the VOD video
     timestamp: string | null, // the timestamp of the VOD
+    url: string, // the full URL of the VOD
 }
