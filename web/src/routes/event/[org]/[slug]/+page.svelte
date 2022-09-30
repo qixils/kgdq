@@ -16,7 +16,7 @@
         return res;
     }
 
-
+    let date_header = new Intl.DateTimeFormat(undefined, { dateStyle: 'full' }).format;
 </script>
 
 <svelte:head>
@@ -41,11 +41,18 @@
             <div class="text-center my-3"><button class="btn loading">loading</button></div>
         {:then runs}
             <ul class="steps steps-vertical block w-full max-w-screen-lg mx-auto">
-                {#each runs as run}
+                {#each runs as run, run_index}
                     <!-- TODO: line separator/divider? -->
                     <!-- TODO: only use step-secondary if run has passed; if up next, use step-primary; else, use nothing -->
                     <li data-content="" class="step step-secondary">
                         <div class="text-left p-2 bg-neutral text-neutral-content w-full block">
+                            {#if run_index === 0 || new Date(run.startTime).getDay() !== new Date(runs[run_index - 1].startTime).getDay()}
+                                {#if run_index > 0}
+                                    <hr class="border-base-300" style="position: relative; top:-.6rem;">
+                                {/if}
+                                <p class="text-lg bg-primary text-primary-content p-2 pl-4 rounded-t font-semibold">{date_header(new Date(run.startTime))}</p>
+                                <hr class="border-primary/70 border-2 mb-3">
+                            {/if}
                             <p>
                                 {#if run.twitchVODs.length > 0 || run.youtubeVODs.length > 0}
                                     <div class="dropdown">
