@@ -56,8 +56,8 @@
         {:then runs}
             <ul class="steps steps-vertical block w-full max-w-screen-lg mx-auto">
                 {#each runs as run, run_index}
-                    <!-- TODO: only use step-secondary if run has passed; if up next, use step-primary; else, use nothing -->
-                    <li data-content="" class="step step-secondary">
+                    {@const step_color = run.scheduleStatus === "UPCOMING" ? "" : (run.scheduleStatus === "IN_PROGRESS" ? "step-primary" : "step-secondary")}
+                    <li data-content="" class="step {step_color}">
                         <div class="text-left p-2 bg-base-300 text-base-content w-full block">
                             {#if run_index === 0 || new Date(run.startTime).getDay() !== new Date(runs[run_index - 1].startTime).getDay()}
                                 {#if run_index > 0}
@@ -149,7 +149,6 @@
                                             </p>
                                             <p>{bid.description}</p>
                                             <p class="text-base-content/80">
-                                                <!-- TODO: these are sorted by descending donationTotal... right? -->
                                                 <span class="font-semibold">Top Options:</span>
                                                 {#each bid.children.slice(0,3) as child, index}
                                                     {#if index > 0}

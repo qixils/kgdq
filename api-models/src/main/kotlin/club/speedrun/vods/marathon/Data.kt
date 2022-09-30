@@ -41,6 +41,10 @@ class RunData{
     val twitchVODs: MutableList<TwitchVOD>
     val youtubeVODs: MutableList<YouTubeVOD>
     var src: String? = null
+    /**
+     * The current status of the run in the schedule.
+     */
+    val scheduleStatus: ScheduleStatus
 
     constructor(
         run: Wrapper<Run>,
@@ -80,6 +84,14 @@ class RunData{
             setupTime = duration
         } else {
             setupTime = run.value.setupTime
+        }
+        scheduleStatus = run {
+            val now = Instant.now()
+            when {
+                now < startTime.minus(setupTime) -> ScheduleStatus.UPCOMING
+                now < endTime -> ScheduleStatus.IN_PROGRESS
+                else -> ScheduleStatus.FINISHED
+            }
         }
     }
 
@@ -127,6 +139,14 @@ class RunData{
         } else {
             setupTime = trackerRun?.setupTime ?: Duration.ZERO
         }
+        scheduleStatus = run {
+            val now = Instant.now()
+            when {
+                now < startTime.minus(setupTime) -> ScheduleStatus.UPCOMING
+                now < endTime -> ScheduleStatus.IN_PROGRESS
+                else -> ScheduleStatus.FINISHED
+            }
+        }
     }
 
     @InternalGdqApi
@@ -150,12 +170,7 @@ class RunData{
     /**
      * Whether this is the current run being played at the event.
      */
-    val isCurrent: Boolean get() {
-        val now = Instant.now()
-        val start = startTime.minus(setupTime)
-        val end = endTime
-        return start <= now && now <= end
-    }
+    val isCurrent: Boolean get() = scheduleStatus == ScheduleStatus.IN_PROGRESS
 
     companion object {
         private val MARKDOWN_LINK: Pattern = Pattern.compile("\\[([^]]+)]\\(([^)]+)\\)")
@@ -311,4 +326,10 @@ data class EventData(
         max = event.value.max,
         avg = event.value.avg,
     )
+}
+
+enum class ScheduleStatus {
+    UPCOMING,
+    IN_PROGRESS,
+    FINISHED,
 }

@@ -43,6 +43,7 @@ export interface Run {
     twitchVODs: VOD[], // the Twitch VODs for this run
     youtubeVODs: VOD[], // the YouTube VODs for this run
     src: string | null, // the speedrun.com slug for the game being run
+    scheduleStatus: string, // the status of the run in the schedule
 }
 
 export interface Runner {

@@ -91,7 +91,10 @@ abstract class Marathon(val api: GDQ) {
             // get bids
             val rawRunBids = runBidMap[run.id]!!
             val runBids = rawRunBids.map { bid ->
-                BidData(bid.first, bid.second.map { value -> BidData(value, emptyList(), run) }, run)
+                val children = bid.second
+                    .map { value -> BidData(value, emptyList(), run) }
+                    .sortedByDescending { it.donationTotal }
+                BidData(bid.first, children, run)
             }
             // get other data
             val overrides = api.db.getOrCreateRunOverrides(run)

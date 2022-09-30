@@ -176,13 +176,12 @@ class ScheduleManager(
                     // text
                     sb.append(' ').append(bid.name)
 
-                    val children = bid.children.sortedByDescending { it.donationTotal }
-                    if (children.isNotEmpty()) {
+                    if (bid.children.isNotEmpty()) {
                         sb.append(" (")
-                        sb.append("**").append(children.first().name).append("**")
-                        if (children.size > 1) {
+                        sb.append("**").append(bid.children.first().name).append("**")
+                        if (bid.children.size > 1) {
                             sb.append('/')
-                            children.drop(1).joinTo(sb, "/") { it.name }
+                            bid.children.drop(1).joinTo(sb, "/") { it.name }
                         }
                         sb.append(')')
                     }
