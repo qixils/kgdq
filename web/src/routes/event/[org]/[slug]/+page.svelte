@@ -24,6 +24,10 @@
     function date_hero(dt: string) {
         return date_hero_format.format(new Date(dt));
     }
+    let time_format = new Intl.DateTimeFormat(undefined, { timeStyle: 'short' });
+    function time(dt: string) {
+        return time_format.format(new Date(dt));
+    }
 </script>
 
 <svelte:head>
@@ -54,58 +58,62 @@
         {#await runs_promise}
             <div class="text-center my-3"><button class="btn loading">loading</button></div>
         {:then runs}
-            <ul class="steps steps-vertical block w-full max-w-screen-lg mx-auto">
+            <ul class="steps steps-vertical block w-full max-w-screen-lg mx-auto overflow-x-hidden text-sm md:text-base">
                 {#each runs as run, run_index}
                     {@const step_color = run.scheduleStatus === "UPCOMING" ? "" : (run.scheduleStatus === "IN_PROGRESS" ? "step-primary" : "step-secondary")}
-                    <li data-content="" class="step {step_color}">
-                        <div class="text-left p-2 bg-base-300 text-base-content w-full block">
-                            {#if run_index === 0 || new Date(run.startTime).getDay() !== new Date(runs[run_index - 1].startTime).getDay()}
-                                {#if run_index > 0}
-                                    <hr class="border-neutral/50" style="position: relative; top:-.6rem;">
+                    <li data-content="" class="step {step_color} text-base-content">
+                        <div class="flex w-full align-center gap-2">
+                            <p class="text-center block my-auto basis-8 font-light md:basis-10 md:font-normal flex-shrink-0" style="position: relative; top:-.175rem;">
+                                {time(run.startTime)}
+                            </p>
+                            <div class="text-left p-2 bg-base-300 block flex-grow">
+                                {#if run_index === 0 || new Date(run.startTime).getDay() !== new Date(runs[run_index - 1].startTime).getDay()}
+                                    {#if run_index > 0}
+                                        <hr class="border-neutral/50" style="position: relative; top:-.6rem;">
+                                    {/if}
+                                    <p class="text-base md:text-lg bg-primary text-primary-content p-2 pl-3 rounded-t font-semibold">{date_header(run.startTime)}</p>
+                                    <hr class="border-primary/70 border-2 mb-3">
                                 {/if}
-                                <p class="text-lg bg-primary text-primary-content p-2 pl-4 rounded-t font-semibold">{date_header(run.startTime)}</p>
-                                <hr class="border-primary/70 border-2 mb-3">
-                            {/if}
-                            <p>
-                                {#if run.twitchVODs.length > 0 || run.youtubeVODs.length > 0}
-                                    <div class="dropdown">
-                                        <label tabindex="0"><span class="hover:bg-info-content rounded-box material-symbols-rounded text-sm text-info">play_circle</span></label>
-                                        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                                            {#each run.youtubeVODs as vod, index}
-                                                <li><a href={vod.url} target="_blank" rel="noopener noreferrer">
-                                                    Watch on YouTube
-                                                    {#if index > 0}(Part {index + 1}){/if}
-                                                </a></li>
-                                            {/each}
-                                            {#each run.twitchVODs as vod, index}
-                                                <li><a href={vod.url} target="_blank" rel="noopener noreferrer">
-                                                    Watch on Twitch
-                                                    {#if index > 0}(Part {index + 1}){/if}
-                                                </a></li>
-                                            {/each}
-                                        </ul>
-                                    </div>
-                                {/if}
-                                <span style="position: relative; top:-.1em;">
+                                <p>
+                                    {#if run.twitchVODs.length > 0 || run.youtubeVODs.length > 0}
+                                        <div class="dropdown">
+                                            <label tabindex="0"><span class="hover:bg-info-content rounded-box material-symbols-rounded text-sm text-info">play_circle</span></label>
+                                            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                                                {#each run.youtubeVODs as vod, index}
+                                                    <li><a href={vod.url} target="_blank" rel="noopener noreferrer">
+                                                        Watch on YouTube
+                                                        {#if index > 0}(Part {index + 1}){/if}
+                                                    </a></li>
+                                                {/each}
+                                                {#each run.twitchVODs as vod, index}
+                                                    <li><a href={vod.url} target="_blank" rel="noopener noreferrer">
+                                                        Watch on Twitch
+                                                        {#if index > 0}(Part {index + 1}){/if}
+                                                    </a></li>
+                                                {/each}
+                                            </ul>
+                                        </div>
+                                    {/if}
+                                    <span style="position: relative; top:-.1em;">
                                     <b>{run.name}</b
                                     >{#if run.src !== null}
                                         <sup>
                                             <a href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer">[src]</a>
                                         </sup>
                                     {/if}
-                                    {#if run.category !== ""}
+                                        {#if run.category !== ""}
                                         <span class="text-base-content/80">&nbsp; {run.category}</span>
                                     {/if}
                                 </span>
-                            </p>
-                            <p>
+                                </p>
+                                <p>
                                 <span class="material-symbols-rounded text-sm">timer</span
                                 ><span class="post-icon">&nbsp;{run.runTime}&nbsp;&nbsp;&nbsp;</span
                                 >{#if run.console !== ""
                                 }<span class="material-symbols-rounded text-sm">stadia_controller</span
                                 ><span class="post-icon">&nbsp;{run.console}</span>{/if}
-                            </p>
-                            <p class="runners">
+                                </p>
+                                <p class="runners">
                                 <span class="material-symbols-rounded text-sm">{run.runners.length === 1 ? 'person' : 'group'}</span
                                 ><span class="post-icon">
                                     {#each run.runners as runner, index}
@@ -119,48 +127,49 @@
                                         {/if}
                                     {/each}
                                 </span>
-                            </p>
-                            {#each run.bids as bid}
-                                <div class="flex flex-start flex-center gap-2 py-1">
-                                    {#if bid.isTarget}
-                                        <!--
-                                        Since Tailwind only generates classes as necessary and my code doesn't write out
-                                        the full names of the classes being used, this comment is here to ensure that
-                                        all of the classes used are generated. So without further ado,
-                                        text-success text-warning text-error
-                                        bg-success-content bg-warning-content bg-error-content
-                                        -->
-                                        {@const percent = Math.round((bid.donationTotal / bid.goal) * 100)}
-                                        {@const color = percent >= 100 ? "success" : (bid.state === "OPENED" ? "warning" : "error")}
-                                        <p class="block my-auto"><span class="radial-progress text-[.65rem] text-{color} bg-{color}-content" style="--value:{percent}; --size:2.2rem;">{percent}%</span></p>
-                                        <div class="bid-body">
-                                            <p>
-                                                <span class="font-semibold">{bid.name}&nbsp;</span>
-                                                <span class="text-base-content/50">{money(bid.donationTotal)} / {money(bid.goal)}</span>
-                                            </p>
-                                            <p>{bid.description}</p>
-                                        </div>
-                                    {:else}
-                                        <p class="block my-auto"><span class="radial-progress text-[.65rem] text-primary bg-primary/30" style="--value:100; --size:2.2rem;"></span></p>
-                                        <div class="bid-body">
-                                            <p>
-                                                <span class="font-semibold">{bid.name}&nbsp;</span>
-                                                <span class="text-base-content/50">{money(bid.donationTotal)}</span>
-                                            </p>
-                                            <p>{bid.description}</p>
-                                            <p class="text-base-content/80">
-                                                <span class="font-semibold">Top Options:</span>
-                                                {#each bid.children.slice(0,3) as child, index}
-                                                    {#if index > 0}
-                                                        ,
-                                                    {/if}
-                                                    <span class:underline={index===0}>{child.name}</span>
-                                                {/each}
-                                            </p>
-                                        </div>
-                                    {/if}
-                                </div>
-                            {/each}
+                                </p>
+                                {#each run.bids as bid}
+                                    <div class="flex flex-center gap-2 py-1">
+                                        {#if bid.isTarget}
+                                            <!--
+                                            Since Tailwind only generates classes as necessary and my code doesn't write out
+                                            the full names of the classes being used, this comment is here to ensure that
+                                            all of the classes used are generated. So without further ado,
+                                            text-success text-warning text-error
+                                            bg-success-content bg-warning-content bg-error-content
+                                            -->
+                                            {@const percent = Math.round((bid.donationTotal / bid.goal) * 100)}
+                                            {@const color = percent >= 100 ? "success" : (bid.state === "OPENED" ? "warning" : "error")}
+                                            <p class="block my-auto"><span class="radial-progress text-[.65rem] text-{color} bg-{color}-content" style="--value:{percent}; --size:2.2rem;">{percent}%</span></p>
+                                            <div class="bid-body">
+                                                <p>
+                                                    <span class="font-semibold">{bid.name}&nbsp;</span>
+                                                    <span class="text-base-content/50">{money(bid.donationTotal)} / {money(bid.goal)}</span>
+                                                </p>
+                                                <p>{bid.description}</p>
+                                            </div>
+                                        {:else}
+                                            <p class="block my-auto"><span class="radial-progress text-[.65rem] text-primary bg-primary/30" style="--value:100; --size:2.2rem;"></span></p>
+                                            <div class="bid-body">
+                                                <p>
+                                                    <span class="font-semibold">{bid.name}&nbsp;</span>
+                                                    <span class="text-base-content/50">{money(bid.donationTotal)}</span>
+                                                </p>
+                                                <p>{bid.description}</p>
+                                                <p class="text-base-content/80">
+                                                    <span class="font-semibold">Top Options:</span>
+                                                    {#each bid.children.slice(0,3) as child, index}
+                                                        {#if index > 0}
+                                                            ,
+                                                        {/if}
+                                                        <span class:underline={index===0}>{child.name}</span>
+                                                    {/each}
+                                                </p>
+                                            </div>
+                                        {/if}
+                                    </div>
+                                {/each}
+                            </div>
                         </div>
                     </li>
                 {/each}
@@ -184,6 +193,6 @@
     }
 
     .bid-body {
-        @apply block my-auto flex-grow text-sm;
+        @apply block my-auto flex-grow text-xs md:text-sm;
     }
 </style>
