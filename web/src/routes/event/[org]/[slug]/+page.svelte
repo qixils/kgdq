@@ -40,9 +40,9 @@
     {:then event}
         <div class="hero bg-base-200 mt-2">
             <div class="hero-content text-center">
-                <div class="max-w-lg">
+                <div>
                     <h1 class="text-4xl font-bold">{event.name}</h1>
-                    <p class="pt-6">
+                    <p class="py-4">
                         {event.short.toUpperCase()} <!-- TODO: this looks bad for some events (namely ESA) -->
                         {#await runs_promise}
                             began on {date_hero(event.datetime)}
@@ -50,6 +50,10 @@
                             ran from {date_hero(event.datetime)} to {date_hero(runs[runs.length - 1].endTime)}
                         {/await}
                         and raised {money(event.amount)} for {event.charityName}.
+                    </p>
+                    <p>
+                        Below you can find the schedule for the event and click on the play icon to the left of each run
+                        to watch back the run's VOD.
                     </p>
                 </div>
             </div>
