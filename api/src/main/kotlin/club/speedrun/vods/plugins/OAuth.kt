@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
 import java.time.Instant
 
 fun Application.configureOAuth() {
-    install (Sessions) {
+    install(Sessions) {
         cookie<UserSession>("user_session")
     }
     authentication {
@@ -48,12 +48,14 @@ fun Application.configureOAuth() {
                         call.respond(HttpStatusCode.Unauthorized)
                         return@get
                     }
-                    call.sessions.set(UserSession(
-                        principal.accessToken,
-                        principal.refreshToken,
-                        principal.expiresIn,
-                        Instant.now().toString(),
-                    ))
+                    call.sessions.set(
+                        UserSession(
+                            principal.accessToken,
+                            principal.refreshToken,
+                            principal.expiresIn,
+                            Instant.now().toString(),
+                        )
+                    )
                     call.respondRedirect("/api/auth/test")
                 }
             }

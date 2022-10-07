@@ -4,6 +4,7 @@ package club.speedrun.vods.plugins
 
 import club.speedrun.vods.esa
 import club.speedrun.vods.gdq
+import club.speedrun.vods.hek
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -21,8 +22,10 @@ fun Application.configureRouting() {
     install(StatusPages) {
         exception<SerializationException> { call, cause ->
             logError(call, cause)
-            call.respond(HttpStatusCode.InternalServerError,
-                mapOf("error" to ("An internal error occurred: " + (cause.message ?: cause.toString()))))
+            call.respond(
+                HttpStatusCode.InternalServerError,
+                mapOf("error" to ("An internal error occurred: " + (cause.message ?: cause.toString())))
+            )
         }
         exception<AuthorizationException> { call, _ ->
             call.respond(HttpStatusCode.Forbidden)
@@ -54,6 +57,7 @@ fun Application.configureRouting() {
             route("/v1") {
                 route("/gdq", gdq.route())
                 route("/esa", esa.route())
+                route("/hek", hek.route())
             }
         }
     }

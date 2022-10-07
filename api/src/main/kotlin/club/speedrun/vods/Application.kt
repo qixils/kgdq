@@ -3,6 +3,7 @@ package club.speedrun.vods
 import club.speedrun.vods.marathon.ESAMarathon
 import club.speedrun.vods.marathon.GDQMarathon
 import club.speedrun.vods.marathon.GdqDatabaseManager
+import club.speedrun.vods.marathon.HEKMarathon
 import club.speedrun.vods.plugins.configureHTTP
 import club.speedrun.vods.plugins.configureMonitoring
 import club.speedrun.vods.plugins.configureOAuth
@@ -18,6 +19,7 @@ import io.ktor.server.plugins.contentnegotiation.*
 
 val gdq = GDQMarathon()
 val esa = ESAMarathon()
+val hek = HEKMarathon()
 val srcDb = SrcDatabaseManager()
 val httpClient = HttpClient(Apache)
 
@@ -28,6 +30,7 @@ fun main() {
         install(ContentNegotiation) { json() }
         configureOAuth()
         configureRouting()
+        // TODO RabbitManager.declareQueue("cg_events_reddit_hekoff22", "ESAMarathon", hek.api.db)
 //        RabbitManager.declareQueue("cg_events_reddit_esaw2023s1", "ESAMarathon", esa.api.db)
 //        RabbitManager.declareQueue("cg_events_reddit_esaw2023s2", "ESAMarathon2", esa.api.db)
     }.start(wait = true)

@@ -6,6 +6,8 @@ import dev.qixils.gdq.models.*
 import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import dev.qixils.gdq.serializers.ZoneIdSerializer
+import dev.qixils.horaro.Horaro
+import dev.qixils.horaro.models.FullSchedule
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import java.time.Duration
@@ -305,6 +307,8 @@ data class EventData(
     val count: Int,
     val max: Float,
     val avg: Double,
+    var horaroEvent: String? = null,
+    var horaroSchedule: String? = null,
 ) {
     constructor(event: Wrapper<Event>) : this(
         id = event.id,
@@ -325,7 +329,16 @@ data class EventData(
         count = event.value.count,
         max = event.value.max,
         avg = event.value.avg,
+        horaroEvent = event.value.horaroEvent,
+        horaroSchedule = event.value.horaroSchedule,
     )
+
+    suspend fun horaroSchedule(): FullSchedule? {
+        if (horaroEvent == null || horaroSchedule == null) return null
+        return Horaro.getSchedule(horaroEvent!!, horaroSchedule!!)
+    }
+
+    val horaroUrl get() = "https://horaro.org/$horaroEvent/$horaroSchedule"
 }
 
 enum class ScheduleStatus {

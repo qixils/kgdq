@@ -1,7 +1,6 @@
 package dev.qixils.gdq.reddit
 
 import club.speedrun.vods.marathon.EventData
-import kotlinx.serialization.SerialName
 import net.dean.jraw.oauth.Credentials
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.meta.Setting
@@ -50,8 +49,16 @@ enum class Organization {
         override val displayName = "European Speedrunner Assembly"
         override val homepageUrl = "https://esamarathon.com/"
         override fun donateUrl(event: EventData) = "https://donations.esamarathon.com/donate/" + event.short
-        override fun scheduleUrl(event: EventData) = "https://esamarathon.com/schedule/" // ESA doesn't keep old schedules
-    };
+        override fun scheduleUrl(event: EventData) = event.horaroUrl
+    },
+    HEK {
+        override val manualVODs = false
+        override val displayName = "Hekathon"
+        override val homepageUrl = "https://hekathon.com/"
+        override fun donateUrl(event: EventData) = "https://hekathon.esamarathon.com/donate/" + event.short
+        override fun scheduleUrl(event: EventData) = event.horaroUrl
+    }
+    ;
 
     abstract val manualVODs: Boolean
     abstract val displayName: String

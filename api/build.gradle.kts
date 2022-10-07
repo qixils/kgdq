@@ -28,7 +28,6 @@ dependencies {
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-auth-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-locations-jvm:$ktor_version")
-    implementation("io.ktor:ktor-client-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-client-apache-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-sessions-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-host-common-jvm:$ktor_version")
@@ -45,6 +44,7 @@ dependencies {
     implementation("org.litote.kmongo:kmongo-coroutine-serialization:$kmongo_version")
     implementation("com.rabbitmq:amqp-client:$amqp_version")
     implementation("com.github.twitch4j:twitch4j-helix:$twitch4j_version")
+    implementation("io.ktor:ktor-client-core-jvm:2.1.2")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
