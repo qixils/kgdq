@@ -112,8 +112,8 @@ class RunData{
         this.event = event.id
         name = calculateHoraroName(horaroRun)
         displayName = trackerRun?.displayName ?: ""
-        twitchName = trackerRun?.twitchName ?: "" // this could be stored from RabbitMQ, but I can't be bothered
-        console = trackerRun?.console ?: horaroRun.getValue("Platform") ?: ""
+        twitchName = trackerRun?.twitchName ?: horaroRun.getValue("Game (Twitch)") ?: "" // this could be stored from RabbitMQ, but I can't be bothered
+        console = trackerRun?.console ?: horaroRun.getValue("Platform") ?: horaroRun.getValue("Console") ?: ""
         commentators = trackerRun?.commentators ?: ""
         description = trackerRun?.description ?: ""
         this.order = order
@@ -159,7 +159,8 @@ class RunData{
             Logger.getLogger("RunData").fine("Loading runners for $name")
             // The Horaro schedule has a "UserIDs" column, but they don't seem to align with the
             // donation tracker API, so I'm falling back to their "Player(s)" column instead
-            runners.addAll(horaroSource!!.getValue("Player(s)")?.split(", ")
+            runners.addAll((horaroSource!!.getValue("Player(s)") ?: horaroSource!!.getValue("Runners"))
+                ?.split(", ")
                 ?.map { calculateHoraroFakeRunner(it) } ?: emptyList())
         } else {
             runners.addAll(trackerSource!!.runners().map { it.value })
@@ -201,7 +202,7 @@ class RunData{
         }
 
         private fun calculateHoraroRunnerNames(run: dev.qixils.horaro.models.Run): List<String>? {
-            val names = run.getValue("Player(s)")?.split(", ") ?: return null
+            val names = (run.getValue("Player(s)") ?: run.getValue("Runners"))?.split(", ") ?: return null
             return names.map {
                 val matcher = MARKDOWN_LINK.matcher(it)
                 if (matcher.matches()) {
