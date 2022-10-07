@@ -33,7 +33,7 @@ class ThreadManager(
     }
 
     init {
-        logger.debug("Loaded thread manager for ${config.organization.name}")
+        logger.debug("Loaded thread manager for ${config.organization.shortName}")
     }
 
     companion object {
@@ -53,7 +53,7 @@ class ThreadManager(
         // Get event and run data
         val event = get("events?id=${eventConfig.eventId}", ListSerializer(EventData.serializer()))
             .firstOrNull()
-            ?: throw IllegalStateException("Event ${eventConfig.eventId} by ${config.organization.name} not found")
+            ?: throw IllegalStateException("Event ${eventConfig.eventId} by ${config.organization.shortName} not found")
         val runs = get("runs?event=${eventConfig.eventId}", ListSerializer(RunData.serializer()))
 
         // Generate body
@@ -68,15 +68,13 @@ class ThreadManager(
         body.append("The event's schedule may change without notice so this thread can be out-of-date by several minutes. ")
             .append("Please check the event's website for the most accurate reference.\n\n")
             .append("Don't gild the thread, donate the money instead! \\^_\\^\n\n")
-            .append("This thread is powered by data from ${config.organization.displayName}")
+            .append("This thread is powered by the [thread updater](https://github.com/qixils/kgdq/tree/main/reddit) ")
+            .append("using data from [${config.organization.displayName}](${config.organization.homepageUrl})")
         if (config.organization.manualVODs)
-            body.append(", Speedrun.com, and the contributors to the VOD list. Thank you to the volunteers that keep this thread running!\n")
+            body.append(", [Speedrun.com](https://www.speedrun.com), and the contributors to the VOD list. ")
+                .append("Thank you to the volunteers that keep this thread running!\n")
         else
-            body.append(" and Speedrun.com.\n")
-        if (config.events.size > 1)
-            body.append("\n### Links\n\n")
-                .append("* [${config.organization.name} homepage](${config.organization.homepageUrl})\n")
-                .append("* [Automatic thread updater](https://github.com/qixils/kgdq/tree/main/reddit)\n")
+            body.append(" and [Speedrun.com](https://www.speedrun.com).\n")
     }
 
     private fun generateSubHeader(body: StringBuilder, event: EventData, eventConfig: EventConfig) {
@@ -87,9 +85,7 @@ class ThreadManager(
             .append("* [Watch ${eventConfig.displayName}](https://twitch.tv/${eventConfig.twitch})\n")
             .append("* [Donate to ${event.charityName}](${config.organization.donateUrl(event)})\n")
             .append("* [Official Schedule](${config.organization.scheduleUrl(event)})\n")
-        if (config.events.size == 1)
-            body.append("* [${config.organization.name} homepage](${config.organization.homepageUrl})\n")
-        body.append("* [${config.organization.name} YouTube playlist](")
+            .append("* [${config.organization.shortName} YouTube playlist](")
         if (eventConfig.playlist != null)
             body.append("https://www.youtube.com/playlist?list=").append(eventConfig.playlist)
         else
@@ -97,8 +93,6 @@ class ThreadManager(
         body.append(")\n")
         if (config.organization.manualVODs)
             body.append("* [VOD list](https://www.reddit.com/r/VODThread/wiki/${event.short}vods)\n")
-        if (config.events.size == 1)
-            body.append("* [Automatic thread updater](https://github.com/qixils/kgdq/tree/main/reddit)\n")
         body.append("\n## Schedule\n\n")
             .append("Game | Runner / Channel | Time / Link\n")
             .append("--|--|:--:|\n")
@@ -165,7 +159,7 @@ class ThreadManager(
     }
 
     suspend fun run() {
-        logger.info("Running thread manager for ${config.organization.name}")
+        logger.info("Running thread manager for ${config.organization.shortName}")
 
         // Generate body
         val body = generateBody().toString()
@@ -179,9 +173,9 @@ class ThreadManager(
             // Perform update
             lastUpdate = Instant.now()
             reddit.submission(config.threadId).edit(body)
-            logger.info("Updated thread ${config.threadId} for ${config.organization.name}")
+            logger.info("Updated thread ${config.threadId} for ${config.organization.shortName}")
         } catch (e: Exception) {
-            logger.error("Failed to update thread ${config.threadId} for ${config.organization.name}", e)
+            logger.error("Failed to update thread ${config.threadId} for ${config.organization.shortName}", e)
         }
     }
 }

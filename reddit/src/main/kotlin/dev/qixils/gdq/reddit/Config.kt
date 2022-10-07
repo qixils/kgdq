@@ -62,6 +62,7 @@ enum class Organization {
         override val homepageUrl = "https://hekathon.com/"
         override fun donateUrl(event: EventData) = "https://hekathon.esamarathon.com/donate/" + event.short
         override fun scheduleUrl(event: EventData) = event.horaroUrl
+        override val shortName: String = "Hekathon"
     }
     ;
 
@@ -70,4 +71,5 @@ enum class Organization {
     abstract val homepageUrl: String
     abstract fun donateUrl(event: EventData): String
     abstract fun scheduleUrl(event: EventData): String
+    open val shortName: String get() = name
 }
