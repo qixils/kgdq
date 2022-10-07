@@ -14,48 +14,71 @@ threads:
 
   # The following example event corresponds to the Summer Games Done Quick 2022 event
 
-    # The display name of the event
-  - display_name: "SGDQ 2022"
-
-    # The organization managing the event (either "GDQ" or "ESA")
-    org: "GDQ"
-
-    # ID of the event -- can be the event's short name or its internal API ID
-    event_id: "sgdq2022"
+    # The organization managing the event (either "GDQ", "ESA", or "HEK")
+  - org: "GDQ"
 
     # ID of the Reddit thread to update
     thread_id: "INSERT_THREAD_ID_HERE"
-
-    # Twitch channel hosting the event
-    twitch: "GamesDoneQuick"
 
     # YouTube channel hosting the event's VODs
     youtube: "GamesDoneQuick"
 
-    # The ID of the YouTube playlist for the event's VODs (can be null)
-    playlist: "PLz8YL4HVC87WXGSecBMfTFFx1Veeeolyj"
+    # The sub-events being tracked in this thread
+    events:
+
+        # The display name of the event
+      - display_name: "SGDQ 2022"
+
+        # ID of the event -- can be the event's short name or its internal API ID
+        event_id: "sgdq2022"
+
+        # Twitch channel hosting the event
+        twitch: "GamesDoneQuick"
+
+        # The ID of the YouTube playlist for the event's VODs (can be null)
+        playlist: "PLz8YL4HVC87WXGSecBMfTFFx1Veeeolyj"
 
 
 
-  # The following example event corresponds to the European Speedrunner Assembly 2022 Stream 1 event
+  # The following example event corresponds to the European Speedrunner Assembly 2022 event
 
-    # The display name of the event
-  - display_name: "ESA 2022 Stream 1"
-
-    # The organization managing the event (either "GDQ" or "ESA")
-    org: "ESA"
-
-    # ID of the event -- can be the event's short name or its internal API ID
-    event_id: "esa2022s1"
+    # The organization managing the event (either "GDQ", "ESA", or "HEK")
+  - org: "ESA"
 
     # ID of the Reddit thread to update
     thread_id: "INSERT_THREAD_ID_HERE"
 
-    # Twitch channel hosting the event
-    twitch: "ESAMarathon"
-
     # YouTube channel hosting the event's VODs
     youtube: "ESAMarathon"
 
-    # The ID of the YouTube playlist for the event's VODs (can be null)
-    playlist: ~
+    # The sub-events being tracked in this thread
+    events:
+
+      # Stream 1
+
+        # The display name of the event
+      - display_name: "Stream 1"
+
+        # ID of the event -- can be the event's short name or its internal API ID
+        event_id: "esa2022s1"
+
+        # Twitch channel hosting the event
+        twitch: "ESAMarathon"
+
+        # The ID of the YouTube playlist for the event's VODs (can be null)
+        playlist: ~
+
+
+      # Stream 2
+
+        # The display name of the event
+      - display_name: "Stream 2"
+
+        # ID of the event -- can be the event's short name or its internal API ID
+        event_id: "esa2022s2"
+
+        # Twitch channel hosting the event
+        twitch: "ESAMarathon2"
+
+        # The ID of the YouTube playlist for the event's VODs (can be null)
+        playlist: ~

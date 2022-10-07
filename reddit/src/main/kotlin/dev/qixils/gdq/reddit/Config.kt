@@ -24,16 +24,21 @@ data class CredentialConfig(
 
 @ConfigSerializable
 data class ThreadConfig(
-    @Setting("display_name") val displayName: String,
     private val org: String = "GDQ",
-    @Setting("event_id") val eventId: String,
     @Setting("thread_id") val threadId: String,
-    val twitch: String = "GamesDoneQuick",
     val youtube: String = "GamesDoneQuick",
-    val playlist: String? = null,
+    val events: List<EventConfig>,
 ) {
     @Transient val organization: Organization = Organization.valueOf(org)
 }
+
+@ConfigSerializable
+data class EventConfig(
+    @Setting("display_name") val displayName: String,
+    @Setting("event_id") val eventId: String,
+    val twitch: String = "GamesDoneQuick",
+    val playlist: String? = null,
+)
 
 @ConfigSerializable
 enum class Organization {

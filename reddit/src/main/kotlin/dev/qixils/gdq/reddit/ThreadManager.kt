@@ -33,45 +33,67 @@ class ThreadManager(
     }
 
     init {
-        logger.debug("Loaded thread manager for ${config.displayName}")
+        logger.debug("Loaded thread manager for ${config.organization.name}")
     }
 
     companion object {
         private var lastUpdate = Instant.MIN
     }
 
-    private fun generateBody(event: EventData, runs: List<RunData>): CharSequence {
+    private suspend fun generateBody(): StringBuilder {
         val body = StringBuilder()
-        generateHeader(body, event)
+        generateMainHeader(body)
+        for (event in config.events) {
+            generateSubBody(body, event)
+        }
+        return body
+    }
+
+    private suspend fun generateSubBody(body: StringBuilder, eventConfig: EventConfig): CharSequence {
+        // Get event and run data
+        val event = get("events?id=${eventConfig.eventId}", ListSerializer(EventData.serializer()))
+            .firstOrNull()
+            ?: throw IllegalStateException("Event ${eventConfig.eventId} by ${config.organization.name} not found")
+        val runs = get("runs?event=${eventConfig.eventId}", ListSerializer(RunData.serializer()))
+
+        // Generate body
+        generateSubHeader(body, event, eventConfig)
         for (run in runs) {
             generateRunRow(body, run)
         }
         return body
     }
 
-    private fun generateHeader(body: StringBuilder, event: EventData) {
-        // this is kind of a mess lol
+    private fun generateMainHeader(body: StringBuilder) {
         body.append("The event's schedule may change without notice so this thread can be out-of-date by several minutes. ")
-            .append("Please check the [event's website](")
-            .append(config.organization.scheduleUrl(event))
-            .append(") for the most accurate reference.\n\n")
-            .append("Don't gild the thread, [donate the money instead](")
-            .append(config.organization.donateUrl(event))
-            .append(")! \\^_\\^\n\n")
+            .append("Please check the event's website for the most accurate reference.\n\n")
+            .append("Don't gild the thread, donate the money instead! \\^_\\^\n\n")
             .append("This thread is powered by data from ${config.organization.displayName}")
         if (config.organization.manualVODs)
-            body.append(", Speedrun.com, and the contributors to the [VOD list](https://www.reddit.com/r/VODThread/wiki/${event.short}vods). Thank you to the volunteers that keep this thread running")
+            body.append(", Speedrun.com, and the contributors to the VOD list. Thank you to the volunteers that keep this thread running!\n")
         else
-            body.append(" and Speedrun.com")
-        body.append(".\n\n### Links\n\n")
-            .append("* [Watch ${config.displayName}](https://twitch.tv/${config.twitch})\n")
+            body.append(" and Speedrun.com.\n")
+    }
+
+    private fun generateSubHeader(body: StringBuilder, event: EventData, eventConfig: EventConfig) {
+        body.append("\n")
+        if (config.events.size > 1)
+            body.append("# ${eventConfig.displayName}\n\n")
+        body.append("## Links\n\n")
+            .append("* [Watch ${eventConfig.displayName}](https://twitch.tv/${eventConfig.twitch})\n")
+            .append("* [Donate to ${event.charityName}](${config.organization.donateUrl(event)})\n")
+            .append("* [Official Schedule](${config.organization.scheduleUrl(event)})\n")
             .append("* [${config.organization.name} homepage](${config.organization.homepageUrl})\n")
             .append("* [${config.organization.name} YouTube playlist](")
-        if (config.playlist != null)
-            body.append("https://www.youtube.com/playlist?list=").append(config.playlist)
+        if (eventConfig.playlist != null)
+            body.append("https://www.youtube.com/playlist?list=").append(eventConfig.playlist)
         else
             body.append("https://www.youtube.com/c/").append(config.youtube)
-        body.append(")\n* [Automatic thread updater](https://github.com/qixils/kgdq/tree/main/reddit)\n\n")
+        body.append(")\n")
+        if (config.organization.manualVODs)
+            body.append("* [VOD list](https://www.reddit.com/r/VODThread/wiki/${event.short}vods)\n")
+        body.append("* [Automatic thread updater](https://github.com/qixils/kgdq/tree/main/reddit)\n\n")
+            .append("## Schedule\n\n")
             .append("Game | Runner / Channel | Time / Link\n")
             .append("--|--|:--:|\n")
     }
@@ -137,16 +159,10 @@ class ThreadManager(
     }
 
     suspend fun run() {
-        logger.info("Running thread manager for ${config.displayName}")
-
-        // Get event and run data
-        val event = get("events?id=${config.eventId}", ListSerializer(EventData.serializer()))
-            .firstOrNull()
-            ?: throw IllegalStateException("Event ${config.eventId} by ${config.organization.name} not found")
-        val runs = get("runs?event=${config.eventId}", ListSerializer(RunData.serializer()))
+        logger.info("Running thread manager for ${config.organization.name}")
 
         // Generate body
-        val body = generateBody(event, runs).toString()
+        val body = generateBody().toString()
 
         // Update thread
         try {
@@ -157,9 +173,9 @@ class ThreadManager(
             // Perform update
             lastUpdate = Instant.now()
             reddit.submission(config.threadId).edit(body)
-            logger.info("Updated thread ${config.threadId} for ${config.displayName}")
+            logger.info("Updated thread ${config.threadId} for ${config.organization.name}")
         } catch (e: Exception) {
-            logger.error("Failed to update thread ${config.threadId} for ${config.displayName}", e)
+            logger.error("Failed to update thread ${config.threadId} for ${config.organization.name}", e)
         }
     }
 }
