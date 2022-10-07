@@ -73,6 +73,10 @@ class ThreadManager(
             body.append(", Speedrun.com, and the contributors to the VOD list. Thank you to the volunteers that keep this thread running!\n")
         else
             body.append(" and Speedrun.com.\n")
+        if (config.events.size > 1)
+            body.append("\n### Links\n\n")
+                .append("* [${config.organization.name} homepage](${config.organization.homepageUrl})\n")
+                .append("* [Automatic thread updater](https://github.com/qixils/kgdq/tree/main/reddit)\n")
     }
 
     private fun generateSubHeader(body: StringBuilder, event: EventData, eventConfig: EventConfig) {
@@ -83,8 +87,9 @@ class ThreadManager(
             .append("* [Watch ${eventConfig.displayName}](https://twitch.tv/${eventConfig.twitch})\n")
             .append("* [Donate to ${event.charityName}](${config.organization.donateUrl(event)})\n")
             .append("* [Official Schedule](${config.organization.scheduleUrl(event)})\n")
-            .append("* [${config.organization.name} homepage](${config.organization.homepageUrl})\n")
-            .append("* [${config.organization.name} YouTube playlist](")
+        if (config.events.size == 1)
+            body.append("* [${config.organization.name} homepage](${config.organization.homepageUrl})\n")
+        body.append("* [${config.organization.name} YouTube playlist](")
         if (eventConfig.playlist != null)
             body.append("https://www.youtube.com/playlist?list=").append(eventConfig.playlist)
         else
@@ -92,8 +97,9 @@ class ThreadManager(
         body.append(")\n")
         if (config.organization.manualVODs)
             body.append("* [VOD list](https://www.reddit.com/r/VODThread/wiki/${event.short}vods)\n")
-        body.append("* [Automatic thread updater](https://github.com/qixils/kgdq/tree/main/reddit)\n\n")
-            .append("## Schedule\n\n")
+        if (config.events.size == 1)
+            body.append("* [Automatic thread updater](https://github.com/qixils/kgdq/tree/main/reddit)\n")
+        body.append("\n## Schedule\n\n")
             .append("Game | Runner / Channel | Time / Link\n")
             .append("--|--|:--:|\n")
     }
