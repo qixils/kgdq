@@ -27,15 +27,17 @@ data class Runner(
             else
                 stream
         } else if (youtube.isNotEmpty()) {
-            if (youtube.contains("youtube.com"))
-                youtube
+            val ytMatcher = ytRegex.matcher(youtube)
+            if (ytMatcher.matches())
+                "https://youtube.com/${ytMatcher.group(1)}"
             else if (youtube.startsWith("UC", false))
                 "https://youtube.com/channel/${youtube}"
             else
                 "https://youtube.com/c/${youtube}"
         } else if (twitter.isNotEmpty()) {
-            if (twitter.contains("twitter.com"))
-                twitter
+            val twitterMatcher = twitterRegex.matcher(twitter)
+            if (twitterMatcher.matches())
+                "https://twitter.com/${twitterMatcher.group(1)}"
             else
                 "https://twitter.com/${twitter}"
         } else {
@@ -44,7 +46,9 @@ data class Runner(
     }
 
     companion object {
-        private val twitchRegex = Pattern.compile("https?://(?:www\\.)?twitch\\.tv/(.+)")
+        private val twitchRegex = Pattern.compile("(?:https?://)?(?:www\\.)?twitch\\.tv/(.+)")
+        private val ytRegex = Pattern.compile("(?:https?://)?(?:www\\.)?youtube\\.com/(.+)")
+        private val twitterRegex = Pattern.compile("(?:https?://)?(?:www\\.)?twitter\\.com/(.+)")
         private val urlRegex = Pattern.compile("https?://.+")
     }
 }
