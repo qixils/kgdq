@@ -33,4 +33,5 @@ data class EventConfig(
 enum class Organization {
     GDQ,
     ESA,
+    HEK,
 }
