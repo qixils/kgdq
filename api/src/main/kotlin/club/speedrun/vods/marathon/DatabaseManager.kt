@@ -7,6 +7,7 @@ import dev.qixils.gdq.models.Wrapper
 import org.litote.kmongo.combine
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
+import org.litote.kmongo.or
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.setValue
 
@@ -29,10 +30,11 @@ class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$orga
     val events = db.getCollection<EventOverrides>(EventOverrides.COLLECTION_NAME)
     val statuses = db.getCollection<ScheduleStatus>(ScheduleStatus.COLLECTION_NAME)
 
+    // TODO: perform updates off-thread
+
     suspend fun getOrCreateRunOverrides(run: Wrapper<Run>): RunOverrides {
         // get
-        var overrides: RunOverrides? = runs.findOne(RunOverrides::runId eq run.id)
-            ?: runs.findOne(RunOverrides::horaroId eq run.value.horaroId)
+        var overrides: RunOverrides? = runs.findOne(or(RunOverrides::runId eq run.id, RunOverrides::horaroId eq run.value.horaroId))
         // create
         if (overrides == null) {
             overrides = RunOverrides(run)
@@ -47,6 +49,7 @@ class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$orga
             val oldOverrides = runs.findOneAndDelete(RunOverrides::horaroId eq run.value.horaroId)
             if (oldOverrides != null) {
                 overrides.mergeIn(oldOverrides)
+                // TODO: figure out and fix this stupid db issue (especially here but also everywhere else)
                 runs.updateOneById(overrides._id, combine(
                     setValue(RunOverrides::runId, overrides.runId),
                     setValue(RunOverrides::horaroId, overrides.horaroId),
@@ -85,9 +88,7 @@ class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$orga
         if (gdqId == null && horaroId == null)
             throw IllegalArgumentException("At least one argument must be non-null")
         // get
-        var overrides: RunOverrides? = runs.findOne(RunOverrides::runId eq gdqId)
-        if (overrides == null)
-            overrides = runs.findOne(RunOverrides::horaroId eq horaroId)
+        var overrides: RunOverrides? = runs.findOne(or(RunOverrides::runId eq gdqId, RunOverrides::horaroId eq horaroId))
         // create
         if (overrides == null) {
             overrides = RunOverrides(runId = gdqId, horaroId = horaroId)

@@ -30,7 +30,6 @@ fun main() {
         install(ContentNegotiation) { json() }
         configureOAuth()
         configureRouting()
-        // TODO RabbitManager.declareQueue("cg_events_reddit_hekoff22", "ESAMarathon", hek.api.db)
 //        RabbitManager.declareQueue("cg_events_reddit_esaw2023s1", "ESAMarathon", esa.api.db)
 //        RabbitManager.declareQueue("cg_events_reddit_esaw2023s2", "ESAMarathon2", esa.api.db)
     }.start(wait = true)
