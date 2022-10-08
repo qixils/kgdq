@@ -18,10 +18,10 @@ import io.ktor.server.application.*
 import io.ktor.server.locations.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import org.litote.kmongo.coroutine.updateOne
+import kotlinx.coroutines.*
+import org.litote.kmongo.and
+import org.litote.kmongo.eq
+import org.litote.kmongo.setValue
 import java.time.Instant
 
 abstract class Marathon(val api: GDQ) {
@@ -226,7 +226,7 @@ suspend fun RunData.loadSrcGame(overrides: RunOverrides?) {
 class EventDataCacher(private val api: GDQ) : Hook<Event> {
     override suspend fun handle(item: Wrapper<Event>) {
         if (!api.eventStartedAt.containsKey(item.id)) {
-            val overrides: EventOverrides = api.db.getOrCreateEventOverrides(item.value)
+            val overrides = api.db.getOrCreateEventOverrides(item.value)
             if (overrides.datetime != null)
                 api.eventStartedAt[item.id] = overrides.datetime!!
         }
@@ -234,12 +234,10 @@ class EventDataCacher(private val api: GDQ) : Hook<Event> {
 }
 
 class EventOverrideUpdater(private val api: GDQ) : Hook<Event> {
-    override suspend fun handle(item: Wrapper<Event>) = coroutineScope {
-        val overrides = api.db.getOrCreateEventOverrides(item.value)
-        if (overrides.datetime == null) {
-            overrides.datetime = item.value.datetime
-            // update db asynchronously
-            launch(Job()) { api.db.events.updateOne(overrides) }
-        }
+    override suspend fun handle(item: Wrapper<Event>) {
+        api.db.events.updateOne(
+            and(EventOverrides::_id eq item.value.short, EventOverrides::datetime eq null),
+            setValue(EventOverrides::datetime, item.value.datetime)
+        )
     }
 }

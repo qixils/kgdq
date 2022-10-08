@@ -35,7 +35,7 @@ open class GDQ(
     private val modelCache: MutableMap<Pair<ModelType<*>, Int>, Pair<Wrapper<*>, Instant>> = mutableMapOf()
     private val responseCache: MutableMap<String, Pair<List<Wrapper<*>>, Instant>> = mutableMapOf()
     protected var lastCachedRunners: Instant? = null
-    val eventStartedAt = mutableMapOf<Int, Instant>()
+    val eventStartedAt = mutableMapOf<Int, Instant?>()
 
     /**
      * Constructs a new GDQ instance with the provided API path.
@@ -67,13 +67,13 @@ open class GDQ(
         modelSerializer: KSerializer<M>,
         preLoad: Hook<M>? = null,
         postLoad: Hook<M>? = null,
-    ): List<Wrapper<M>> {
+    ): List<Wrapper<M>> = coroutineScope {
         // look in the cache first
         if (responseCache.containsKey(query)) {
             val (wrappers, cachedAt) = responseCache[query]!!
             if (cachedAt.plus(modelType.cacheFor).isAfter(Instant.now())) {
                 @Suppress("UNCHECKED_CAST") // the type is correct it's ok
-                return wrappers as List<Wrapper<M>>
+                return@coroutineScope wrappers as List<Wrapper<M>>
             }
         }
 
@@ -94,8 +94,8 @@ open class GDQ(
         // load data
         models.forEach {
             preLoad?.handle(it)
-            it.value.loadData(this, it.id)
-            postLoad?.handle(it)
+            it.value.loadData(this@GDQ, it.id)
+            launch(Job()) { postLoad?.handle(it) } // run post-load in background
         }
 
         // remove invalid models
@@ -107,7 +107,7 @@ open class GDQ(
         responseCache[query] = models to now
 
         // return
-        return models
+        return@coroutineScope models
     }
 
     /**
