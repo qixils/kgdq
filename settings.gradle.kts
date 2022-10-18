@@ -1,4 +1,4 @@
-rootProject.name = "gdq-discord-schedule-parent"
+rootProject.name = "kgdq-parent"
 include(":discord")
 include(":kgdq")
 include(":api")

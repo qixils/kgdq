@@ -4,6 +4,10 @@ import club.speedrun.vods.rabbit.ScheduleStatus
 import dev.qixils.gdq.models.Event
 import dev.qixils.gdq.models.Run
 import dev.qixils.gdq.models.Wrapper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.litote.kmongo.combine
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
@@ -32,7 +36,7 @@ class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$orga
 
     // TODO: perform updates off-thread
 
-    suspend fun getOrCreateRunOverrides(run: Wrapper<Run>): RunOverrides {
+    suspend fun getOrCreateRunOverrides(run: Wrapper<Run>): RunOverrides = withContext(Dispatchers.IO) {
         // get
         var overrides: RunOverrides? = runs.findOne(or(RunOverrides::runId eq run.id, RunOverrides::horaroId eq run.value.horaroId))
         // create
@@ -50,15 +54,17 @@ class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$orga
             if (oldOverrides != null) {
                 overrides.mergeIn(oldOverrides)
                 // TODO: figure out and fix this stupid db issue (especially here but also everywhere else)
-                runs.updateOneById(overrides._id, combine(
-                    setValue(RunOverrides::runId, overrides.runId),
-                    setValue(RunOverrides::horaroId, overrides.horaroId),
-                    setValue(RunOverrides::twitchVODs, overrides.twitchVODs),
-                    setValue(RunOverrides::youtubeVODs, overrides.youtubeVODs),
-                    setValue(RunOverrides::startTime, overrides.startTime),
-                    setValue(RunOverrides::runTime, overrides.runTime),
-                    setValue(RunOverrides::src, overrides.src),
-                ))
+                launch(Job()) {
+                    runs.updateOneById(overrides._id, combine(
+                        setValue(RunOverrides::runId, overrides.runId),
+                        setValue(RunOverrides::horaroId, overrides.horaroId),
+                        setValue(RunOverrides::twitchVODs, overrides.twitchVODs),
+                        setValue(RunOverrides::youtubeVODs, overrides.youtubeVODs),
+                        setValue(RunOverrides::startTime, overrides.startTime),
+                        setValue(RunOverrides::runTime, overrides.runTime),
+                        setValue(RunOverrides::src, overrides.src),
+                    ))
+                }
             } else {
                 overrides.horaroId = run.value.horaroId
                 runs.updateOneById(
@@ -68,7 +74,7 @@ class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$orga
             }
         }
         // return
-        return overrides
+        return@withContext overrides
     }
 
     suspend fun getOrCreateRunOverrides(run: dev.qixils.horaro.models.Run): RunOverrides? {

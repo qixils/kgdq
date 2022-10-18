@@ -180,7 +180,7 @@ class RunData{
         private val MAX_RAW_SETUP_TIME = Duration.ofMinutes(30)
 
         fun calculateHoraroName(run: dev.qixils.horaro.models.Run): String {
-            val rawName = run.getValue("Game")!!.trim()
+            val rawName = run.getValue("Game")?.trim() ?: return "[Unknown Game]"
             // TODO: incorporate an actual markdown parser here to strip the Game field
             //  of markdown formatting (namely links)
             val matcher = MARKDOWN_LINK.matcher(rawName)
@@ -193,7 +193,7 @@ class RunData{
         }
 
         private fun calculateHoraroVODs(run: dev.qixils.horaro.models.Run): MutableList<VOD>? {
-            val rawName = run.getValue("Game")!!.trim()
+            val rawName = run.getValue("Game")?.trim() ?: return null
             val matcher = MARKDOWN_LINK.matcher(rawName)
             val vods = mutableListOf<VOD>()
             while (matcher.find())
