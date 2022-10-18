@@ -4,10 +4,7 @@ import club.speedrun.vods.rabbit.ScheduleStatus
 import dev.qixils.gdq.models.Event
 import dev.qixils.gdq.models.Run
 import dev.qixils.gdq.models.Wrapper
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.litote.kmongo.combine
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
@@ -29,6 +26,7 @@ open class DatabaseManager(dbName: String) {
     protected val db = dbClient.getDatabase(dbName)
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$organization") {
     val runs = db.getCollection<RunOverrides>(RunOverrides.COLLECTION_NAME)
     val events = db.getCollection<EventOverrides>(EventOverrides.COLLECTION_NAME)
@@ -36,7 +34,7 @@ class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$orga
 
     // TODO: perform updates off-thread
 
-    suspend fun getOrCreateRunOverrides(run: Wrapper<Run>): RunOverrides = withContext(Dispatchers.IO) {
+    suspend fun getOrCreateRunOverrides(run: Wrapper<Run>): RunOverrides {
         // get
         var overrides: RunOverrides? = runs.findOne(or(RunOverrides::runId eq run.id, RunOverrides::horaroId eq run.value.horaroId))
         // create
@@ -54,7 +52,7 @@ class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$orga
             if (oldOverrides != null) {
                 overrides.mergeIn(oldOverrides)
                 // TODO: figure out and fix this stupid db issue (especially here but also everywhere else)
-                launch(Job()) {
+                GlobalScope.launch {
                     runs.updateOneById(overrides._id, combine(
                         setValue(RunOverrides::runId, overrides.runId),
                         setValue(RunOverrides::horaroId, overrides.horaroId),
@@ -74,7 +72,7 @@ class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$orga
             }
         }
         // return
-        return@withContext overrides
+        return overrides
     }
 
     suspend fun getOrCreateRunOverrides(run: dev.qixils.horaro.models.Run): RunOverrides? {
@@ -84,7 +82,7 @@ class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$orga
         // create
         if (overrides == null) {
             overrides = RunOverrides(run)
-            runs.insertOne(overrides)
+            GlobalScope.launch { runs.insertOne(overrides) }
         }
         // return
         return overrides
@@ -98,15 +96,15 @@ class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$orga
         // create
         if (overrides == null) {
             overrides = RunOverrides(runId = gdqId, horaroId = horaroId)
-            runs.insertOne(overrides)
+            GlobalScope.launch { runs.insertOne(overrides) }
         }
         // update
         if (overrides.runId == null && gdqId != null) {
             overrides.runId = gdqId
-            runs.updateOneById(overrides._id, setValue(RunOverrides::runId, gdqId))
+            GlobalScope.launch { runs.updateOneById(overrides._id, setValue(RunOverrides::runId, gdqId)) }
         } else if (overrides.horaroId == null && horaroId != null) {
             overrides.horaroId = horaroId
-            runs.updateOneById(overrides._id, setValue(RunOverrides::horaroId, horaroId))
+            GlobalScope.launch { runs.updateOneById(overrides._id, setValue(RunOverrides::horaroId, horaroId)) }
         }
         // return
         return overrides
@@ -118,7 +116,7 @@ class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$orga
         // create
         if (overrides == null) {
             overrides = EventOverrides(event)
-            events.insertOne(overrides)
+            GlobalScope.launch { events.insertOne(overrides) }
         }
         // return
         return overrides
@@ -130,7 +128,7 @@ class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$orga
         // create
         if (status == null) {
             status = ScheduleStatus(queue)
-            statuses.insertOne(status)
+            GlobalScope.launch { statuses.insertOne(status) }
         }
         // return
         return status
