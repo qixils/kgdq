@@ -5,6 +5,7 @@ package club.speedrun.vods.marathon
 import club.speedrun.vods.db
 import club.speedrun.vods.plugins.UserError
 import club.speedrun.vods.srcDb
+import com.mongodb.client.model.Updates
 import dev.qixils.gdq.GDQ
 import dev.qixils.gdq.Hook
 import dev.qixils.gdq.ModelType
@@ -21,7 +22,6 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.*
 import org.litote.kmongo.and
 import org.litote.kmongo.eq
-import org.litote.kmongo.setValue
 import java.time.Instant
 
 abstract class Marathon(val api: GDQ) {
@@ -187,6 +187,7 @@ data class RunList(val id: String? = null, val event: String? = null, val runner
 class GDQMarathon : Marathon(GDQ())
 class ESAMarathon : Marathon(ESA())
 class HEKMarathon : Marathon(ESA("https://hekathon.esamarathon.com/search/", "hek"))
+class RPGLBMarathon : Marathon(GDQ("https://rpglimitbreak.com/tracker/search/", "rpglb"))
 
 class ESA(url: String = "https://donations.esamarathon.com/search/", org: String = "esa") : GDQ(url, org) {
     override suspend fun cacheRunners() {
@@ -237,7 +238,7 @@ class EventOverrideUpdater(private val api: GDQ) : Hook<Event> {
     override suspend fun handle(item: Wrapper<Event>) {
         api.db.events.updateOne(
             and(EventOverrides::_id eq item.value.short, EventOverrides::datetime eq null),
-            setValue(EventOverrides::datetime, item.value.datetime)
+            Updates.set("datetime", item.value.datetime.toString()) // setValue for some reason bypasses the custom serializer, so we must manually convert to string
         )
     }
 }

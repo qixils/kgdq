@@ -1,9 +1,6 @@
 package club.speedrun.vods
 
-import club.speedrun.vods.marathon.ESAMarathon
-import club.speedrun.vods.marathon.GDQMarathon
-import club.speedrun.vods.marathon.GdqDatabaseManager
-import club.speedrun.vods.marathon.HEKMarathon
+import club.speedrun.vods.marathon.*
 import club.speedrun.vods.plugins.configureHTTP
 import club.speedrun.vods.plugins.configureMonitoring
 import club.speedrun.vods.plugins.configureOAuth
@@ -20,6 +17,7 @@ import io.ktor.server.plugins.contentnegotiation.*
 val gdq = GDQMarathon()
 val esa = ESAMarathon()
 val hek = HEKMarathon()
+val rpglb = RPGLBMarathon()
 val srcDb = SrcDatabaseManager()
 val httpClient = HttpClient(Apache)
 

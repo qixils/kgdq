@@ -57,13 +57,20 @@ enum class Organization {
         override fun scheduleUrl(event: EventData) = event.horaroUrl
     },
     HEK {
-        override val manualVODs = false
+        override val manualVODs = true
         override val displayName = "Hekathon"
         override val homepageUrl = "https://hekathon.com/"
         override fun donateUrl(event: EventData) = "https://hekathon.esamarathon.com/donate/" + event.short
         override fun scheduleUrl(event: EventData) = event.horaroUrl
         override val shortName: String = "Hekathon"
-    }
+    },
+    RPGLB {
+        override val manualVODs = true
+        override val displayName = "RPG Limit Break"
+        override val homepageUrl = "https://rpglimitbreak.com/"
+        override fun donateUrl(event: EventData) = "https://rpglimitbreak.com/tracker/ui/donate/" + event.short
+        override fun scheduleUrl(event: EventData) = "https://rpglimitbreak.com/tracker/runs/" + event.short
+    },
     ;
 
     abstract val manualVODs: Boolean

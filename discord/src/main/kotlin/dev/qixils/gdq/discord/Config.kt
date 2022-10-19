@@ -34,4 +34,5 @@ enum class Organization {
     GDQ,
     ESA,
     HEK,
+    RPGLB,
 }
