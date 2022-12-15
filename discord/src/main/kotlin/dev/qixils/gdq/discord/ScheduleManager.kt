@@ -6,6 +6,7 @@ import club.speedrun.vods.naturalJoinTo
 import dev.minn.jda.ktx.coroutines.await
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.qixils.gdq.models.BidState
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.KSerializer
@@ -79,9 +80,9 @@ class ScheduleManager(
         logger.info("Started schedule manager for ${config.organization.name}'s ${config.id}")
 
         // Get event and run data
+        val runs = async { get("runs?event=${config.id}", ListSerializer(RunData.serializer())) }
         val event = get("events?id=${config.id}", ListSerializer(EventData.serializer()))
             .firstOrNull() ?: throw IllegalStateException("Event ${config.id} by ${config.organization.name} not found")
-        val runs = get("runs?event=${config.id}", ListSerializer(RunData.serializer()))
 
         // Initialize misc utility vals
         val moneyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
@@ -105,10 +106,10 @@ class ScheduleManager(
         )
 
         // Add message for each run
-        runs.forEachIndexed { index, run ->
+        runs.await().forEachIndexed { index, run ->
             val sb = StringBuilder()
             val tz = event.timezone
-            if (index == 0 || runs[index-1].startTime.atZone(tz).dayOfWeek != run.startTime.atZone(tz).dayOfWeek)
+            if (index == 0 || runs.await()[index-1].startTime.atZone(tz).dayOfWeek != run.startTime.atZone(tz).dayOfWeek)
                 sb.append(dateHeaderFormat.format(run.startTime.atZone(tz)))
 
             if (run.isCurrent) {
@@ -233,7 +234,7 @@ class ScheduleManager(
                                     value = "The event is currently in-between runs. Stay tuned for more!"
                                     return@field
                                 }
-                            } else if (index != 0) {
+                            } else {
                                 name = TimeFormat.RELATIVE.format(run.startTime)
                             }
 

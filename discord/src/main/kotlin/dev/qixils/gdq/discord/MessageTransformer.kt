@@ -27,29 +27,34 @@ data class MessageTransformer(
     ) : this(content, listOf(embed.build()), pin)
 
     // this is a `suspend` function because the order of messages is important
-    suspend fun send(channel: MessageChannel) {
+    suspend fun send(channel: MessageChannel): Message {
         val sentMessage = channel.send(content, embeds = embeds).await()
         if (pin)
             sentMessage.pin().await()
+        return sentMessage
     }
 
-    suspend fun edit(toEdit: Message) {
-        if (content != toEdit.contentRaw || toEdit.embeds.isNotEmpty() || embeds.isNotEmpty())
+    suspend fun edit(toEdit: Message): Message {
+        val edited
+        = if (content != toEdit.contentRaw || toEdit.embeds.isNotEmpty() || embeds.isNotEmpty())
             toEdit.edit(content, embeds = embeds, replace = true).await()
+        else
+            toEdit
 
-        if (!toEdit.guild.selfMember.hasPermission(toEdit.guildChannel, Permission.MESSAGE_MANAGE)) {
-            if (!pinWarnings.contains(toEdit.guildChannel.idLong)) {
+        if (!edited.guild.selfMember.hasPermission(edited.guildChannel, Permission.MESSAGE_MANAGE)) {
+            if (!pinWarnings.contains(edited.guildChannel.idLong)) {
                 logger.warn(
-                    "Cannot pin messages in channel ${toEdit.channel.id} (#${toEdit.channel.name}) " +
+                    "Cannot pin messages in channel ${edited.channel.id} (#${edited.channel.name}) " +
                             "because bot lacks MANAGE_MESSAGE permission"
                 )
-                pinWarnings.add(toEdit.guildChannel.idLong)
+                pinWarnings.add(edited.guildChannel.idLong)
             }
         } else if (pin) {
-            if (!toEdit.isPinned)
-                toEdit.pin().await()
-        } else if (toEdit.isPinned) {
-            toEdit.unpin().await()
+            if (!edited.isPinned)
+                edited.pin().await()
+        } else if (edited.isPinned) {
+            edited.unpin().await()
         }
+        return edited
     }
 }
