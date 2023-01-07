@@ -279,7 +279,7 @@ class ScheduleManager(
                 return@forEach
             }
             // Get channel data
-            val channelData = db.get(owningChannel.id) ?: ChannelData(config.id)
+            val channelData = db.get(owningChannel.id) ?: ChannelData(owningChannel.id)
             // Get or create thread
             val threadKey = "${config.organization.name}-${event.id}"
             val thread: ThreadChannel
