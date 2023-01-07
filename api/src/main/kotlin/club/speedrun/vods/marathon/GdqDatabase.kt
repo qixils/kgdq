@@ -1,14 +1,14 @@
 package club.speedrun.vods.marathon
 
-import club.speedrun.vods.marathon.Filter.Companion.or
+import club.speedrun.vods.db.Database
+import club.speedrun.vods.db.Filter.Companion.eq
+import club.speedrun.vods.db.Filter.Companion.or
 import club.speedrun.vods.rabbit.ScheduleStatus
 import dev.qixils.gdq.models.Event
 import dev.qixils.gdq.models.Run
 import dev.qixils.gdq.models.Wrapper
-import kotlinx.coroutines.DelicateCoroutinesApi
 
-@OptIn(DelicateCoroutinesApi::class)
-class GdqDatabaseManager(organization: String) : DatabaseManager("$organization-org") {
+class GdqDatabase(organization: String) : Database("api", "orgs", organization) {
     val runs = getCollection(RunOverrides.COLLECTION_NAME, RunOverrides.serializer())
     val events = getCollection(EventOverrides.COLLECTION_NAME, EventOverrides.serializer())
     val statuses = getCollection(ScheduleStatus.COLLECTION_NAME, ScheduleStatus.serializer())

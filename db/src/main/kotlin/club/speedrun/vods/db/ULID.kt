@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package club.speedrun.vods
+package club.speedrun.vods.db
 
 import java.util.*
 import kotlin.experimental.and

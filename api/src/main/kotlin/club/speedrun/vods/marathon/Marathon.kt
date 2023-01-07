@@ -3,8 +3,10 @@
 package club.speedrun.vods.marathon
 
 import club.speedrun.vods.db
-import club.speedrun.vods.marathon.Filter.Companion.and
-import club.speedrun.vods.marathon.Filter.Companion.id
+import club.speedrun.vods.db.Filter.Companion.and
+import club.speedrun.vods.db.Filter.Companion.eq
+import club.speedrun.vods.db.Filter.Companion.id
+import club.speedrun.vods.db.Update.Companion.set
 import club.speedrun.vods.plugins.UserError
 import club.speedrun.vods.srcDb
 import dev.qixils.gdq.GDQ
@@ -23,7 +25,7 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.*
 import java.time.Instant
 
-abstract class Marathon(val api: GDQ) {
+abstract class Marathon(protected val api: GDQ) {
     private val eventIdCache = mutableMapOf<String, Int>()
     private val eventCacher = EventDataCacher(api)
     private val eventUpdater = EventOverrideUpdater(api)

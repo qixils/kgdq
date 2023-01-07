@@ -1,6 +1,6 @@
 package club.speedrun.vods.rabbit
 
-import club.speedrun.vods.marathon.GdqDatabaseManager
+import club.speedrun.vods.marathon.GdqDatabase
 import club.speedrun.vods.marathon.TwitchVOD
 import com.github.twitch4j.helix.TwitchHelix
 import com.github.twitch4j.helix.TwitchHelixBuilder
@@ -39,7 +39,7 @@ object RabbitManager {
     }
     private var queues: Int = 0
 
-    fun declareQueue(queueName: String, twitchChannel: String, db: GdqDatabaseManager) {
+    fun declareQueue(queueName: String, twitchChannel: String, db: GdqDatabase) {
         if (channel == null) {
             logger.error("Failed to connect to RabbitMQ")
             return
@@ -58,7 +58,7 @@ class DeliverHandler(
     private val queue: String,
     private val stream: String,
     private val channel: Channel,
-    private val db: GdqDatabaseManager,
+    private val db: GdqDatabase,
 ) : DeliverCallback {
     private val logger: Logger = LoggerFactory.getLogger("DeliverHandler:$stream")
     private val loadedAt = Instant.now()

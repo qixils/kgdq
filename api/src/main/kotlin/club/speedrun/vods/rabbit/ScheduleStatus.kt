@@ -1,6 +1,6 @@
 package club.speedrun.vods.rabbit
 
-import club.speedrun.vods.Identified
+import club.speedrun.vods.db.Identified
 import kotlinx.serialization.Serializable
 
 @Serializable

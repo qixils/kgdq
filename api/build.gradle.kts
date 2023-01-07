@@ -18,13 +18,13 @@ application {
 }
 
 repositories {
-    mavenCentral()
     maven { url = uri("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-js-wrappers") }
 }
 
 dependencies {
     implementation(project(":api-models"))
     implementation(project(":srcom"))
+    implementation(project(":db"))
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-auth-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-locations-jvm:$ktor_version")
@@ -43,7 +43,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("com.rabbitmq:amqp-client:$amqp_version")
     implementation("com.github.twitch4j:twitch4j-helix:$twitch4j_version")
-    implementation("io.ktor:ktor-client-core-jvm:2.1.2")
+    implementation("io.ktor:ktor-client-core-jvm:$ktor_version")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-cbor:$serialization_version")

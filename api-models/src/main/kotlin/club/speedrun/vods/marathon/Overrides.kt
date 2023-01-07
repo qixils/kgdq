@@ -1,7 +1,7 @@
 package club.speedrun.vods.marathon
 
-import club.speedrun.vods.Identified
-import club.speedrun.vods.ULID
+import club.speedrun.vods.db.Identified
+import club.speedrun.vods.db.ULID
 import dev.qixils.gdq.models.Event
 import dev.qixils.gdq.models.Run
 import dev.qixils.gdq.models.Wrapper

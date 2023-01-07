@@ -1,6 +1,7 @@
 package club.speedrun.vods
 
-import club.speedrun.vods.marathon.DatabaseManager
+import club.speedrun.vods.db.Database
+import club.speedrun.vods.db.Identified
 import dev.qixils.gdq.serializers.InstantAsSecondsSerializer
 import dev.qixils.gdq.src.SpeedrunClient
 import kotlinx.coroutines.*
@@ -10,7 +11,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.*
 
-class SrcDatabaseManager : DatabaseManager("kgdq-api-misc-src") {
+class SrcDatabase : Database("api", "src") {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val games = getCollection(SrcGame.COLLECTION_NAME, SrcGame.serializer())
     private val cacheFor = Duration.ofDays(365)
