@@ -14,10 +14,13 @@ import kotlinx.serialization.Serializable
 import java.time.Instant
 
 fun Application.configureOAuth() {
+    val redirects = mutableMapOf<String, String>()
+
     install(Sessions) {
-        cookie<UserSession>("user_session")
+        cookie<DiscordSession>("discord_session")
     }
-    authentication {
+
+    install(Authentication) {
         oauth("auth-oauth-discord") {
             urlProvider = { "https://vods.speedrun.club/api/auth/callback" }
             providerLookup = {
@@ -29,6 +32,9 @@ fun Application.configureOAuth() {
                     clientId = System.getenv("DISCORD_CLIENT_ID"),
                     clientSecret = System.getenv("DISCORD_CLIENT_SECRET"),
                     defaultScopes = listOf("identify"),
+                    onStateCreated = { call, state ->
+                        redirects[state] = call.request.queryParameters["redirectUrl"]!!
+                    }
                 )
             }
             client = httpClient
@@ -43,44 +49,45 @@ fun Application.configureOAuth() {
                 }
 
                 get("/callback") {
-                    val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
+                    val principal: OAuthAccessTokenResponse.OAuth2? = call.principal()
                     if (principal == null) {
-                        call.respond(HttpStatusCode.Unauthorized)
+                        call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "You are not authenticated"))
                         return@get
                     }
                     call.sessions.set(
-                        UserSession(
+                        DiscordSession(
                             principal.accessToken,
                             principal.refreshToken,
                             principal.expiresIn,
-                            Instant.now().toString(),
+                            Instant.now().epochSecond,
                         )
                     )
-                    call.respondRedirect("/api/auth/test")
+                    val redirect = redirects[principal.state!!]
+                    call.respondRedirect(redirect!!)
                 }
             }
         }
     }
 }
 
-suspend fun discordUser(userSession: UserSession?, redirectOnFailure: Boolean = true): DiscordUser {
-    if (userSession == null)
+suspend fun discordUser(discordSession: DiscordSession?, redirectOnFailure: Boolean = true): DiscordUser {
+    if (discordSession == null)
         throw AuthenticationException(redirectOnFailure)
 
     // TODO: support refreshing tokens
     return httpClient.get("https://discord.com/api/v10/users/@me") {
-        header(HttpHeaders.Authorization, "Bearer ${userSession.accessToken}")
+        header(HttpHeaders.Authorization, "Bearer ${discordSession.accessToken}")
     }.body()
 }
 
 @Serializable
-data class UserSession(
+data class DiscordSession(
     val accessToken: String,
     val refreshToken: String?,
     val expiresIn: Long,
-    val createdAt: String,
+    val createdAt: Long,
 ) {
     fun expiresAt(): Instant {
-        return Instant.parse(createdAt).plusSeconds(expiresIn)
+        return Instant.ofEpochSecond(createdAt).plusSeconds(expiresIn)
     }
 }

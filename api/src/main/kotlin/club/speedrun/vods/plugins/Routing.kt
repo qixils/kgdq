@@ -11,6 +11,7 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.locations.*
 import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
@@ -29,14 +30,17 @@ fun Application.configureRouting() {
             )
         }
         exception<AuthorizationException> { call, _ ->
-            call.respond(HttpStatusCode.Forbidden)
+            call.respond(HttpStatusCode.Forbidden, mapOf("error" to "You are not authorized to access this resource"))
         }
         exception<AuthenticationException> { call, cause ->
             if (cause.redirect) {
-                call.respondRedirect("/api/auth/login")
-                // TODO: auto-redirect to the page that caused the error? (idk how to do that)
+                val redirectUrl = URLBuilder("/api/auth/login").run {
+                    parameters.append("redirectUrl", call.request.uri)
+                    build()
+                }
+                call.respondRedirect(redirectUrl)
             } else {
-                call.respond(HttpStatusCode.Unauthorized)
+                call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "You are not authenticated"))
             }
         }
         exception<UserError> { call, cause ->
@@ -49,7 +53,7 @@ fun Application.configureRouting() {
         route("/api") {
             route("/auth") {
                 get("/test") {
-                    val session = call.sessions.get<UserSession>()
+                    val session: DiscordSession? = call.sessions.get()
                     val user = discordUser(session)
                     call.respond(user)
                 }
