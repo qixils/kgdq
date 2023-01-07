@@ -267,29 +267,29 @@ class ScheduleManager(
         // Send/edit messages
         config.channels.forEach { channelId ->
             // Get channel | TODO: forum support?
-            val channel = bot.jda.getTextChannelById(channelId)
-            if (channel == null) {
+            val owningChannel = bot.jda.getTextChannelById(channelId)
+            if (owningChannel == null) {
                 logger.error("Could not find guild text channel $channelId")
                 return@forEach
             }
             // Validate permissions
-            val self = channel.guild.selfMember
-            if (!self.hasPermission(channel, Permission.CREATE_PUBLIC_THREADS)) {
-                logger.error("Cannot create threads in channel $channelId (#${channel.name})")
+            val self = owningChannel.guild.selfMember
+            if (!self.hasPermission(owningChannel, Permission.CREATE_PUBLIC_THREADS)) {
+                logger.error("Cannot create threads in channel $channelId (#${owningChannel.name})")
                 return@forEach
             }
             // Get channel data
-            val channelData = db.get(channel.id) ?: ChannelData(config.id)
+            val channelData = db.get(owningChannel.id) ?: ChannelData(config.id)
             // Get or create thread
             val threadKey = "${config.organization.name}-${event.id}"
             val thread: ThreadChannel
             if (threadKey in channelData.threads) {
-                thread = channel.guild.getThreadChannelById(channelData.threads[threadKey]!!) ?: run {
+                thread = owningChannel.guild.getThreadChannelById(channelData.threads[threadKey]!!) ?: run {
                     logger.error("Could not find thread ${channelData.threads[threadKey]}")
                     return@forEach
                 }
             } else {
-                thread = channel.createThreadChannel(event.name)
+                thread = owningChannel.createThreadChannel(event.name)
                     .setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK)
                     .submit().await()
                 channelData.threads[threadKey] = thread.idLong
@@ -297,11 +297,11 @@ class ScheduleManager(
             }
             // Validate permissions
             if (!self.hasPermission(thread, Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_HISTORY)) {
-                logger.error("Cannot view and/or send messages in thread $channelId (#${channel.name})")
+                logger.error("Cannot view and/or send messages in thread ${thread.id} (#${thread.name})")
                 return@forEach
             }
             // Get messages
-            val channelHistory = channel.history
+            val channelHistory = thread.history
             val oldMessages = mutableListOf<Message>()
             while (true) {
                 val retrievedMessages = channelHistory.retrievePast(100).await().filter { it.author.id == bot.jda.selfUser.id }
@@ -324,9 +324,9 @@ class ScheduleManager(
                     oldMessage.delete().await()
             }
             // Send new messages
-            newMessagesCopy.forEach { it.send(channel) }
+            newMessagesCopy.forEach { it.send(thread) }
             // Log
-            logger.info("Updated schedule for ${config.organization.name}'s ${event.short} in #${channel.name} ($channelId)")
+            logger.info("Updated schedule for ${config.organization.name}'s ${event.short} in #${owningChannel.name} ($channelId)")
         }
     }
 }
