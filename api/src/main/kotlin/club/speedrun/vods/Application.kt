@@ -14,6 +14,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 
+const val root = "https://vods.speedrun.club"
 val gdq = GDQMarathon()
 val esa = ESAMarathon()
 val hek = HEKMarathon()

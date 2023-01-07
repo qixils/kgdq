@@ -2,10 +2,7 @@
 
 package club.speedrun.vods.plugins
 
-import club.speedrun.vods.esa
-import club.speedrun.vods.gdq
-import club.speedrun.vods.hek
-import club.speedrun.vods.rpglb
+import club.speedrun.vods.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -34,8 +31,8 @@ fun Application.configureRouting() {
         }
         exception<AuthenticationException> { call, cause ->
             if (cause.redirect) {
-                val redirectUrl = URLBuilder("/api/auth/login").run {
-                    parameters.append("redirectUrl", call.request.uri)
+                val redirectUrl = URLBuilder("$root/api/auth/login").run {
+                    parameters.append("redirectUrl", root + call.request.uri)
                     build()
                 }
                 call.respondRedirect(redirectUrl)
