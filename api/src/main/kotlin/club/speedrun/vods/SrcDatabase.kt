@@ -13,7 +13,7 @@ import java.util.*
 
 class SrcDatabase : Database("api", "src") {
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val games = getCollection(SrcGame.COLLECTION_NAME, SrcGame.serializer())
+    private val games = getCollection(SrcGame.serializer(), SrcGame.COLLECTION_NAME)
     private val cacheFor = Duration.ofDays(365)
     private val pendingCache = mutableListOf<SrcGame>()
 

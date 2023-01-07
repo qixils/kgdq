@@ -15,6 +15,7 @@ import kotlinx.serialization.json.Json
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageType
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel
 import net.dv8tion.jda.api.utils.TimeFormat
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -25,7 +26,6 @@ import java.text.NumberFormat
 import java.time.Duration
 import java.time.Instant
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -35,6 +35,7 @@ class ScheduleManager(
     private val bot: Bot,
     private val config: EventConfig,
 ) {
+    private val db = bot.db.getCollection(ChannelData.serializer(), ChannelData.COLLECTION_NAME)
     private val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
     private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build()
     private val apiRoot = "https://vods.speedrun.club/api/v1/${config.organization.name.lowercase(Locale.ENGLISH)}/"
@@ -205,67 +206,67 @@ class ScheduleManager(
         // Add ticker
         messages.add(
             MessageTransformer(
-            embed = EmbedBuilder {
-                title = event.name + " Ticker"
-                description = """
-                    Bot created by [qixils](https://qixils.dev).
-                    Updates every ${config.waitMinutes} minutes.
-                    Watch live at [twitch.tv/${config.twitch}](https://twitch.tv/${config.twitch}).
-                """.trimIndent()
-                color = 0xA547DE // purple
-                timestamp = Instant.now()
-                footer(name = "Last Updated")
+                embed = EmbedBuilder {
+                    title = event.name + " Ticker"
+                    description = """
+                        Bot created by [qixils](https://qixils.dev).
+                        Updates every ${config.waitMinutes} minutes.
+                        Watch live at [twitch.tv/${config.twitch}](https://twitch.tv/${config.twitch}).
+                    """.trimIndent()
+                    color = 0xA547DE // purple
+                    timestamp = Instant.now()
+                    footer(name = "Last Updated")
 
-                if (event.datetime > Instant.now()) {
-                    field {
-                        name = "Starting Soon!"
-                        value = "The event will start " +
-                                TimeFormat.RELATIVE.format(event.datetime) + " on " +
-                                TimeFormat.DATE_TIME_SHORT.format(event.datetime) + "."
-                        inline = false
-                    }
-                } else if (runTicker.isNotEmpty()) {
-                    runTicker.forEachIndexed { index, run ->
+                    if (event.datetime > Instant.now()) {
                         field {
+                            name = "Starting Soon!"
+                            value = "The event will start " +
+                                    TimeFormat.RELATIVE.format(event.datetime) + " on " +
+                                    TimeFormat.DATE_TIME_SHORT.format(event.datetime) + "."
                             inline = false
-                            if (run == null || index == 0) {
-                                name = "Current Game"
-                                if (run == null) {
-                                    value = "The event is currently in-between runs. Stay tuned for more!"
-                                    return@field
+                        }
+                    } else if (runTicker.isNotEmpty()) {
+                        runTicker.forEachIndexed { index, run ->
+                            field {
+                                inline = false
+                                if (run == null || index == 0) {
+                                    name = "Current Game"
+                                    if (run == null) {
+                                        value = "The event is currently in-between runs. Stay tuned for more!"
+                                        return@field
+                                    }
+                                } else {
+                                    name = TimeFormat.RELATIVE.format(run.startTime)
                                 }
-                            } else {
-                                name = TimeFormat.RELATIVE.format(run.startTime)
-                            }
 
-                            val sb = StringBuilder(run.name)
-                            if (run.category.isNotEmpty())// && !"Any%".equals(run.category, true))
-                                sb.append(" (").append(run.category).append(')')
-                            if (run.runners.isNotEmpty()) {
-                                sb.append(" by ")
-                                naturalJoinTo(sb, run.runners) { runner ->
-                                    // TODO: re-add emotes when Discord releases the React Native port for Android
-                                    runner.url?.let { "[${runner.name}]($it)" } ?: runner.name
+                                val sb = StringBuilder(run.name)
+                                if (run.category.isNotEmpty())// && !"Any%".equals(run.category, true))
+                                    sb.append(" (").append(run.category).append(')')
+                                if (run.runners.isNotEmpty()) {
+                                    sb.append(" by ")
+                                    naturalJoinTo(sb, run.runners) { runner ->
+                                        // TODO: re-add emotes when Discord releases the React Native port for Android
+                                        runner.url?.let { "[${runner.name}]($it)" } ?: runner.name
+                                    }
                                 }
+                                value = sb.toString()
                             }
-                            value = sb.toString()
+                        }
+                    } else {
+                        field {
+                            name = "Thanks for watching!"
+                            value = "The event has come to a close. Thank you all for watching and donating!"
+                            inline = false
                         }
                     }
-                } else {
-                    field {
-                        name = "Thanks for watching!"
-                        value = "The event has come to a close. Thank you all for watching and donating!"
-                        inline = false
-                    }
-                }
-            },
-            pin = false
-        )
+                },
+                pin = false
+            )
         )
 
         // Send/edit messages
         config.channels.forEach { channelId ->
-            // Get channel
+            // Get channel | TODO: forum support?
             val channel = bot.jda.getTextChannelById(channelId)
             if (channel == null) {
                 logger.error("Could not find guild text channel $channelId")
@@ -273,25 +274,41 @@ class ScheduleManager(
             }
             // Validate permissions
             val self = channel.guild.selfMember
-            if (!self.hasPermission(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_HISTORY)) {
-                logger.error("Cannot view and/or send messages in channel $channelId (#${channel.name})")
+            if (!self.hasPermission(channel, Permission.CREATE_PUBLIC_THREADS)) {
+                logger.error("Cannot create threads in channel $channelId (#${channel.name})")
+                return@forEach
+            }
+            // Get channel data
+            val channelData = db.get(channel.id) ?: ChannelData(config.id)
+            // Get or create thread
+            val threadKey = "${config.organization.name}-${event.id}"
+            val thread: ThreadChannel
+            if (threadKey in channelData.threads) {
+                thread = channel.guild.getThreadChannelById(channelData.threads[threadKey]!!) ?: run {
+                    logger.error("Could not find thread ${channelData.threads[threadKey]}")
+                    return@forEach
+                }
+            } else {
+                thread = channel.createThreadChannel(event.name)
+                    .setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK)
+                    .submit().await()
+                channelData.threads[threadKey] = thread.idLong
+                db.update(channelData)
+            }
+            // Validate permissions
+            if (!self.hasPermission(thread, Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_HISTORY)) {
+                logger.error("Cannot view and/or send messages in thread $channelId (#${channel.name})")
                 return@forEach
             }
             // Get messages
             val channelHistory = channel.history
             val oldMessages = mutableListOf<Message>()
             while (true) {
-                val retrievedMessages = channelHistory.retrievePast(100).await().filter {
-                    if (it.author.id != bot.jda.selfUser.id)
-                        false
-                    else
-                        it.timeCreated.toInstant().isAfter(event.datetime.minus(1, ChronoUnit.DAYS))
-                }
+                val retrievedMessages = channelHistory.retrievePast(100).await().filter { it.author.id == bot.jda.selfUser.id }
                 if (retrievedMessages.isEmpty())
                     break
-                oldMessages.addAll(retrievedMessages)
+                retrievedMessages.forEach { oldMessages.add(0, it) } // reverse order
             }
-            oldMessages.sortBy { it.timeCreated }
             // Copy message contents for iteration
             val newMessagesCopy = messages.toMutableList()
             // Edit existing messages

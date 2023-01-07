@@ -9,9 +9,9 @@ import dev.qixils.gdq.models.Run
 import dev.qixils.gdq.models.Wrapper
 
 class GdqDatabase(organization: String) : Database("api", "orgs", organization) {
-    val runs = getCollection(RunOverrides.COLLECTION_NAME, RunOverrides.serializer())
-    val events = getCollection(EventOverrides.COLLECTION_NAME, EventOverrides.serializer())
-    val statuses = getCollection(ScheduleStatus.COLLECTION_NAME, ScheduleStatus.serializer())
+    val runs = getCollection(RunOverrides.serializer(), RunOverrides.COLLECTION_NAME)
+    val events = getCollection(EventOverrides.serializer(), EventOverrides.COLLECTION_NAME)
+    val statuses = getCollection(ScheduleStatus.serializer(), ScheduleStatus.COLLECTION_NAME)
 
     fun getOrCreateRunOverrides(run: Wrapper<Run>): RunOverrides {
         // get

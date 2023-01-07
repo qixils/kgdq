@@ -1,5 +1,6 @@
 package dev.qixils.gdq.discord
 
+import club.speedrun.vods.db.Database
 import dev.minn.jda.ktx.events.listener
 import dev.minn.jda.ktx.jdabuilder.intents
 import dev.minn.jda.ktx.jdabuilder.light
@@ -22,6 +23,7 @@ import kotlin.io.path.writeLines
 import kotlin.system.exitProcess
 
 object Bot {
+    val db = Database("discord")
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
     private val config: Config
     val jda: JDA
