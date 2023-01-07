@@ -3,9 +3,10 @@
 package club.speedrun.vods.marathon
 
 import club.speedrun.vods.db
+import club.speedrun.vods.marathon.Filter.Companion.and
+import club.speedrun.vods.marathon.Filter.Companion.id
 import club.speedrun.vods.plugins.UserError
 import club.speedrun.vods.srcDb
-import com.mongodb.client.model.Updates
 import dev.qixils.gdq.GDQ
 import dev.qixils.gdq.Hook
 import dev.qixils.gdq.ModelType
@@ -20,8 +21,6 @@ import io.ktor.server.locations.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.*
-import org.litote.kmongo.and
-import org.litote.kmongo.eq
 import java.time.Instant
 
 abstract class Marathon(val api: GDQ) {
@@ -207,7 +206,7 @@ suspend fun Event.horaroSchedule(): FullSchedule? {
 
 val excludedGameTitles = listOf("bonus game", "daily recap", "tasbot plays")
 
-suspend fun RunData.loadSrcGame(overrides: RunOverrides?) {
+fun RunData.loadSrcGame(overrides: RunOverrides?) {
     src = if (overrides?.src == "")
         null
     else if (overrides?.src != null)
@@ -220,12 +219,12 @@ suspend fun RunData.loadSrcGame(overrides: RunOverrides?) {
                 else -> name
             }
             excludedGameTitles.forEach { if (gameName.contains(it, true)) return@run null }
-            return@run srcDb.getGame(gameName).srcId
+            return@run srcDb.getGame(gameName).abbreviation
         }
 }
 
 class EventDataCacher(private val api: GDQ) : Hook<Event> {
-    override suspend fun handle(item: Wrapper<Event>) {
+    override fun handle(item: Wrapper<Event>) {
         if (!api.eventStartedAt.containsKey(item.id)) {
             val overrides = api.db.getOrCreateEventOverrides(item.value)
             if (overrides.datetime != null)
@@ -235,10 +234,10 @@ class EventDataCacher(private val api: GDQ) : Hook<Event> {
 }
 
 class EventOverrideUpdater(private val api: GDQ) : Hook<Event> {
-    override suspend fun handle(item: Wrapper<Event>) {
+    override fun handle(item: Wrapper<Event>) {
         api.db.events.updateOne(
-            and(EventOverrides::_id eq item.value.short, EventOverrides::datetime eq null),
-            Updates.set("datetime", item.value.datetime.toString()) // setValue for some reason bypasses the custom serializer, so we must manually convert to string
+            and(id(item.value.short), EventOverrides::datetime eq null),
+            EventOverrides::datetime set item.value.datetime
         )
     }
 }

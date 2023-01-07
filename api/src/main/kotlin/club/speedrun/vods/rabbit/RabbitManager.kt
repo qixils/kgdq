@@ -1,22 +1,17 @@
 package club.speedrun.vods.rabbit
 
 import club.speedrun.vods.marathon.GdqDatabaseManager
-import club.speedrun.vods.marathon.RunOverrides
 import club.speedrun.vods.marathon.TwitchVOD
 import com.github.twitch4j.helix.TwitchHelix
 import com.github.twitch4j.helix.TwitchHelixBuilder
 import com.github.twitch4j.helix.domain.StreamList
 import com.github.twitch4j.helix.domain.VideoList
-import com.mongodb.client.model.Updates
 import com.netflix.hystrix.HystrixCommand
 import com.rabbitmq.client.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import org.litote.kmongo.coroutine.updateOne
-import org.litote.kmongo.eq
-import org.litote.kmongo.push
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.charset.StandardCharsets
@@ -67,7 +62,7 @@ class DeliverHandler(
 ) : DeliverCallback {
     private val logger: Logger = LoggerFactory.getLogger("DeliverHandler:$stream")
     private val loadedAt = Instant.now()
-    private val status = runBlocking { db.getOrCreateStatus(queue) }
+    private val status = db.getOrCreateStatus(queue)
 
     companion object {
         private val executor = Executors.newSingleThreadScheduledExecutor()
@@ -84,20 +79,20 @@ class DeliverHandler(
     }
 
     init {
-        val runnable = Runnable { runBlocking {
-            db.statuses.updateOne(status)
-            logger.info("Updated MongoDB with run ${status.currentRun} and game scene ${status.usingGameScene}")
-        } }
+        val runnable = Runnable {
+            db.statuses.update(status)
+            logger.info("Updated DB with run ${status.currentRun} and game scene ${status.usingGameScene}")
+        }
         executor.schedule(runnable, minDuration.toSeconds(), TimeUnit.SECONDS)
     }
 
-    private suspend fun handleRunChanged(runChanged: SCActiveRunChanged) {
+    private fun handleRunChanged(runChanged: SCActiveRunChanged) {
         if (status.currentRun != runChanged.run?.horaroId) {
             // update instance
             status.currentRun = runChanged.run?.horaroId
             // update db
             if (Duration.between(loadedAt, Instant.now()) > minDuration)
-                db.statuses.updateOne(status)
+                db.statuses.update(status)
             // log
             logger.info("Run is now ${status.currentRun}")
         }
@@ -123,16 +118,15 @@ class DeliverHandler(
                 && isGameScene
                 && status.currentRun != null
         if (updateRunDb) {
+            // Start fetching current stream for VOD link timestamp
+            val streams = async { twitch.streams(userLogins = listOf(stream)).execute() }
             // Updating start time of run
             val runStart = sceneChanged.time.instant
             logger.info("Updating start time of run ${status.currentRun} to ${sceneChanged.time.iso}")
             val overrides = db.getOrCreateRunOverrides(null, status.currentRun)
             overrides.startTime = runStart
-            db.runs.updateOne(RunOverrides::horaroId eq status.currentRun, Updates.set("startTime", runStart.toString()))
-            // Fetching current stream for VOD link timestamp
-            val streams = async { twitch.streams(userLogins = listOf(stream)).execute() }
-            val stream = streams.await().streams.firstOrNull() ?: return@coroutineScope
             // Fetching stream's video (should always be the latest video)
+            val stream = streams.await().streams.firstOrNull() ?: return@coroutineScope
             val videos = async { twitch.videos(userId = stream.userId, type = "archive", limit = 1).execute() }
             val video = videos.await().videos.firstOrNull() ?: return@coroutineScope
             // Create VOD object
@@ -140,7 +134,7 @@ class DeliverHandler(
             // Adding VOD link to run
             logger.info("Adding VOD link ${vod.url} to run ${status.currentRun}")
             overrides.twitchVODs.add(vod)
-            db.runs.updateOne(RunOverrides::horaroId eq status.currentRun, push(RunOverrides::twitchVODs, vod))
+            db.runs.update(overrides)
         }
 
         if (status.usingGameScene != isGameScene) {
@@ -148,7 +142,7 @@ class DeliverHandler(
             status.usingGameScene = isGameScene
             // update db
             if (updateDb)
-                db.statuses.updateOne(status)
+                db.statuses.update(status)
             // log
             logger.info("Scene is now ${status.usingGameScene}")
         }

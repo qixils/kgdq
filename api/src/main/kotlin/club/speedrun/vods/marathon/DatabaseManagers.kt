@@ -1,0 +1,101 @@
+package club.speedrun.vods.marathon
+
+import club.speedrun.vods.marathon.Filter.Companion.or
+import club.speedrun.vods.rabbit.ScheduleStatus
+import dev.qixils.gdq.models.Event
+import dev.qixils.gdq.models.Run
+import dev.qixils.gdq.models.Wrapper
+import kotlinx.coroutines.DelicateCoroutinesApi
+
+@OptIn(DelicateCoroutinesApi::class)
+class GdqDatabaseManager(organization: String) : DatabaseManager("$organization-org") {
+    val runs = getCollection(RunOverrides.COLLECTION_NAME, RunOverrides.serializer())
+    val events = getCollection(EventOverrides.COLLECTION_NAME, EventOverrides.serializer())
+    val statuses = getCollection(ScheduleStatus.COLLECTION_NAME, ScheduleStatus.serializer())
+
+    fun getOrCreateRunOverrides(run: Wrapper<Run>): RunOverrides {
+        // get
+        var overrides: RunOverrides? = runs.find(or(RunOverrides::runId eq run.id, RunOverrides::horaroId eq run.value.horaroId))
+        // create
+        if (overrides == null) {
+            overrides = RunOverrides(run)
+            runs.insert(overrides)
+        }
+        // update
+        if (overrides.runId == null) {
+            overrides.runId = run.id
+            runs.update(overrides)
+        }
+        if (overrides.horaroId == null && run.value.horaroId != null) {
+            val oldOverrides = runs.findAndDelete(RunOverrides::horaroId eq run.value.horaroId)
+            if (oldOverrides != null)
+                overrides.mergeIn(oldOverrides)
+            else
+                overrides.horaroId = run.value.horaroId
+            runs.update(overrides)
+        }
+        // return
+        return overrides
+    }
+
+    fun getOrCreateRunOverrides(run: dev.qixils.horaro.models.Run): RunOverrides? {
+        // get
+        val horaroId = run.getValue("ID") ?: return null
+        var overrides: RunOverrides? = runs.find(RunOverrides::horaroId eq horaroId)
+        // create
+        if (overrides == null) {
+            overrides = RunOverrides(run)
+            runs.insert(overrides)
+        }
+        // return
+        return overrides
+    }
+
+    fun getOrCreateRunOverrides(gdqId: Int?, horaroId: String?): RunOverrides {
+        if (gdqId == null && horaroId == null)
+            throw IllegalArgumentException("At least one argument must be non-null")
+        // get
+        val gdqIdFilter = gdqId?.let { RunOverrides::runId eq it }
+        val horariIdFilter = horaroId?.let { RunOverrides::horaroId eq it }
+        var overrides: RunOverrides? = runs.find(or(listOfNotNull(gdqIdFilter, horariIdFilter)))
+        // create
+        if (overrides == null) {
+            overrides = RunOverrides(runId = gdqId, horaroId = horaroId)
+            runs.insert(overrides)
+        }
+        // update
+        if (overrides.runId == null && gdqId != null) {
+            overrides.runId = gdqId
+            runs.update(overrides)
+        } else if (overrides.horaroId == null && horaroId != null) {
+            overrides.horaroId = horaroId
+            runs.update(overrides)
+        }
+        // return
+        return overrides
+    }
+
+    fun getOrCreateEventOverrides(event: Event): EventOverrides {
+        // get
+        var overrides: EventOverrides? = events.get(event.short)
+        // create
+        if (overrides == null) {
+            overrides = EventOverrides(event)
+            events.insert(overrides)
+        }
+        // return
+        return overrides
+    }
+
+    fun getOrCreateStatus(queue: String): ScheduleStatus {
+        // get
+        var status = statuses.get(queue)
+        // create
+        if (status == null) {
+            status = ScheduleStatus(queue)
+            statuses.insert(status)
+        }
+        // return
+        return status
+    }
+}

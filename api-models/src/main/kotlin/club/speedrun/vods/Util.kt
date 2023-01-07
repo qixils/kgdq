@@ -1,8 +1,6 @@
 package club.speedrun.vods
 
-import java.util.concurrent.CompletableFuture
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
+import java.util.*
 
 fun <T> Appendable.appendElement(element: T, transform: ((T) -> CharSequence)?) {
     when {
@@ -43,6 +41,12 @@ fun <T> List<T>.naturalJoinToString(prefix: CharSequence = "", postfix: CharSequ
     val buffer = StringBuilder()
     naturalJoinTo(buffer, prefix, postfix, transform)
     return buffer.toString()
+}
+
+fun Random.nextBytes(size: Int): ByteArray {
+    val bytes = ByteArray(size)
+    nextBytes(bytes)
+    return bytes
 }
 
 

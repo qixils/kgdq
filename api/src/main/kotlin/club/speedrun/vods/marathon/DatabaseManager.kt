@@ -1,136 +1,142 @@
 package club.speedrun.vods.marathon
 
-import club.speedrun.vods.rabbit.ScheduleStatus
-import dev.qixils.gdq.models.Event
-import dev.qixils.gdq.models.Run
-import dev.qixils.gdq.models.Wrapper
+import club.speedrun.vods.Identified
 import kotlinx.coroutines.*
-import org.litote.kmongo.combine
-import org.litote.kmongo.coroutine.coroutine
-import org.litote.kmongo.eq
-import org.litote.kmongo.or
-import org.litote.kmongo.reactivestreams.KMongo
-import org.litote.kmongo.setValue
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.cbor.Cbor
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.util.concurrent.Executors
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.readBytes
+import kotlin.io.path.writeBytes
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KProperty1
 
 open class DatabaseManager(dbName: String) {
-    companion object {
-        private val dbClient = KMongo.createClient(
-            "mongodb+srv://" +
-                    System.getenv("MONGO_USERNAME") +
-                    ":${System.getenv("MONGO_PASSWORD")}" +
-                    "@${System.getenv("MONGO_URL")}" +
-                    "/?retryWrites=true&w=majority"
-        ).coroutine
-    }
+    val rootPath = Paths.get(System.getProperty("user.home"), "kgdq-api", dbName)
 
-    protected val db = dbClient.getDatabase(dbName)
+    inline fun <reified T : Identified> getCollection(name: String, serializer: KSerializer<T>): DatabaseCollection<T> {
+        val path = rootPath.resolve(name)
+        return DatabaseCollection(path, serializer)
+    }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
-class GdqDatabaseManager(organization: String) : DatabaseManager("kgdq-api-$organization") {
-    val runs = db.getCollection<RunOverrides>(RunOverrides.COLLECTION_NAME)
-    val events = db.getCollection<EventOverrides>(EventOverrides.COLLECTION_NAME)
-    val statuses = db.getCollection<ScheduleStatus>(ScheduleStatus.COLLECTION_NAME)
+@OptIn(ExperimentalSerializationApi::class)
+class DatabaseCollection<T : Identified>(private val path: Path, private val serializer: KSerializer<T>) {
+    private val cache = mutableMapOf<String, T>()
 
-    // TODO: perform updates off-thread
+    companion object {
+        private val executor = Executors.newSingleThreadExecutor()
+        private val sanitizer = Regex("[^a-zA-Z0-9_-]")
+    }
 
-    suspend fun getOrCreateRunOverrides(run: Wrapper<Run>): RunOverrides {
-        // get
-        var overrides: RunOverrides? = runs.findOne(or(RunOverrides::runId eq run.id, RunOverrides::horaroId eq run.value.horaroId))
-        // create
-        if (overrides == null) {
-            overrides = RunOverrides(run)
-            runs.insertOne(overrides)
-        }
-        // update
-        if (overrides.runId == null) {
-            overrides.runId = run.id
-            runs.updateOneById(overrides._id, setValue(RunOverrides::runId, run.id))
-        }
-        if (overrides.horaroId == null && run.value.horaroId != null) {
-            val oldOverrides = runs.findOneAndDelete(RunOverrides::horaroId eq run.value.horaroId)
-            if (oldOverrides != null) {
-                overrides.mergeIn(oldOverrides)
-                // TODO: figure out and fix this stupid db issue (especially here but also everywhere else)
-                GlobalScope.launch {
-                    runs.updateOneById(overrides._id, combine(
-                        setValue(RunOverrides::runId, overrides.runId),
-                        setValue(RunOverrides::horaroId, overrides.horaroId),
-                        setValue(RunOverrides::twitchVODs, overrides.twitchVODs),
-                        setValue(RunOverrides::youtubeVODs, overrides.youtubeVODs),
-                        setValue(RunOverrides::startTime, overrides.startTime),
-                        setValue(RunOverrides::runTime, overrides.runTime),
-                        setValue(RunOverrides::src, overrides.src),
-                    ))
-                }
-            } else {
-                overrides.horaroId = run.value.horaroId
-                runs.updateOneById(
-                    overrides._id,
-                    setValue(RunOverrides::horaroId, run.value.horaroId)
-                )
+    init {
+        path.toFile().mkdirs()
+        // init cache
+        executor.execute {
+            path.listDirectoryEntries("*.cbor").forEach {
+                val obj = Cbor.decodeFromByteArray(serializer, it.readBytes())
+                cache[obj.id] = obj
             }
         }
-        // return
-        return overrides
     }
 
-    suspend fun getOrCreateRunOverrides(run: dev.qixils.horaro.models.Run): RunOverrides? {
-        // get
-        val horaroId = run.getValue("ID") ?: return null
-        var overrides: RunOverrides? = runs.findOne(RunOverrides::horaroId eq horaroId)
-        // create
-        if (overrides == null) {
-            overrides = RunOverrides(run)
-            GlobalScope.launch { runs.insertOne(overrides) }
-        }
-        // return
-        return overrides
+    private fun sanitize(id: String) = sanitizer.replace(id, "_")
+
+    private fun pathOf(id: String) = path.resolve(sanitize(id) + ".cbor")
+
+    private fun pathOf(obj: T) = pathOf(obj.id)
+
+    fun get(id: String): T? = cache[id]
+
+    fun getAll(): List<T> = cache.values.toList()
+
+    fun find(filter: Filter<T>): T? = cache.values.find { filter.matches(it) }
+
+    fun findAll(filter: Filter<T>): List<T> = cache.values.filter { filter.matches(it) }
+
+    private fun save(id: String) {
+        val obj = cache[id] ?: return
+        val bytes = Cbor.encodeToByteArray(serializer, obj)
+        executor.execute { pathOf(id).writeBytes(bytes) }
     }
 
-    suspend fun getOrCreateRunOverrides(gdqId: Int?, horaroId: String?): RunOverrides {
-        if (gdqId == null && horaroId == null)
-            throw IllegalArgumentException("At least one argument must be non-null")
-        // get
-        var overrides: RunOverrides? = runs.findOne(or(RunOverrides::runId eq gdqId, RunOverrides::horaroId eq horaroId))
-        // create
-        if (overrides == null) {
-            overrides = RunOverrides(runId = gdqId, horaroId = horaroId)
-            GlobalScope.launch { runs.insertOne(overrides) }
-        }
-        // update
-        if (overrides.runId == null && gdqId != null) {
-            overrides.runId = gdqId
-            GlobalScope.launch { runs.updateOneById(overrides._id, setValue(RunOverrides::runId, gdqId)) }
-        } else if (overrides.horaroId == null && horaroId != null) {
-            overrides.horaroId = horaroId
-            GlobalScope.launch { runs.updateOneById(overrides._id, setValue(RunOverrides::horaroId, horaroId)) }
-        }
-        // return
-        return overrides
+    fun update(obj: T) {
+        cache[obj.id] = obj
+        save(obj.id)
     }
 
-    suspend fun getOrCreateEventOverrides(event: Event): EventOverrides {
-        // get
-        var overrides: EventOverrides? = events.findOne(EventOverrides::_id eq event.short)
-        // create
-        if (overrides == null) {
-            overrides = EventOverrides(event)
-            GlobalScope.launch { events.insertOne(overrides) }
-        }
-        // return
-        return overrides
+    fun update(filter: Filter<T>, update: Update<T>) {
+        findAll(filter).forEach { update.apply(it); update(it) }
     }
 
-    suspend fun getOrCreateStatus(queue: String): ScheduleStatus {
-        // get
-        var status = statuses.findOneById(queue)
-        // create
-        if (status == null) {
-            status = ScheduleStatus(queue)
-            GlobalScope.launch { statuses.insertOne(status) }
-        }
-        // return
-        return status
+    fun updateOne(filter: Filter<T>, update: Update<T>) {
+        find(filter)?.let { update.apply(it); update(it) }
+    }
+
+    fun updateById(id: String, update: Update<T>) {
+        val obj = cache[id] ?: return
+        update.apply(obj)
+        save(id)
+    }
+
+    fun insert(obj: T) {
+        cache[obj.id] = obj
+        save(obj.id)
+    }
+
+    fun delete(id: String) {
+        cache.remove(id)
+        executor.execute { pathOf(id).deleteIfExists() }
+    }
+
+    fun delete(obj: T) = delete(obj.id)
+
+    fun findAndDeleteAll(filter: Filter<T>): List<T> {
+        val toDelete = findAll(filter)
+        toDelete.forEach { delete(it) }
+        return toDelete
+    }
+
+    fun findAndDelete(filter: Filter<T>): T? {
+        val toDelete = find(filter)
+        toDelete?.let { delete(it) }
+        return toDelete
+    }
+
+    fun findAndDelete(id: String): T? {
+        val toDelete = get(id)
+        toDelete?.let { delete(it) }
+        return toDelete
     }
 }
+
+fun interface Filter<T : Identified> {
+    fun matches(obj: T): Boolean
+
+    companion object {
+        fun <T : Identified> and(vararg filters: Filter<T>): Filter<T> = and(filters.asIterable())
+        fun <T : Identified> and(filters: Iterable<Filter<T>>): Filter<T> = Filter { filters.all { filter -> filter.matches(it) } }
+        fun <T : Identified> or(vararg filters: Filter<T>): Filter<T> = or(filters.asIterable())
+        fun <T : Identified> or(filters: Iterable<Filter<T>>): Filter<T> = Filter { filters.any { filter -> filter.matches(it) } }
+        fun <T : Identified> not(filter: Filter<T>): Filter<T> = Filter { !filter.matches(it) }
+        fun <T : Identified, V> eq(function: (T) -> V?, value: V?): Filter<T> = Filter { function(it) == value }
+        fun <T : Identified> id(id: String): Filter<T> = Filter { it.id == id }
+    }
+}
+
+infix fun <T : Identified, V> KProperty1<T, V?>.eq(value: V?): Filter<T> = Filter.eq(this::get, value)
+
+fun interface Update<T : Identified> {
+    fun apply(obj: T)
+
+    companion object {
+        fun <T : Identified> join(vararg updates: Update<T>): Update<T> = Update { updates.forEach { update -> update.apply(it) } }
+        fun <T : Identified, V> set(function: (T, V?) -> Unit, value: V?): Update<T> = Update { function(it, value) }
+    }
+}
+
+infix fun <T : Identified, V> KMutableProperty1<T, V?>.set(value: V?): Update<T> = Update.set(this::set, value)

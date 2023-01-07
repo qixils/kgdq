@@ -1,14 +1,13 @@
 package club.speedrun.vods.marathon
 
+import club.speedrun.vods.Identified
+import club.speedrun.vods.ULID
 import dev.qixils.gdq.models.Event
 import dev.qixils.gdq.models.Run
 import dev.qixils.gdq.models.Wrapper
-import dev.qixils.gdq.serializers.DurationAsStringSerializer
-import dev.qixils.gdq.serializers.InstantAsStringSerializer
-import kotlinx.serialization.Contextual
+import dev.qixils.gdq.serializers.DurationAsSecondsSerializer
+import dev.qixils.gdq.serializers.InstantAsSecondsSerializer
 import kotlinx.serialization.Serializable
-import org.litote.kmongo.Id
-import org.litote.kmongo.newId
 import java.time.Duration
 import java.time.Instant
 
@@ -23,29 +22,21 @@ import java.time.Instant
 //  - hey, now that i think about it, why does updating fail but inserting works???
 @Serializable
 data class RunOverrides(
-    @Contextual val _id: Id<RunOverrides>,
+    override val id: String = ULID.random(),
     var runId: Int? = null,
     var horaroId: String? = null,
     val twitchVODs: MutableList<TwitchVOD> = mutableListOf(),
     val youtubeVODs: MutableList<YouTubeVOD> = mutableListOf(),
-    @Serializable(with = InstantAsStringSerializer::class) var startTime: Instant? = null,
-    @Serializable(with = DurationAsStringSerializer::class) var runTime: Duration? = null,
+    @Serializable(with = InstantAsSecondsSerializer::class) var startTime: Instant? = null,
+    @Serializable(with = DurationAsSecondsSerializer::class) var runTime: Duration? = null,
     var src: String? = null,
-) {
-    constructor(runId: Int?, horaroId: String?) : this(
-        _id = newId(),
-        runId = runId,
-        horaroId = horaroId,
-    )
-
+) : Identified {
     constructor(run: Wrapper<Run>) : this(
-        _id = newId(),
         runId = run.id,
         horaroId = run.value.horaroId
     )
 
     constructor(run: dev.qixils.horaro.models.Run) : this(
-        _id = newId(),
         horaroId = run.getValue("ID")
     )
 
@@ -66,11 +57,11 @@ data class RunOverrides(
 
 @Serializable
 data class EventOverrides(
-    val _id: String,
-    @Serializable(with = InstantAsStringSerializer::class) var datetime: Instant? = null,
-) {
+    override val id: String,
+    @Serializable(with = InstantAsSecondsSerializer::class) var datetime: Instant? = null,
+) : Identified {
     constructor(event: Event) : this(
-        _id = event.short,
+        id = event.short,
     )
 
     companion object {
