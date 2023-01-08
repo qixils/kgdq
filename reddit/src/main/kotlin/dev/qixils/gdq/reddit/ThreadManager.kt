@@ -74,7 +74,7 @@ class ThreadManager(
             .append("using data from [${config.organization.displayName}](${config.organization.homepageUrl})")
         if (config.organization.manualVODs)
             body.append(", [Speedrun.com](https://www.speedrun.com), and the contributors to the ")
-                .append("[VOD List](https://www.reddit.com/r/VODThread/wiki/index/). ")
+                .append("[VOD list](https://www.reddit.com/r/VODThread/wiki/index/). ")
                 .append("Thank you to the volunteers that keep this thread running!\n")
         else
             body.append(" and [Speedrun.com](https://www.speedrun.com).\n")
