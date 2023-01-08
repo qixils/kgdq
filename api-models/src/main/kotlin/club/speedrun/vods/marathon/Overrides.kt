@@ -25,19 +25,23 @@ data class RunOverrides(
     override val id: String = ULID.random(),
     var runId: Int? = null,
     var horaroId: String? = null,
-    val vods: MutableList<VOD> = mutableListOf(),
-    val vodSuggestions: MutableList<VodSuggestion> = mutableListOf(),
+    val vods: MutableList<VOD>,
+    val vodSuggestions: MutableList<VodSuggestion>,
     @Serializable(with = InstantAsSecondsSerializer::class) var startTime: Instant? = null,
     @Serializable(with = DurationAsSecondsSerializer::class) var runTime: Duration? = null,
     var src: String? = null,
 ) : Identified {
     constructor(run: Wrapper<Run>) : this(
         runId = run.id,
-        horaroId = run.value.horaroId
+        horaroId = run.value.horaroId,
+        vods = mutableListOf(),
+        vodSuggestions = mutableListOf()
     )
 
     constructor(run: dev.qixils.horaro.models.Run) : this(
-        horaroId = run.getValue("ID")
+        horaroId = run.getValue("ID"),
+        vods = mutableListOf(),
+        vodSuggestions = mutableListOf()
     )
 
     fun mergeIn(other: RunOverrides) {

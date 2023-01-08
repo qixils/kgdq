@@ -61,19 +61,20 @@ abstract class Marathon(val api: GDQ) {
     }
 
     private suspend inline fun getRedditTwitchVODs(short: String, logErrors: Boolean = true): List<List<VOD>> {
-        return getRedditWiki<MutableList<String>>("${short}vods", logErrors).map {
+        return getRedditWiki<List<String>>("${short}vods", logErrors).map {
+            val strs = it.toMutableList()
             val vods = mutableListOf<VOD>()
-            while (it.size >= 2) {
-                val videoId = it.removeFirst()
-                val timestamp = it.removeFirst()
+            while (strs.size >= 2) {
+                val videoId = strs.removeFirst()
+                val timestamp = strs.removeFirst()
                 try {
                     vods.add(VODType.TWITCH.fromParts(videoId, timestamp))
                 } catch (e: Exception) {
                     if (logErrors) logger.warn("Failed to parse Twitch VOD $videoId ($timestamp) for $short", e)
                 }
             }
-            if (it.isNotEmpty() && logErrors)
-                logger.warn("Excess data found for Twitch VODs for $short: ${it.first()}")
+            if (strs.isNotEmpty() && logErrors)
+                logger.warn("Excess data found for Twitch VODs for $short: ${strs.first()}")
             vods
         }
     }
@@ -90,7 +91,17 @@ abstract class Marathon(val api: GDQ) {
     }
 
     private suspend inline fun getRedditVODs(short: String): List<List<VOD>> {
-        return getRedditTwitchVODs(short) + getRedditYouTubeVODs(short).map { listOfNotNull(it) }
+        val twitch = getRedditTwitchVODs(short)
+        val yt = getRedditYouTubeVODs(short)
+        // merge
+        val vods = mutableListOf<List<VOD>>()
+        for (i in 0 until maxOf(twitch.size, yt.size)) {
+            val list = mutableListOf<VOD>()
+            if (i < twitch.size) list.addAll(twitch[i])
+            if (i < yt.size) yt[i]?.let { list.add(it) }
+            vods.add(list)
+        }
+        return vods
     }
 
     private suspend fun getEvent(id: String): Wrapper<Event>? {

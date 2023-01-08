@@ -71,7 +71,7 @@ class RunData{
         runners = mutableListOf()
         runnersAsString = run.value.deprecatedRunners.split(", ").naturalJoinToString()
         this.bids = bids.toMutableList()
-        vods = overrides.vods
+        vods = overrides.vods.toMutableList()
         startTime = overrides.startTime
             ?: calculateOffsetTime(previousRun?.endTime, run.value.setupTime)
             ?: run.value.startTime
@@ -124,7 +124,7 @@ class RunData{
             trackerRun?.runnersAsString
         ).firstOrNull { !it.isNullOrEmpty() } ?: ""
         bids = trackerRun?.bids ?: mutableListOf()
-        vods = calculateHoraroVODs(horaroRun) ?: overrides?.vods ?: mutableListOf()
+        vods = calculateHoraroVODs(horaroRun) ?: overrides?.vods?.toMutableList() ?: mutableListOf()
         startTime = overrides?.startTime
             ?: calculateOffsetTime(previousRun?.endTime, calculateHoraroRawSetupTime(horaroRun, previousRun))
             ?: horaroRun.scheduled.toInstant()
