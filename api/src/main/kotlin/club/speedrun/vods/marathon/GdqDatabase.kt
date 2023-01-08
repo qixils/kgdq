@@ -18,7 +18,7 @@ class GdqDatabase(organization: String) : Database("api", "orgs", organization) 
         var overrides: RunOverrides? = runs.find(or(RunOverrides::runId eq run.id, RunOverrides::horaroId eq run.value.horaroId))
         // create
         if (overrides == null) {
-            overrides = RunOverrides(run)
+            overrides = RunOverrides.create(run)
             runs.insert(overrides)
         }
         // update
@@ -44,7 +44,7 @@ class GdqDatabase(organization: String) : Database("api", "orgs", organization) 
         var overrides: RunOverrides? = runs.find(RunOverrides::horaroId eq horaroId)
         // create
         if (overrides == null) {
-            overrides = RunOverrides(run)
+            overrides = RunOverrides.create(run)
             runs.insert(overrides)
         }
         // return
@@ -83,7 +83,7 @@ class GdqDatabase(organization: String) : Database("api", "orgs", organization) 
         var overrides: RunOverrides? = runs.find(or(listOfNotNull(gdqIdFilter, horariIdFilter)))
         // create
         if (overrides == null) {
-            overrides = RunOverrides(runId = gdqId, horaroId = horaroId)
+            overrides = RunOverrides.create(runId = gdqId, horaroId = horaroId)
             runs.insert(overrides)
         }
         // update

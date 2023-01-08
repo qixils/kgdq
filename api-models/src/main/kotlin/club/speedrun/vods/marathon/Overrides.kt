@@ -11,15 +11,6 @@ import kotlinx.serialization.Serializable
 import java.time.Duration
 import java.time.Instant
 
-// TODO: this class is i guess silently failing to serialize.
-//  - probably because of the VOD objects?
-//  - or maybe Duration?
-//  - definitely shouldn't be the Instant tho because it works for EventOverrides.
-//  - either way, I can't think of a good solution besides maybe storing everything as strings or to
-//  swap out the DB serializers for something else.
-//  - i should also try running registerSerializer() with my DurationAsStringSerializer and see if
-//  that fixes it.
-//  - hey, now that i think about it, why does updating fail but inserting works???
 @Serializable
 data class RunOverrides(
     override val id: String = ULID.random(),
@@ -31,19 +22,6 @@ data class RunOverrides(
     @Serializable(with = DurationAsSecondsSerializer::class) var runTime: Duration? = null,
     var src: String? = null,
 ) : Identified {
-    constructor(run: Wrapper<Run>) : this(
-        runId = run.id,
-        horaroId = run.value.horaroId,
-        vods = mutableListOf(),
-        vodSuggestions = mutableListOf()
-    )
-
-    constructor(run: dev.qixils.horaro.models.Run) : this(
-        horaroId = run.getValue("ID"),
-        vods = mutableListOf(),
-        vodSuggestions = mutableListOf()
-    )
-
     fun mergeIn(other: RunOverrides) {
         if (runId == null) runId = other.runId
         if (horaroId == null) horaroId = other.horaroId
@@ -56,6 +34,23 @@ data class RunOverrides(
 
     companion object {
         const val COLLECTION_NAME = "RunOverrides"
+        fun create(runId: Int? = null, horaroId: String? = null) = RunOverrides(
+            runId = runId,
+            horaroId = horaroId,
+            vods = mutableListOf(),
+            vodSuggestions = mutableListOf()
+        )
+        fun create(run: Wrapper<Run>) = RunOverrides(
+            runId = run.id,
+            horaroId = run.value.horaroId,
+            vods = mutableListOf(),
+            vodSuggestions = mutableListOf()
+        )
+        fun create(run: dev.qixils.horaro.models.Run) = RunOverrides(
+            horaroId = run.getValue("ID"),
+            vods = mutableListOf(),
+            vodSuggestions = mutableListOf()
+        )
     }
 }
 
