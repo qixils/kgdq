@@ -16,12 +16,21 @@ data class RunOverrides(
     override val id: String = ULID.random(),
     var runId: Int? = null,
     var horaroId: String? = null,
-    val vods: MutableList<VOD>,
-    val vodSuggestions: MutableList<VodSuggestion>,
+    val vods: MutableList<VOD> = mutableListOf(),
+    val vodSuggestions: MutableList<VodSuggestion> = mutableListOf(),
     @Serializable(with = InstantAsSecondsSerializer::class) var startTime: Instant? = null,
     @Serializable(with = DurationAsSecondsSerializer::class) var runTime: Duration? = null,
     var src: String? = null,
 ) : Identified {
+    constructor(run: Wrapper<Run>) : this(
+        runId = run.id,
+        horaroId = run.value.horaroId
+    )
+
+    constructor(run: dev.qixils.horaro.models.Run) : this(
+        horaroId = run.getValue("ID")
+    )
+
     fun mergeIn(other: RunOverrides) {
         if (runId == null) runId = other.runId
         if (horaroId == null) horaroId = other.horaroId
@@ -34,23 +43,6 @@ data class RunOverrides(
 
     companion object {
         const val COLLECTION_NAME = "RunOverrides"
-        fun create(runId: Int? = null, horaroId: String? = null) = RunOverrides(
-            runId = runId,
-            horaroId = horaroId,
-            vods = mutableListOf(),
-            vodSuggestions = mutableListOf()
-        )
-        fun create(run: Wrapper<Run>) = RunOverrides(
-            runId = run.id,
-            horaroId = run.value.horaroId,
-            vods = mutableListOf(),
-            vodSuggestions = mutableListOf()
-        )
-        fun create(run: dev.qixils.horaro.models.Run) = RunOverrides(
-            horaroId = run.getValue("ID"),
-            vods = mutableListOf(),
-            vodSuggestions = mutableListOf()
-        )
     }
 }
 
