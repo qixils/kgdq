@@ -73,7 +73,8 @@ class ThreadManager(
             .append("This thread is powered by the [thread updater](https://github.com/qixils/kgdq/tree/main/reddit) ")
             .append("using data from [${config.organization.displayName}](${config.organization.homepageUrl})")
         if (config.organization.manualVODs)
-            body.append(", [Speedrun.com](https://www.speedrun.com), and the contributors to the VOD list. ")
+            body.append(", [Speedrun.com](https://www.speedrun.com), and the contributors to the ")
+                .append("[VOD List](https://www.reddit.com/r/VODThread/wiki/index/). ")
                 .append("Thank you to the volunteers that keep this thread running!\n")
         else
             body.append(" and [Speedrun.com](https://www.speedrun.com).\n")
@@ -93,8 +94,6 @@ class ThreadManager(
         else
             body.append("https://www.youtube.com/@").append(config.youtube)
         body.append(")\n")
-        if (config.organization.manualVODs)
-            body.append("* [VOD list](https://www.reddit.com/r/VODThread/wiki/${event.short}vods)\n")
         body.append("\n## Schedule\n\n")
             .append("Game | Runner / Channel | Time / Link\n")
             .append("--|--|:--:|\n")
