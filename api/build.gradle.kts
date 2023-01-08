@@ -44,6 +44,7 @@ dependencies {
     implementation("com.rabbitmq:amqp-client:$amqp_version")
     implementation("com.github.twitch4j:twitch4j-helix:$twitch4j_version")
     implementation("io.ktor:ktor-client-core-jvm:$ktor_version")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-cbor:$serialization_version")

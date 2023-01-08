@@ -12,7 +12,7 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.server.plugins.contentnegotiation.*
+import kotlinx.serialization.json.Json
 
 const val root = "https://vods.speedrun.club"
 val gdq = GDQMarathon()
@@ -20,7 +20,15 @@ val esa = ESAMarathon()
 val hek = HEKMarathon()
 val rpglb = RPGLBMarathon()
 val srcDb = SrcDatabase()
-val httpClient = HttpClient(Apache)
+val httpClient = HttpClient(Apache) {
+    install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
+        json(Json {
+            isLenient = true
+            ignoreUnknownKeys = true
+            coerceInputValues = true
+        })
+    }
+}
 
 fun main() {
     embeddedServer(Netty, port = 4010, host = "0.0.0.0", module = Application::kgdqApiModule).start(wait = true)
@@ -36,7 +44,7 @@ val GDQ.db: GdqDatabase get() = getDB(organization)
 fun Application.kgdqApiModule() {
     configureHTTP()
     configureMonitoring()
-    install(ContentNegotiation) { json() }
+    install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) { json() }
     configureOAuth()
     configureRouting()
 //    RabbitManager.declareQueue("cg_events_reddit_esaw2023s1", "ESAMarathon", esa.api.db)
