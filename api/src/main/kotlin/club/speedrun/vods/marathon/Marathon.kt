@@ -7,6 +7,8 @@ import club.speedrun.vods.db.Filter.Companion.and
 import club.speedrun.vods.db.Filter.Companion.eq
 import club.speedrun.vods.db.Filter.Companion.id
 import club.speedrun.vods.db.Update.Companion.set
+import club.speedrun.vods.httpClient
+import club.speedrun.vods.json
 import club.speedrun.vods.plugins.UserError
 import club.speedrun.vods.srcDb
 import dev.qixils.gdq.GDQ
@@ -18,17 +20,77 @@ import dev.qixils.gdq.models.Run
 import dev.qixils.gdq.models.Wrapper
 import dev.qixils.horaro.Horaro
 import dev.qixils.horaro.models.FullSchedule
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.locations.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import org.slf4j.LoggerFactory
 import java.time.Instant
+import java.util.regex.Pattern
 
 abstract class Marathon(val api: GDQ) {
+    private val logger = LoggerFactory.getLogger("Marathon")
     private val eventIdCache = mutableMapOf<String, Int>()
     private val eventCacher = EventDataCacher(api)
     private val eventUpdater = EventOverrideUpdater(api)
+
+    private suspend inline fun <reified T> getRedditWiki(id: String, logErrors: Boolean = true): List<T> {
+        val response = httpClient.get("https://www.reddit.com/r/VODThread/wiki/$id.json") {
+            header(HttpHeaders.UserAgent, "GDQ VODs API v2 (/u/noellekiq)")
+        }
+        if (response.status != HttpStatusCode.OK) {
+            if (logErrors) logger.warn("Failed to fetch wiki for $id: ${response.status}")
+            return emptyList()
+        }
+        // strip leading spaces and trailing comments
+        val body: JsonObject = response.body()
+        val content = body["data"]?.jsonObject?.get("content_md")?.jsonPrimitive?.content
+            ?.split(Pattern.compile("\\r?\\n"))
+            ?.joinToString("") { it.substring(0, it.indexOf('#')).trim() } ?: return emptyList()
+        return json.decodeFromString(content)
+    }
+
+    private suspend inline fun getRedditTwitchVODs(short: String, logErrors: Boolean = true): List<List<VOD>> {
+        return getRedditWiki<MutableList<String>>("${short}vods", logErrors).map {
+            val vods = mutableListOf<VOD>()
+            while (it.size >= 2) {
+                val videoId = it.removeFirst()
+                val timestamp = it.removeFirst()
+                try {
+                    vods.add(VODType.TWITCH.fromParts(videoId, timestamp))
+                } catch (e: Exception) {
+                    if (logErrors) logger.warn("Failed to parse Twitch VOD $videoId ($timestamp) for $short", e)
+                }
+            }
+            if (it.isNotEmpty() && logErrors)
+                logger.warn("Excess data found for Twitch VODs for $short: ${it.first()}")
+            vods
+        }
+    }
+
+    private suspend inline fun getRedditYouTubeVODs(short: String): List<VOD?> {
+        return getRedditWiki<String>("${short}yt").map {
+            try {
+                VODType.YOUTUBE.fromUrl("https://youtu.be/$it")
+            } catch (e: Exception) {
+                logger.warn("Failed to parse YouTube VOD $it for $short", e)
+                null
+            }
+        }
+    }
+
+    private suspend inline fun getRedditVODs(short: String): List<List<VOD>> {
+        return getRedditTwitchVODs(short) + getRedditYouTubeVODs(short).map { listOfNotNull(it) }
+    }
 
     private suspend fun getEvent(id: String): Wrapper<Event>? {
         val eventId = id.toIntOrNull() ?: eventIdCache[id]
@@ -57,7 +119,8 @@ abstract class Marathon(val api: GDQ) {
     private suspend fun handleClassicSchedule(
         query: RunList,
         event: Wrapper<Event>
-    ): List<RunData> {
+    ): List<RunData> = coroutineScope {
+        val vods = async { getRedditVODs(event.value.short) }
         // do queries
         val runs: List<Wrapper<Run>> = ArrayList(
             api.query(
@@ -92,7 +155,7 @@ abstract class Marathon(val api: GDQ) {
 
         // finalize & respond
         val runData: MutableList<RunData> = ArrayList()
-        runs.forEach { run ->
+        runs.forEachIndexed { index, run ->
             // get bids
             val rawRunBids = runBidMap[run.id]!!
             val runBids = rawRunBids.map { bid ->
@@ -108,9 +171,10 @@ abstract class Marathon(val api: GDQ) {
             val data = RunData(run, runBids, previousRun, overrides)
             data.loadData()
             data.loadSrcGame(overrides)
+            vods.await().getOrNull(index)?.let { data.vods.addAll(it) } // TODO: add VODs directly to overrides for >1mo old events
             runData.add(data)
         }
-        return runData
+        return@coroutineScope runData
     }
 
     private suspend fun handleHoraroSchedule(
