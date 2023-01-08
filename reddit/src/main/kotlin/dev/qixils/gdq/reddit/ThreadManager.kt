@@ -91,7 +91,7 @@ class ThreadManager(
         if (eventConfig.playlist != null)
             body.append("https://www.youtube.com/playlist?list=").append(eventConfig.playlist)
         else
-            body.append("https://www.youtube.com/c/").append(config.youtube)
+            body.append("https://www.youtube.com/@").append(config.youtube)
         body.append(")\n")
         if (config.organization.manualVODs)
             body.append("* [VOD list](https://www.reddit.com/r/VODThread/wiki/${event.short}vods)\n")

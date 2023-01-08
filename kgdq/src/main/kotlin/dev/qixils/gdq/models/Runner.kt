@@ -33,7 +33,7 @@ data class Runner(
             else if (youtube.startsWith("UC", false))
                 "https://youtube.com/channel/${youtube}"
             else
-                "https://youtube.com/c/${youtube}"
+                "https://youtube.com/@${youtube}"
         } else if (twitter.isNotEmpty()) {
             val twitterMatcher = twitterRegex.matcher(twitter)
             if (twitterMatcher.matches())
