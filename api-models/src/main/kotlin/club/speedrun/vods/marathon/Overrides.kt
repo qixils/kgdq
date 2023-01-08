@@ -25,8 +25,8 @@ data class RunOverrides(
     override val id: String = ULID.random(),
     var runId: Int? = null,
     var horaroId: String? = null,
-    val twitchVODs: MutableList<TwitchVOD> = mutableListOf(),
-    val youtubeVODs: MutableList<YouTubeVOD> = mutableListOf(),
+    val vods: MutableList<VOD> = mutableListOf(),
+    val vodSuggestions: MutableList<VodSuggestion> = mutableListOf(),
     @Serializable(with = InstantAsSecondsSerializer::class) var startTime: Instant? = null,
     @Serializable(with = DurationAsSecondsSerializer::class) var runTime: Duration? = null,
     var src: String? = null,
@@ -46,8 +46,8 @@ data class RunOverrides(
         if (startTime == null) startTime = other.startTime
         if (runTime == null) runTime = other.runTime
         if (src == null) src = other.src
-        twitchVODs.addAll(other.twitchVODs)
-        youtubeVODs.addAll(other.youtubeVODs)
+        vods.addAll(other.vods)
+        vodSuggestions.addAll(other.vodSuggestions)
     }
 
     companion object {

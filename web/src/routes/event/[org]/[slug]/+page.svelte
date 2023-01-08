@@ -79,19 +79,20 @@
                                     <hr class="border-primary/70 border-2 mb-3">
                                 {/if}
                                 <p>
-                                    {#if run.twitchVODs.length > 0 || run.youtubeVODs.length > 0}
+                                    {#if run.vods.length > 0}
+                                        {@const vodCount = new Map()}
                                         <div class="dropdown">
                                             <label tabindex="0"><span class="hover:bg-info-content rounded-box material-symbols-rounded text-sm text-info">play_circle</span></label>
                                             <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                                                {#each run.youtubeVODs as vod, index}
+                                                {#each run.vods as vod}
+                                                    {@const index = vodCount.set(vod.platform, (vodCount.get(vod.platform) ?? -1) + 1).get(vod.platform)}
                                                     <li><a href={vod.url} target="_blank" rel="noopener noreferrer">
-                                                        Watch on YouTube
-                                                        {#if index > 0}(Part {index + 1}){/if}
-                                                    </a></li>
-                                                {/each}
-                                                {#each run.twitchVODs as vod, index}
-                                                    <li><a href={vod.url} target="_blank" rel="noopener noreferrer">
-                                                        Watch on Twitch
+                                                        Watch
+                                                        {#if vod.type === "YOUTUBE"}
+                                                            on YouTube
+                                                        {:else if vod.type === "TWITCH"}
+                                                            on Twitch
+                                                        {/if}
                                                         {#if index > 0}(Part {index + 1}){/if}
                                                     </a></li>
                                                 {/each}

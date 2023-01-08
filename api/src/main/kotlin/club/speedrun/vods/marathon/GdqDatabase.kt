@@ -51,6 +51,29 @@ class GdqDatabase(organization: String) : Database("api", "orgs", organization) 
         return overrides
     }
 
+    private fun updateRunOverrideIds(overrides: RunOverrides, gdqId: Int?, horaroId: String?) {
+        if (overrides.runId == null && gdqId != null) {
+            overrides.runId = gdqId
+            runs.update(overrides)
+        } else if (overrides.horaroId == null && horaroId != null) {
+            overrides.horaroId = horaroId
+            runs.update(overrides)
+        }
+    }
+
+    fun getRunOverrides(gdqId: Int?, horaroId: String?): RunOverrides? {
+        if (gdqId == null && horaroId == null)
+            throw IllegalArgumentException("At least one argument must be non-null")
+        // get
+        val gdqIdFilter = gdqId?.let { RunOverrides::runId eq it }
+        val horariIdFilter = horaroId?.let { RunOverrides::horaroId eq it }
+        val overrides: RunOverrides = runs.find(or(listOfNotNull(gdqIdFilter, horariIdFilter))) ?: return null
+        // update
+        updateRunOverrideIds(overrides, gdqId, horaroId)
+        // return
+        return overrides
+    }
+
     fun getOrCreateRunOverrides(gdqId: Int?, horaroId: String?): RunOverrides {
         if (gdqId == null && horaroId == null)
             throw IllegalArgumentException("At least one argument must be non-null")
@@ -64,13 +87,7 @@ class GdqDatabase(organization: String) : Database("api", "orgs", organization) 
             runs.insert(overrides)
         }
         // update
-        if (overrides.runId == null && gdqId != null) {
-            overrides.runId = gdqId
-            runs.update(overrides)
-        } else if (overrides.horaroId == null && horaroId != null) {
-            overrides.horaroId = horaroId
-            runs.update(overrides)
-        }
+        updateRunOverrideIds(overrides, gdqId, horaroId)
         // return
         return overrides
     }

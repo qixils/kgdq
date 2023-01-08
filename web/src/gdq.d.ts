@@ -40,8 +40,7 @@ export interface Run {
     runners: Runner[], // the runners performing this run
     runnersAsString: string, // the runners performing this run as a pre-formatted string
     bids: Bid[], // the bids (bid wars, donation incentives) for this run
-    twitchVODs: VOD[], // the Twitch VODs for this run
-    youtubeVODs: VOD[], // the YouTube VODs for this run
+    vods: VOD[], // the VODs for this run
     src: string | null, // the speedrun.com slug for the game being run
     scheduleStatus: string, // the status of the run in the schedule
 }
@@ -73,7 +72,8 @@ export interface Bid {
 }
 
 export interface VOD {
-    videoId: string, // the ID of the VOD video
+    type: string, // the type of VOD (either 'TWITCH', 'YOUTUBE', or 'OTHER')
+    videoId: string | null, // the ID of the VOD video
     timestamp: string | null, // the timestamp of the VOD
     url: string, // the full URL of the VOD
 }

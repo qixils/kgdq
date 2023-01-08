@@ -2,6 +2,8 @@ package dev.qixils.gdq.reddit
 
 import club.speedrun.vods.marathon.EventData
 import club.speedrun.vods.marathon.RunData
+import club.speedrun.vods.marathon.VOD
+import club.speedrun.vods.marathon.VODType
 import club.speedrun.vods.naturalJoinTo
 import dev.qixils.gdq.models.Runner
 import kotlinx.coroutines.delay
@@ -123,11 +125,22 @@ class ThreadManager(
         return runner.url?.let { "[${runner.name}]($it)" } ?: runner.name
     }
 
+    private fun appendMiscVODs(sb: StringBuilder, vods: List<VOD>, id: String) {
+        vods.forEachIndexed { index, vod ->
+            sb.append(" [").append(id)
+            if (index > 0) sb.append(index + 1)
+            sb.append("](").append(vod.url).append(")")
+        }
+    }
+
     private fun generateTime(run: RunData): CharSequence {
         val time = StringBuilder()
+        val twitchVODs = run.vods.filter { it.type == VODType.TWITCH }
+        val ytVODs = run.vods.filter { it.type == VODType.YOUTUBE }
+        val otherVODs = run.vods.filter { it.type == VODType.OTHER }
         // add twitch VODs if available
-        if (run.twitchVODs.isNotEmpty()) {
-            run.twitchVODs.forEachIndexed { index, vod ->
+        if (twitchVODs.isNotEmpty()) {
+            twitchVODs.forEachIndexed { index, vod ->
                 if (index == 0)
                     time.append('[').append(run.runTimeText)
                 else
@@ -139,11 +152,8 @@ class ThreadManager(
             time.append(run.runTimeText)
         }
         // add YouTube VODs if available
-        run.youtubeVODs.forEachIndexed { index, vod ->
-            time.append(" [YT")
-            if (index > 0) time.append(index + 1)
-            time.append("](").append(vod.url).append(")")
-        }
+        appendMiscVODs(time, ytVODs, "YT")
+        appendMiscVODs(time, otherVODs, "MISC")
         // add italics if the run is ongoing
         if (run.isCurrent)
             time.insert(0, '*').append('*')

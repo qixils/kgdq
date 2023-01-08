@@ -191,8 +191,7 @@ class ScheduleManager(
             }
 
             // Append VODs
-            val vods = run.twitchVODs + run.youtubeVODs
-            vods.forEach { vod -> sb.append("\n<").append(vod.url).append('>') }
+            run.vods.forEach { vod -> sb.append("\n<").append(vod.url).append('>') }
 
             // Finalize
             messages.add(

@@ -1,8 +1,8 @@
-@file:OptIn(KtorExperimentalLocationsAPI::class)
-
 package club.speedrun.vods.plugins
 
 import club.speedrun.vods.*
+import club.speedrun.vods.marathon.VOD
+import club.speedrun.vods.marathon.VodSuggestion
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -13,6 +13,24 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.SerializationException
+
+private suspend fun getUser(call: ApplicationCall): User? {
+    return try {
+        rootDb.getFromSession(call.sessions.get()!!)!!
+    } catch (e: Exception) {
+        call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "You are not authenticated"))
+        null
+    }
+}
+
+private suspend fun getDiscordUser(call: ApplicationCall): DiscordUser? {
+    return try {
+        rootDb.getFromSession(call.sessions.get()!!)!!.discord!!.fetchUserOrNull()!!
+    } catch (e: Exception) {
+        call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "You are not authenticated"))
+        null
+    }
+}
 
 fun Application.configureRouting() {
 
@@ -31,7 +49,7 @@ fun Application.configureRouting() {
         }
         exception<AuthenticationException> { call, cause ->
             if (cause.redirect) {
-                val redirectUrl = URLBuilder("$root/api/auth/login").run {
+                val redirectUrl = URLBuilder("$root/api/auth/discord/login").run {
                     parameters.append("redirectUrl", root + call.request.uri)
                     build()
                 }
@@ -49,11 +67,7 @@ fun Application.configureRouting() {
     routing {
         route("/api") {
             route("/auth") {
-                get("/test") {
-                    val session: DiscordSession? = call.sessions.get()
-                    val user = discordUser(session)
-                    call.respond(user)
-                }
+                get("/user") { call.respond(getDiscordUser(call) ?: return@get) }
             }
 
             route("/v1") {
@@ -61,6 +75,30 @@ fun Application.configureRouting() {
                 route("/esa", esa.route())
                 route("/hek", hek.route())
                 route("/rpglb", rpglb.route())
+
+                put("/suggest/vod") {
+                    val user = getUser(call) ?: return@put
+                    val body: VodSuggestionBody
+                    try {
+                        body = call.receive()
+                    } catch (e: ContentTransformationException) {
+                        throw UserError("Invalid request body")
+                    }
+                    // parse VOD from URL
+                    val vod = VOD.fromUrl(body.url)
+                    // get marathon
+                    val marathon = marathons.firstOrNull { it.api.organization.equals(body.organization, true) }
+                        ?: throw UserError("Invalid organization; must be one of: ${marathons.joinToString { it.api.organization }}")
+                    // get override
+                    val run = marathon.api.db.getRunOverrides(gdqId = body.runId, horaroId = null)
+                        ?: throw UserError("Invalid run ID")
+                    // add suggestion
+                    run.vodSuggestions.add(VodSuggestion(vod, user.id))
+                    // update override
+                    marathon.api.db.runs.update(run)
+                    // respond
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }
@@ -81,3 +119,9 @@ class AuthenticationException(val redirect: Boolean) : RuntimeException()
  * Thrown when a user enters some invalid input.
  */
 class UserError(message: String) : RuntimeException(message)
+
+class VodSuggestionBody(
+    val organization: String,
+    val runId: Int,
+    val url: String,
+)

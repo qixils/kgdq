@@ -40,8 +40,7 @@ class RunData{
     val runners: MutableList<Runner>
     val runnersAsString: String
     val bids: MutableList<BidData>
-    val twitchVODs: MutableList<TwitchVOD>
-    val youtubeVODs: MutableList<YouTubeVOD>
+    val vods: MutableList<VOD>
     var src: String? = null
     /**
      * The current status of the run in the schedule.
@@ -72,8 +71,7 @@ class RunData{
         runners = mutableListOf()
         runnersAsString = run.value.deprecatedRunners.split(", ").naturalJoinToString()
         this.bids = bids.toMutableList()
-        twitchVODs = overrides.twitchVODs
-        youtubeVODs = overrides.youtubeVODs
+        vods = overrides.vods
         startTime = overrides.startTime
             ?: calculateOffsetTime(previousRun?.endTime, run.value.setupTime)
             ?: run.value.startTime
@@ -126,8 +124,7 @@ class RunData{
             trackerRun?.runnersAsString
         ).firstOrNull { !it.isNullOrEmpty() } ?: ""
         bids = trackerRun?.bids ?: mutableListOf()
-        twitchVODs = calculateHoraroVODs(horaroRun)?.filterIsInstance<TwitchVOD>()?.toMutableList() ?: overrides?.twitchVODs ?: mutableListOf()
-        youtubeVODs = calculateHoraroVODs(horaroRun)?.filterIsInstance<YouTubeVOD>()?.toMutableList() ?: overrides?.youtubeVODs ?: mutableListOf()
+        vods = calculateHoraroVODs(horaroRun) ?: overrides?.vods ?: mutableListOf()
         startTime = overrides?.startTime
             ?: calculateOffsetTime(previousRun?.endTime, calculateHoraroRawSetupTime(horaroRun, previousRun))
             ?: horaroRun.scheduled.toInstant()
@@ -197,7 +194,7 @@ class RunData{
             val matcher = MARKDOWN_LINK.matcher(rawName)
             val vods = mutableListOf<VOD>()
             while (matcher.find())
-                vods += VOD.fromURL(matcher.group(2))
+                VOD.fromUrlOrNull(matcher.group(2))?.let { vods += it }
             return if (vods.isEmpty()) null else vods
         }
 

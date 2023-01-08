@@ -25,7 +25,7 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.*
 import java.time.Instant
 
-abstract class Marathon(protected val api: GDQ) {
+abstract class Marathon(val api: GDQ) {
     private val eventIdCache = mutableMapOf<String, Int>()
     private val eventCacher = EventDataCacher(api)
     private val eventUpdater = EventOverrideUpdater(api)
@@ -190,7 +190,7 @@ class ESAMarathon : Marathon(ESA())
 class HEKMarathon : Marathon(ESA("https://hekathon.esamarathon.com/search/", "hek"))
 class RPGLBMarathon : Marathon(GDQ("https://rpglimitbreak.com/tracker/search/", "rpglb"))
 
-class ESA(url: String = "https://donations.esamarathon.com/search/", org: String = "esa") : GDQ(url, org) {
+class ESA(apiPath: String = "https://donations.esamarathon.com/search/", organization: String = "esa") : GDQ(apiPath, organization) {
     override suspend fun cacheRunners() {
         // TODO: remove this method (and this whole subclass TBH) when ESA fixes their API
         val now = Instant.now()

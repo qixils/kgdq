@@ -1,7 +1,7 @@
 package club.speedrun.vods.rabbit
 
 import club.speedrun.vods.marathon.GdqDatabase
-import club.speedrun.vods.marathon.TwitchVOD
+import club.speedrun.vods.marathon.VODType
 import com.github.twitch4j.helix.TwitchHelix
 import com.github.twitch4j.helix.TwitchHelixBuilder
 import com.github.twitch4j.helix.domain.StreamList
@@ -130,10 +130,10 @@ class DeliverHandler(
             val videos = async { twitch.videos(userId = stream.userId, type = "archive", limit = 1).execute() }
             val video = videos.await().videos.firstOrNull() ?: return@coroutineScope
             // Create VOD object
-            val vod = TwitchVOD(video.id, Duration.between(stream.startedAtInstant, runStart))
+            val vod = VODType.TWITCH.fromParts(video.id, Duration.between(stream.startedAtInstant, runStart))
             // Adding VOD link to run
             logger.info("Adding VOD link ${vod.url} to run ${status.currentRun}")
-            overrides.twitchVODs.add(vod)
+            overrides.vods.add(vod)
             db.runs.update(overrides)
         }
 
