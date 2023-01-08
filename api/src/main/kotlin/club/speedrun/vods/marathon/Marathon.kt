@@ -55,7 +55,8 @@ abstract class Marathon(val api: GDQ) {
         val body: JsonObject = response.body()
         val content = body["data"]?.jsonObject?.get("content_md")?.jsonPrimitive?.content
             ?.split(Pattern.compile("\\r?\\n"))
-            ?.joinToString("") { it.substring(0, it.indexOf('#')).trim() } ?: return emptyList()
+            ?.joinToString("") { it.split('#', limit=2)[0].trim() }
+            ?: return emptyList()
         return json.decodeFromString(content)
     }
 
