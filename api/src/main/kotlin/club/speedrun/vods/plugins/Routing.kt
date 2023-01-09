@@ -1,3 +1,5 @@
+@file:OptIn(KtorExperimentalLocationsAPI::class)
+
 package club.speedrun.vods.plugins
 
 import club.speedrun.vods.*
@@ -67,7 +69,7 @@ fun Application.configureRouting() {
     routing {
         route("/api") {
             route("/auth") {
-                get("/user") { call.respond(getDiscordUser(call) ?: return@get) }
+                get("/user") { call.respond(getDiscordUser(call) ?: return@get) } // debug
             }
 
             route("/v1") {
@@ -75,6 +77,11 @@ fun Application.configureRouting() {
                 route("/esa", esa.route())
                 route("/hek", hek.route())
                 route("/rpglb", rpglb.route())
+
+                get("/profile") {
+                    val user = getUser(call) ?: return@get
+                    call.respond(mapOf("id" to user.id, "name" to user.discord?.user?.username))
+                }
 
                 put("/suggest/vod") {
                     val user = getUser(call) ?: return@put

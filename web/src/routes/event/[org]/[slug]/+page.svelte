@@ -65,7 +65,7 @@
             <ul class="steps steps-vertical block w-full max-w-screen-lg mx-auto overflow-x-hidden text-sm md:text-base">
                 {#each runs as run, run_index}
                     {@const step_color = run.scheduleStatus === "UPCOMING" ? "" : (run.scheduleStatus === "IN_PROGRESS" ? "step-primary" : "step-secondary")}
-                    <li data-content="" class="step {step_color} text-base-content">
+                    <li data-content="" class="step {step_color} text-base-content" style="z-index: -{run_index}">
                         <div class="flex w-full align-center gap-2">
                             <p class="text-center block my-auto basis-8 font-light md:basis-10 md:font-normal flex-shrink-0" style="position: relative; top:-.175rem;">
                                 {time(run.startTime)}

@@ -25,4 +25,6 @@ class RootDatabase : Database("api") {
         if (session == null) return null
         return users.find { it.id == session.id && it.token == session.token }
     }
+
+    fun getFromToken(token: String): User? = users.find { it.token == token }
 }
