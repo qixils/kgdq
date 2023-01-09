@@ -7,6 +7,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.auth.*
+import io.ktor.util.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import java.security.SecureRandom
@@ -22,7 +23,7 @@ data class User(
     companion object {
         const val COLLECTION_NAME = "users"
         private val random = SecureRandom()
-        private fun randomToken(): String = random.nextBytes(64).joinToString("") { "%02x".format(it) }
+        private fun randomToken(): String = random.nextBytes(32).encodeBase64().dropLastWhile { it == '=' }
     }
     fun regenerateToken() {
         token = randomToken()
