@@ -180,7 +180,7 @@ abstract class Marathon(val api: GDQ) {
                     .map { value -> BidData(value, emptyList(), run) }
                     .sortedByDescending { it.donationTotal }
                 BidData(bid.first, children, run)
-            }
+            }.sortedWith(compareBy<BidData>{ it.revealedAt }.thenBy{ it.name }) // TODO: replace fallback with ID
             // get other data
             val overrides = api.db.getOrCreateRunOverrides(run)
             val previousRun = runData.lastOrNull()
