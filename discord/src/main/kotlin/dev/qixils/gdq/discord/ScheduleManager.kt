@@ -180,11 +180,12 @@ class ScheduleManager(
 
                     if (bid.children.isNotEmpty()) {
                         sb.append(" (")
-                        sb.append("**").append(bid.children.first().name).append("**")
-                        if (bid.children.size > 1) {
-                            sb.append('/')
-                            bid.children.drop(1).joinTo(sb, "/") { it.name }
-                        }
+                        val toBold = run.runners.size.coerceAtLeast(1)
+                        val toDisplay = if (bid.allowUserOptions) toBold else bid.children.size
+                        bid.children
+                            .subList(0, toDisplay.coerceIn(5, bid.children.size) - 1)
+                            .mapIndexed { index, child -> if (index < toBold) "**${child.name}**" else child.name }
+                            .joinTo(sb, "/")
                         sb.append(')')
                     }
                 }
