@@ -183,7 +183,7 @@ class ScheduleManager(
                         val toBold = run.runners.size.coerceAtLeast(1)
                         val toDisplay = if (bid.allowUserOptions) toBold else bid.children.size
                         bid.children
-                            .subList(0, toDisplay.coerceIn(5, bid.children.size) - 1)
+                            .subList(0, toDisplay.coerceAtLeast(5).coerceAtMost(bid.children.size))
                             .mapIndexed { index, child -> if (index < toBold) "**${child.name}**" else child.name }
                             .joinTo(sb, "/")
                         sb.append(')')
