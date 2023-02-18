@@ -21,7 +21,6 @@ events:
     id: sgdq2022
 
     # IDs of the Discord channels to post the event's schedule to
-    # Note: No two events should share the same channel
     channels:
       - 12345
       - 67890
@@ -46,7 +45,6 @@ events:
     id: esa2022s1
 
     # IDs of the Discord channels to post the event's schedule to
-    # Note: No two events should share the same channel
     channels:
       - 12345
       - 67890
