@@ -15,6 +15,9 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.SerializationException
+import java.time.Duration
+
+private val ADMINS: List<Long> = listOf(140564059417346049L)
 
 private suspend fun getUser(call: ApplicationCall): User? {
     return try {
@@ -106,6 +109,58 @@ fun Application.configureRouting() {
                     // respond
                     call.respond(HttpStatusCode.OK)
                 }
+
+                put("/add/vod") {
+                    val user = getDiscordUser(call) ?: return@put
+                    if (user.id !in ADMINS)
+                        throw AuthorizationException()
+                    val body: VodSuggestionBody
+                    try {
+                        body = call.receive()
+                    } catch (e: ContentTransformationException) {
+                        throw UserError("Invalid request body")
+                    }
+                    // parse VOD from URL
+                    val vod = VOD.fromUrl(body.url)
+                    // get marathon
+                    val marathon = marathons.firstOrNull { it.api.organization.equals(body.organization, true) }
+                        ?: throw UserError("Invalid organization; must be one of: ${marathons.joinToString { it.api.organization }}")
+                    // get override
+                    val run = marathon.api.db.getRunOverrides(gdqId = body.runId, horaroId = null)
+                        ?: throw UserError("Invalid run ID")
+                    // add VOD
+                    run.vods.add(vod)
+                    // update override
+                    marathon.api.db.runs.update(run)
+                    // respond
+                    call.respond(HttpStatusCode.OK)
+                }
+
+                put("/set/time") {
+                    val user = getDiscordUser(call) ?: return@put
+                    if (user.id !in ADMINS)
+                        throw AuthorizationException()
+                    val body: SetTimeBody
+                    try {
+                        body = call.receive()
+                    } catch (e: ContentTransformationException) {
+                        throw UserError("Invalid request body")
+                    }
+                    // parse duration from time
+                    val duration = Duration.ofSeconds(body.time)
+                    // get marathon
+                    val marathon = marathons.firstOrNull { it.api.organization.equals(body.organization, true) }
+                        ?: throw UserError("Invalid organization; must be one of: ${marathons.joinToString { it.api.organization }}")
+                    // get override
+                    val run = marathon.api.db.getRunOverrides(gdqId = body.runId, horaroId = null)
+                        ?: throw UserError("Invalid run ID")
+                    // set time
+                    run.runTime = duration
+                    // update override
+                    marathon.api.db.runs.update(run)
+                    // respond
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }
@@ -131,4 +186,10 @@ class VodSuggestionBody(
     val organization: String,
     val runId: Int,
     val url: String,
+)
+
+class SetTimeBody(
+    val organization: String,
+    val runId: Int,
+    val time: Long,
 )
