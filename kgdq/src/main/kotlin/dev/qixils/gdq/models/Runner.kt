@@ -15,9 +15,11 @@ data class Runner(
     val public: String,
 ) : Model {
 
-    val url: String? = run { // TODO: why not serialize this?
+    val url: String? = computeUrl()
+
+    private fun computeUrl(): String? {
         // Find one of the runner's social media profiles
-        if (stream.isNotEmpty()) {
+        return if (stream.isNotEmpty()) {
             val twitchMatcher = twitchRegex.matcher(stream)
             val urlMatcher = urlRegex.matcher(stream)
             if (twitchMatcher.matches())
