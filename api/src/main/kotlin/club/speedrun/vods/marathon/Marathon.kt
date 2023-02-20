@@ -221,41 +221,45 @@ abstract class Marathon(val api: GDQ) {
         }
     }
 
-    fun route(): Route.() -> Unit {
-        return {
-            get<EventList> { query ->
-                // get events
-                val events: List<Wrapper<Event>> = if (query.id != null) {
-                    val event = getEvent(query.id)
-                    if (event == null) emptyList() else listOf(event)
-                } else {
-                    ArrayList(api.query(type = ModelType.EVENT, preLoad = eventCacher, postLoad = eventUpdater))
-                }
-                call.respond(events.map { EventData(it) }.sortedBy { it.datetime })
+    suspend fun getEvents(query: EventList? = null): List<Wrapper<Event>> {
+        return if (query?.id != null) {
+            val event = getEvent(query.id)
+            if (event == null) emptyList() else listOf(event)
+        } else {
+            ArrayList(api.query(type = ModelType.EVENT, preLoad = eventCacher, postLoad = eventUpdater))
+        }
+    }
+
+    suspend fun getEventsData(query: EventList? = null): List<EventData> {
+        return getEvents(query).map { EventData(it) }.sortedBy { it.datetime }
+    }
+
+    fun route(): Route.() -> Unit = {
+        get<EventList> { query ->
+            call.respond(getEventsData(query))
+        }
+
+        get<RunList> { query ->
+            if (query.id == null && query.event == null && query.runner == null)
+                throw UserError("A search parameter (id, event, or runner) is required.")
+
+            // get event id and ensure it exists
+            val event: Wrapper<Event>? = query.event?.let { getEvent(it) }
+            if (event == null) {
+                call.respond(emptyList<RunData>())
+                return@get
             }
 
-            get<RunList> { query ->
-                if (query.id == null && query.event == null && query.runner == null)
-                    throw UserError("A search parameter (id, event, or runner) is required.")
+            // get schedule
+            val schedule: FullSchedule? = event.value.horaroSchedule()
 
-                // get event id and ensure it exists
-                val event: Wrapper<Event>? = query.event?.let { getEvent(it) }
-                if (event == null) {
-                    call.respond(emptyList<RunData>())
-                    return@get
-                }
-
-                // get schedule
-                val schedule: FullSchedule? = event.value.horaroSchedule()
-
-                // handle
-                call.respond(
-                    if (schedule != null)
-                        handleHoraroSchedule(query, event, schedule)
-                    else
-                        handleClassicSchedule(query, event)
-                )
-            }
+            // handle
+            call.respond(
+                if (schedule != null)
+                    handleHoraroSchedule(query, event, schedule)
+                else
+                    handleClassicSchedule(query, event)
+            )
         }
     }
 }

@@ -7,9 +7,6 @@ import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
-import kotlin.collections.listOf
-import kotlin.collections.mapOf
-import kotlin.collections.mutableMapOf
 import kotlin.collections.set
 
 fun Application.configureOAuth() {
@@ -32,7 +29,7 @@ fun Application.configureOAuth() {
                     clientSecret = System.getenv("DISCORD_CLIENT_SECRET"),
                     defaultScopes = listOf("identify"),
                     onStateCreated = { call, state ->
-                        redirects[state] = call.request.queryParameters["redirectUrl"]!!
+                        call.request.queryParameters["redirectUrl"]?.let { redirects[state] = it }
                     }
                 )
             }
@@ -56,8 +53,8 @@ fun Application.configureOAuth() {
                     val oauth = DiscordOAuth.from(principal)
                     val user = rootDb.getOrCreateFromDiscord(oauth)
                     call.sessions.set(user.session())
-                    val redirect = redirects[principal.state!!]
-                    call.respondRedirect(redirect!!)
+                    val redirect = redirects[principal.state!!] ?: "/"
+                    call.respondRedirect(redirect)
                 }
             }
         }

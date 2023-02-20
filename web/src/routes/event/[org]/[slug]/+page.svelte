@@ -2,9 +2,9 @@
     import type {Event, Run} from 'src/gdq';
     import {page} from "$app/stores";
     // TODO: handle the case where the event is not found
-    let event_promise: Promise<Event> = fetch(`https://vods.speedrun.club/api/v1/${$page.params.org}/events?id=${$page.params.slug}`)
+    let event_promise: Promise<Event> = fetch(`https://vods.speedrun.club/api/v2/marathons/${$page.params.org}/events?id=${$page.params.slug}`)
         .then(r => r.json()).then(r => r[0]);
-    let runs_promise: Promise<Run[]> = fetch(`https://vods.speedrun.club/api/v1/${$page.params.org}/runs?event=${$page.params.slug}`)
+    let runs_promise: Promise<Run[]> = fetch(`https://vods.speedrun.club/api/v2/marathons/${$page.params.org}/runs?event=${$page.params.slug}`)
         .then(r => r.json())
 
     let money_format = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });

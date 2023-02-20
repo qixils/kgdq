@@ -38,7 +38,7 @@ class ScheduleManager(
     private val db = bot.db.getCollection(ChannelData.serializer(), ChannelData.COLLECTION_NAME)
     private val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
     private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build()
-    private val apiRoot = "https://vods.speedrun.club/api/v1/${config.organization.name.lowercase(Locale.ENGLISH)}/"
+    private val apiRoot = "https://vods.speedrun.club/api/v2/marathons/${config.organization.name.lowercase(Locale.ENGLISH)}/"
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
