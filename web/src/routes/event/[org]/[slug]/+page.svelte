@@ -1,6 +1,8 @@
 <script lang="ts">
     import type {Event, Run} from 'src/gdq';
     import {page} from "$app/stores";
+    import VODs from "$lib/VODs.svelte";
+
     // TODO: handle the case where the event is not found
     let event_promise: Promise<Event> = fetch(`https://vods.speedrun.club/api/v2/marathons/${$page.params.org}/events?id=${$page.params.slug}`)
         .then(r => r.json()).then(r => r[0]);
@@ -64,6 +66,7 @@
         {:then runs}
             <ul class="steps steps-vertical block w-full max-w-screen-lg mx-auto overflow-x-hidden text-sm md:text-base">
                 {#each runs as run, run_index}
+                    <!-- TODO: move to a component -->
                     {@const step_color = run.scheduleStatus === "UPCOMING" ? "" : (run.scheduleStatus === "IN_PROGRESS" ? "step-primary" : "step-secondary")}
                     <li data-content="" class="step {step_color} text-base-content" style="z-index: -{run_index}">
                         <div class="flex w-full align-center gap-2">
@@ -80,26 +83,7 @@
                                 {/if}
                                 <p>
                                     {#if run.vods.length > 0}
-                                        <!-- TODO: move to a component -->
-                                        {@const vodCount = new Map()}
-                                        <div class="dropdown">
-                                            <label tabindex="0"><span class="hover:bg-info-content rounded-box material-symbols-rounded text-sm text-info">play_circle</span></label>
-                                            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-56">
-                                                {#each run.vods as vod}
-                                                    <!-- TODO: move to a component -->
-                                                    {@const index = vodCount.set(vod.type, (vodCount.get(vod.type) ?? -1) + 1).get(vod.type)}
-                                                    <li><a href={vod.url} target="_blank" rel="noopener noreferrer">
-                                                        Watch
-                                                        {#if vod.type === "YOUTUBE"}
-                                                            on YouTube
-                                                        {:else if vod.type === "TWITCH"}
-                                                            on Twitch
-                                                        {/if}
-                                                        {#if index > 0}(Part {index + 1}){/if}
-                                                    </a></li>
-                                                {/each}
-                                            </ul>
-                                        </div>
+                                        <VODs run={run} />
                                     {/if}
                                     <span style="position: relative; top:-.1em;">
                                     <b>{run.name}</b

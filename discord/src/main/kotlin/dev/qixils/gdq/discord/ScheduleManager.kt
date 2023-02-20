@@ -58,7 +58,7 @@ class ScheduleManager(
     }
 
     private suspend fun <M> get(query: String, serializer: KSerializer<M>): M {
-        // TODO: i should really have a module for using the vods.speedrun.club API
+        // TODO: i should really have a client for using the vods.speedrun.club API
         val uri = URI(apiRoot + query)
         logger.debug("GET $uri")
         val request = HttpRequest.newBuilder(uri).GET().build()
