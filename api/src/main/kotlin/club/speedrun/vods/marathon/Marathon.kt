@@ -167,16 +167,16 @@ abstract class Marathon(val api: GDQ) {
         val topLevelBidMap = bids
             .filter { it.value.parent() == null && it.value.run() != null }
             .map { it.id }
-            .associateWith { mutableListOf<Bid>() }
-        bids.forEach { if (it.value.parent() != null) topLevelBidMap[it.value.parent()!!.id]?.add(it.value) }
+            .associateWith { mutableListOf<Wrapper<Bid>>() }
+        bids.forEach { if (it.value.parent() != null) topLevelBidMap[it.value.parent()!!.id]?.add(it) }
 
         // compute run data
-        val runBidMap = runs.associate { it.id to mutableListOf<Pair<Bid, MutableList<Bid>>>() }
+        val runBidMap = runs.associate { it.id to mutableListOf<Pair<Wrapper<Bid>, MutableList<Wrapper<Bid>>>>() }
         topLevelBidMap.entries
             // map bid ids to bids
-            .map { entry -> (bids.first { bid -> bid.id == entry.key }).value to entry.value }
+            .map { entry -> (bids.first { bid -> bid.id == entry.key }) to entry.value }
             // add to runBidMap
-            .forEach { runBidMap[it.first.run()!!.id]?.add(it) }
+            .forEach { runBidMap[it.first.value.run()!!.id]?.add(it) }
 
         // finalize & respond
         val runData: MutableList<RunData> = ArrayList()
@@ -188,7 +188,7 @@ abstract class Marathon(val api: GDQ) {
                     .map { value -> BidData(value, emptyList(), run) }
                     .sortedByDescending { it.donationTotal }
                 BidData(bid.first, children, run)
-            }.sortedWith(compareBy<BidData>{ it.revealedAt }.thenBy{ it.name }) // TODO: replace fallback with ID
+            }.sortedWith(compareBy<BidData>{ it.revealedAt }.thenBy{ it.id })
             // get other data
             val overrides = api.db.getOrCreateRunOverrides(run)
             val previousRun = runData.lastOrNull()

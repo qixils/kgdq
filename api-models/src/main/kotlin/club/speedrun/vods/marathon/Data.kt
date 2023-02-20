@@ -249,7 +249,7 @@ class RunData{
 
 @Serializable
 data class BidData(
-    // TODO: id?
+    val id: Int,
     val children: List<BidData>,
     val name: String,
     val state: BidState,
@@ -264,24 +264,25 @@ data class BidData(
     val donationCount: Int,
     val pinned: Boolean,
 ) {
-    constructor(bid: Bid, children: List<BidData>, run: Wrapper<Run>) : this(
+    constructor(bid: Wrapper<Bid>, children: List<BidData>, run: Wrapper<Run>) : this(
+        id = bid.id,
         children = children,
-        name = bid.name,
+        name = bid.value.name,
         state = when {
-            bid.state != null -> bid.state!!
+            bid.value.state != null -> bid.value.state!!
             run.value.endTime.isBefore(Instant.now()) -> BidState.CLOSED
             else -> BidState.OPENED
         },
-        description = bid.description,
-        shortDescription = bid.shortDescription,
-        goal = bid.goal,
-        isTarget = bid.isTarget,
-        allowUserOptions = bid.allowUserOptions,
-        optionMaxLength = bid.optionMaxLength,
-        revealedAt = bid.revealedAt,
-        donationTotal = bid.total,
-        donationCount = bid.count,
-        pinned = bid.pinned
+        description = bid.value.description,
+        shortDescription = bid.value.shortDescription,
+        goal = bid.value.goal,
+        isTarget = bid.value.isTarget,
+        allowUserOptions = bid.value.allowUserOptions,
+        optionMaxLength = bid.value.optionMaxLength,
+        revealedAt = bid.value.revealedAt,
+        donationTotal = bid.value.total,
+        donationCount = bid.value.count,
+        pinned = bid.value.pinned
     )
 }
 
