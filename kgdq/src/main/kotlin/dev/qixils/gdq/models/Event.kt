@@ -37,7 +37,7 @@ data class Event(
 
     override suspend fun loadData(api: GDQ, id: Int) {
         // datetime fallback
-        if (_starttime == null) {
+        if (_starttime == null || _endtime == null) {
             if (!api.eventStartedAt.containsKey(id) || !api.eventEndedAt.containsKey(id)) {
                 val runs = api.getRuns(event = id).sortedBy { it.value.order }
                 api.eventStartedAt[id] = runs.firstOrNull()?.value?.startTime ?: Instant.EPOCH
