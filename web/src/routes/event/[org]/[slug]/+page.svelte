@@ -3,11 +3,12 @@
     import {page} from "$app/stores";
     import VODs from "$lib/VODs.svelte";
 
+    // TODO: something is causing ESA APIs to get spammed really hard
     // TODO: handle the case where the event is not found
     let event_promise: Promise<Event> = fetch(`https://vods.speedrun.club/api/v2/marathons/${$page.params.org}/events?id=${$page.params.slug}`)
-        .then(r => r.json()).then(r => r[0]);
+        .then(r => r.json() /* todo: handle decode error */).then(r => r[0]);
     let runs_promise: Promise<Run[]> = fetch(`https://vods.speedrun.club/api/v2/marathons/${$page.params.org}/runs?event=${$page.params.slug}`)
-        .then(r => r.json())
+        .then(r => r.json() /* todo: handle decode error */)
 
     let money_format = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });
     function money(n: number) {

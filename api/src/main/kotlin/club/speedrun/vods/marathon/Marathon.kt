@@ -336,7 +336,7 @@ fun RunData.loadSrcGame(overrides: RunOverrides?) {
 
 class EventDataCacher(private val api: GDQ) : Hook<Event> {
     override fun handle(item: Wrapper<Event>) {
-        if (!api.eventStartedAt.containsKey(item.id)) {
+        if (!api.eventStartedAt.containsKey(item.id) || !api.eventEndedAt.containsKey(item.id)) {
             val overrides = api.db.getOrCreateEventOverrides(item)
             if (overrides.startedAt != null)
                 api.eventStartedAt[item.id] = overrides.startedAt!!
