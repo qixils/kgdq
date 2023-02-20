@@ -317,7 +317,7 @@ data class EventData(
         targetAmount = event.value.targetAmount,
         minimumDonation = event.value.minimumDonation,
         paypalCurrency = event.value.paypalCurrency,
-        datetime = event.value.datetime,
+        datetime = event.value.startedAt,
         timezone = event.value.timezone,
         locked = event.value.locked,
         allowDonations = event.value.allowDonations,

@@ -6,6 +6,8 @@ import club.speedrun.vods.db
 import club.speedrun.vods.db.Filter.Companion.and
 import club.speedrun.vods.db.Filter.Companion.eq
 import club.speedrun.vods.db.Filter.Companion.id
+import club.speedrun.vods.db.Filter.Companion.or
+import club.speedrun.vods.db.Update.Companion.join
 import club.speedrun.vods.db.Update.Companion.set
 import club.speedrun.vods.httpClient
 import club.speedrun.vods.json
@@ -35,6 +37,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.slf4j.LoggerFactory
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
 abstract class Marathon(val api: GDQ) {
@@ -128,9 +131,17 @@ abstract class Marathon(val api: GDQ) {
 
     private suspend fun handleClassicSchedule(
         query: RunList,
-        event: Wrapper<Event>
+        event: Wrapper<Event>,
+        eventOverrides: EventOverrides,
     ): List<RunData> = coroutineScope {
-        val vods = async { getRedditVODs(event.value.short) }
+        val vodsFinalized = event.value.endedAt.isBefore(Instant.now().minus(7, ChronoUnit.DAYS))
+        val vods: Deferred<List<List<VOD>>> = async {
+            if (!eventOverrides.redditMergedIn || !vodsFinalized)
+                getRedditVODs(event.value.short)
+            else
+                emptyList()
+        }
+
         // do queries
         val runs: List<Wrapper<Run>> = ArrayList(
             api.query(
@@ -140,6 +151,7 @@ abstract class Marathon(val api: GDQ) {
                 runner = query.runner
             )
         ).sortedBy { it.value.order }
+
         val bids = (
             // TODO: pagination (if not ESA...)
             api.getBidTargets(
@@ -184,19 +196,34 @@ abstract class Marathon(val api: GDQ) {
             val data = RunData(run, runBids, previousRun, overrides)
             data.loadData()
             data.loadSrcGame(overrides)
-            vods.await().getOrNull(index)?.let { data.vods.addAll(it) } // TODO: add VODs directly to overrides for >1mo old events
+            vods.await().getOrNull(index)?.let {
+                data.vods.addAll(it)
+                if (vodsFinalized) {
+                    overrides.vods.addAll(it)
+                    api.db.runs.update(overrides)
+                }
+            }
             runData.add(data)
         }
+
+        // update override
+        if (!eventOverrides.redditMergedIn && vodsFinalized) {
+            eventOverrides.redditMergedIn = true
+            api.db.events.update(eventOverrides)
+        }
+
+        // return
         return@coroutineScope runData
     }
 
     private suspend fun handleHoraroSchedule(
         query: RunList,
         event: Wrapper<Event>,
+        eventOverrides: EventOverrides,
         schedule: FullSchedule
     ): List<RunData> {
         // this method is a bit hacky by nature of how Horaro works, but it should be stable.
-        val trackerRuns = handleClassicSchedule(query, event)
+        val trackerRuns = handleClassicSchedule(query, event, eventOverrides)
         val horaroRuns = ArrayList<RunData>(schedule.items.size)
         schedule.items.forEach { horaroRun ->
             val order = horaroRuns.size + 1
@@ -245,6 +272,7 @@ abstract class Marathon(val api: GDQ) {
                 call.respond(emptyList<RunData>())
                 return@get
             }
+            val eventOverrides = api.db.getOrCreateEventOverrides(event)
 
             // get schedule
             val schedule: FullSchedule? = event.value.horaroSchedule()
@@ -252,9 +280,9 @@ abstract class Marathon(val api: GDQ) {
             // handle
             call.respond(
                 if (schedule != null)
-                    handleHoraroSchedule(query, event, schedule)
+                    handleHoraroSchedule(query, event, eventOverrides, schedule)
                 else
-                    handleClassicSchedule(query, event)
+                    handleClassicSchedule(query, event, eventOverrides)
             )
         }
     }
@@ -309,9 +337,11 @@ fun RunData.loadSrcGame(overrides: RunOverrides?) {
 class EventDataCacher(private val api: GDQ) : Hook<Event> {
     override fun handle(item: Wrapper<Event>) {
         if (!api.eventStartedAt.containsKey(item.id)) {
-            val overrides = api.db.getOrCreateEventOverrides(item.value)
-            if (overrides.datetime != null)
-                api.eventStartedAt[item.id] = overrides.datetime!!
+            val overrides = api.db.getOrCreateEventOverrides(item)
+            if (overrides.startedAt != null)
+                api.eventStartedAt[item.id] = overrides.startedAt!!
+            if (overrides.endedAt != null)
+                api.eventEndedAt[item.id] = overrides.endedAt!!
         }
     }
 }
@@ -319,8 +349,8 @@ class EventDataCacher(private val api: GDQ) : Hook<Event> {
 class EventOverrideUpdater(private val api: GDQ) : Hook<Event> {
     override fun handle(item: Wrapper<Event>) {
         api.db.events.updateOne(
-            and(id(item.value.short), EventOverrides::datetime eq null),
-            EventOverrides::datetime set item.value.datetime
+            and(id(item.value.short), or(EventOverrides::startedAt eq null, EventOverrides::endedAt eq null)),
+            join(EventOverrides::startedAt set item.value.startedAt, EventOverrides::endedAt set item.value.endedAt)
         )
     }
 }

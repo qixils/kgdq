@@ -49,10 +49,12 @@ data class RunOverrides(
 @Serializable
 data class EventOverrides(
     override val id: String,
-    @Serializable(with = InstantAsSecondsSerializer::class) var datetime: Instant? = null,
+    @Serializable(with = InstantAsSecondsSerializer::class) var startedAt: Instant? = null,
+    @Serializable(with = InstantAsSecondsSerializer::class) var endedAt: Instant? = null,
+    var redditMergedIn: Boolean = false,
 ) : Identified {
-    constructor(event: Event) : this(
-        id = event.short,
+    constructor(event: Wrapper<Event>) : this(
+        id = event.id.toString(),
     )
 
     companion object {

@@ -95,9 +95,9 @@ class GdqDatabase(organization: String) : Database("api", "orgs", organization) 
         return overrides
     }
 
-    fun getOrCreateEventOverrides(event: Event): EventOverrides {
+    fun getOrCreateEventOverrides(event: Wrapper<Event>): EventOverrides {
         // get
-        var overrides: EventOverrides? = events.get(event.short)
+        var overrides: EventOverrides? = events.get(event.id.toString())
         // create
         if (overrides == null) {
             overrides = EventOverrides(event)

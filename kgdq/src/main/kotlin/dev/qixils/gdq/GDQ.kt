@@ -34,6 +34,7 @@ open class GDQ(
     private val responseCache: MutableMap<String, Pair<List<Wrapper<*>>, Instant>> = mutableMapOf()
     protected var lastCachedRunners: Instant? = null
     val eventStartedAt = mutableMapOf<Int, Instant?>()
+    val eventEndedAt = mutableMapOf<Int, Instant?>()
 
     /**
      * Constructs a new GDQ instance with the provided API path.

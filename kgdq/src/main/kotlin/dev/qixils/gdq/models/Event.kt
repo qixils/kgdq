@@ -21,7 +21,8 @@ data class Event(
     @SerialName("minimumdonation") val minimumDonation: Float,
 //    @SerialName("paypalemail") val paypalEmail: String, - don't see a reason to expose this
     @SerialName("paypalcurrency") val paypalCurrency: String,
-    @SerialName("datetime") @Serializable(with = InstantAsStringSerializer::class) private var _datetime: Instant? = null,
+    @SerialName("datetime") @Serializable(with = InstantAsStringSerializer::class) private var _starttime: Instant? = null,
+    @SerialName("endtime") @Serializable(with = InstantAsStringSerializer::class) private var _endtime: Instant? = null,
     @Serializable(with = ZoneIdSerializer::class) val timezone: ZoneId,
     val locked: Boolean,
     @SerialName("allow_donations") val allowDonations: Boolean = !locked,
@@ -36,12 +37,14 @@ data class Event(
 
     override suspend fun loadData(api: GDQ, id: Int) {
         // datetime fallback
-        if (_datetime == null) {
-            if (!api.eventStartedAt.containsKey(id))
-                api.eventStartedAt[id] = api.getRuns(event = id)
-                    .minByOrNull { it.value.order }?.value?.startTime
-                    ?: Instant.EPOCH
-            _datetime = api.eventStartedAt[id]
+        if (_starttime == null) {
+            if (!api.eventStartedAt.containsKey(id) || !api.eventEndedAt.containsKey(id)) {
+                val runs = api.getRuns(event = id).sortedBy { it.value.order }
+                api.eventStartedAt[id] = runs.firstOrNull()?.value?.startTime ?: Instant.EPOCH
+                api.eventEndedAt[id] = runs.lastOrNull()?.value?.endTime ?: Instant.EPOCH
+            }
+            _starttime = api.eventStartedAt[id]
+            _endtime = api.eventEndedAt[id]
         }
 
         // canonical URL fallback
@@ -52,16 +55,30 @@ data class Event(
     /**
      * The [Instant] at which the event will start.
      *
-     * @see zonedDateTime
+     * @see zonedStartTime
      */
-    val datetime: Instant get() = _datetime!!
+    val startedAt: Instant get() = _starttime!!
+
+    /**
+     * The [Instant] at which the event will end.
+     *
+     * @see zonedEndTime
+     */
+    val endedAt: Instant get() = _endtime!!
 
     /**
      * The [ZonedDateTime] at which the event will start.
      *
-     * @see datetime
+     * @see startedAt
      */
-    val zonedDateTime: ZonedDateTime get() = datetime.atZone(timezone)
+    val zonedStartTime: ZonedDateTime get() = startedAt.atZone(timezone)
+
+    /**
+     * The [ZonedDateTime] at which the event will end.
+     *
+     * @see endedAt
+     */
+    val zonedEndTime: ZonedDateTime get() = endedAt.atZone(timezone)
 
     /**
      * The public-facing URL of the event from the donation tracker website.
