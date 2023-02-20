@@ -16,6 +16,7 @@ class Collection<T : Identified>(private val serializer: KSerializer<T>, vararg 
     private val cache = mutableMapOf<String, T>()
 
     companion object {
+        private val cbor = Cbor{}
         private val executor = Executors.newSingleThreadExecutor()
         private val sanitizer = Regex("[^a-zA-Z0-9_-]")
     }
@@ -23,7 +24,7 @@ class Collection<T : Identified>(private val serializer: KSerializer<T>, vararg 
     init {
         path.toFile().mkdirs()
         path.listDirectoryEntries("*.cbor").forEach {
-            val obj = Cbor.decodeFromByteArray(serializer, it.readBytes())
+            val obj = cbor.decodeFromByteArray(serializer, it.readBytes())
             cache[obj.id] = obj
         }
     }
@@ -44,7 +45,7 @@ class Collection<T : Identified>(private val serializer: KSerializer<T>, vararg 
 
     private fun save(id: String) {
         val obj = cache[id] ?: return
-        val bytes = Cbor.encodeToByteArray(serializer, obj)
+        val bytes = cbor.encodeToByteArray(serializer, obj)
         executor.execute { pathOf(id).writeBytes(bytes) }
     }
 
