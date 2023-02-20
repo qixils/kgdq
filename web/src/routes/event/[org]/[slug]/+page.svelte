@@ -80,12 +80,14 @@
                                 {/if}
                                 <p>
                                     {#if run.vods.length > 0}
+                                        <!-- TODO: move to a component -->
                                         {@const vodCount = new Map()}
                                         <div class="dropdown">
                                             <label tabindex="0"><span class="hover:bg-info-content rounded-box material-symbols-rounded text-sm text-info">play_circle</span></label>
-                                            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                                            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-56">
                                                 {#each run.vods as vod}
-                                                    {@const index = vodCount.set(vod.platform, (vodCount.get(vod.platform) ?? -1) + 1).get(vod.platform)}
+                                                    <!-- TODO: move to a component -->
+                                                    {@const index = vodCount.set(vod.type, (vodCount.get(vod.type) ?? -1) + 1).get(vod.type)}
                                                     <li><a href={vod.url} target="_blank" rel="noopener noreferrer">
                                                         Watch
                                                         {#if vod.type === "YOUTUBE"}
@@ -101,7 +103,7 @@
                                     {/if}
                                     <span style="position: relative; top:-.1em;">
                                     <b>{run.name}</b
-                                    >{#if run.src !== null}
+                                    >{#if run.src !== null && run.src !== undefined}
                                         <sup>
                                             <a href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer">[src]</a>
                                         </sup>
@@ -125,7 +127,7 @@
                                         {#if index > 0}
                                             ,
                                         {/if}
-                                        {#if runner.url !== null}
+                                        {#if runner.url !== null && runner.url !== undefined}
                                             <a href={runner.url} target="_blank" rel="noopener noreferrer">{runner.name}</a>
                                         {:else}
                                             {runner.name}
@@ -143,6 +145,7 @@
                                             text-success text-warning text-error
                                             bg-success-content bg-warning-content bg-error-content
                                             -->
+                                            <!-- TODO: move to a component -->
                                             {@const percent = Math.round((bid.donationTotal / bid.goal) * 100)}
                                             {@const color = percent >= 100 ? "success" : (bid.state === "OPENED" ? "warning" : "error")}
                                             <p class="block my-auto"><span class="radial-progress text-[.65rem] text-{color} bg-{color}-content" style="--value:{percent}; --size:2.2rem;">{percent}%</span></p>
