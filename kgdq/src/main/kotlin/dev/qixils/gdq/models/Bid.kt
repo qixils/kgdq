@@ -1,7 +1,6 @@
 package dev.qixils.gdq.models
 
 import dev.qixils.gdq.GDQ
-import dev.qixils.gdq.ModelType
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -46,17 +45,17 @@ data class Bid(
 
     suspend fun event(): Wrapper<Event> {
         if (_event == null)
-            _event = api!!.query(type = ModelType.EVENT, id = eventId).first()
+            _event = api!!.getEvent(eventId)
         return _event!!
     }
     suspend fun run(): Wrapper<Run>? {
         if (_run == null && runId != null)
-            _run = api!!.query(type = ModelType.RUN, id = runId).firstOrNull()
+            _run = api!!.getRun(runId)
         return _run
     }
     suspend fun parent(): Wrapper<Bid>? {
         if (_parent == null && parentId != null)
-            _parent = api!!.query(type = ModelType.BID, id = parentId).firstOrNull()
+            _parent = api!!.getBid(parentId)
         return _parent
     }
 }

@@ -1,7 +1,6 @@
 package dev.qixils.gdq.models
 
 import dev.qixils.gdq.GDQ
-import dev.qixils.gdq.ModelType
 import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import kotlinx.serialization.SerialName
@@ -62,13 +61,13 @@ data class Run(
 
     suspend fun event(): Wrapper<Event> {
         if (_event == null)
-            _event = api!!.query(type = ModelType.EVENT, id = eventId).first()
+            _event = api!!.getEvent(eventId)
         return _event!!
     }
 
     suspend fun runners(): List<Wrapper<Runner>> {
         if (_runners == null)
-            _runners = runnerIds.map { api!!.query(type = ModelType.RUNNER, id = it ).first() }
+            _runners = runnerIds.map { api!!.getRunner(it)!! }
         return _runners!!
     }
 }

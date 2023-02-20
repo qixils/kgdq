@@ -57,8 +57,6 @@ class ScheduleManager(
 
     private suspend fun <M> get(query: String, serializer: KSerializer<M>): M {
         // TODO: i should really have a module for using the vods.speedrun.club API.
-        //  and while I'm at it, I should consider sorta rewriting the GDQ API module to actually provide dedicated
-        //  functions and response objects for each endpoint instead of just a generic "get" function.
         val uri = URI(apiRoot + query)
         logger.debug("GET $uri")
         val request = HttpRequest.newBuilder(uri).GET().build()

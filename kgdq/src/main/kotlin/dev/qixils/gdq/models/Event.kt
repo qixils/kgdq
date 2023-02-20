@@ -1,7 +1,6 @@
 package dev.qixils.gdq.models
 
 import dev.qixils.gdq.GDQ
-import dev.qixils.gdq.ModelType
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import dev.qixils.gdq.serializers.ZoneIdSerializer
 import kotlinx.serialization.SerialName
@@ -39,7 +38,7 @@ data class Event(
         // datetime fallback
         if (_datetime == null) {
             if (!api.eventStartedAt.containsKey(id))
-                api.eventStartedAt[id] = api.query(type = ModelType.RUN, event = id)
+                api.eventStartedAt[id] = api.getRuns(event = id)
                     .minByOrNull { it.value.order }?.value?.startTime
                     ?: Instant.EPOCH
             _datetime = api.eventStartedAt[id]

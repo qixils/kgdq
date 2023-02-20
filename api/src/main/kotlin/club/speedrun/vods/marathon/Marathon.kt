@@ -108,12 +108,10 @@ abstract class Marathon(val api: GDQ) {
         val eventId = id.toIntOrNull() ?: eventIdCache[id]
         if (eventId != null) {
             if (eventId == -1) return null
-            return api
-                .query(ModelType.EVENT, id = eventId, preLoad = eventCacher, postLoad = eventUpdater)
-                .firstOrNull()
+            return api.getEvent(eventId, preLoad = eventCacher, postLoad = eventUpdater)
         }
 
-        val events = ArrayList(api.query(type = ModelType.EVENT, preLoad = eventCacher, postLoad = eventUpdater))
+        val events = ArrayList(api.getEvents(preLoad = eventCacher, postLoad = eventUpdater))
         events.forEach { eventIdCache[it.value.short] = it.id }
 
         val event = events.firstOrNull { it.value.short.equals(id, true) }
@@ -144,12 +142,10 @@ abstract class Marathon(val api: GDQ) {
         ).sortedBy { it.value.order }
         val bids = (
             // TODO: pagination (if not ESA...)
-            api.query(
-                type = ModelType.BID_TARGET,
+            api.getBidTargets(
                 run = query.id?.toInt(),
                 event = event.id
-            ) + api.query(
-                type = ModelType.BID, // ensures the parents of hardcoded bid wars are loaded
+            ) + api.getBids( // ensures the parents of hardcoded bid wars are loaded
                 run = query.id?.toInt(),
                 event = event.id
             )
@@ -226,7 +222,7 @@ abstract class Marathon(val api: GDQ) {
             val event = getEvent(query.id)
             if (event == null) emptyList() else listOf(event)
         } else {
-            ArrayList(api.query(type = ModelType.EVENT, preLoad = eventCacher, postLoad = eventUpdater))
+            ArrayList(api.getEvents(preLoad = eventCacher, postLoad = eventUpdater))
         }
     }
 
@@ -282,7 +278,7 @@ class ESA(apiPath: String = "https://donations.esamarathon.com/search/", organiz
         if (lastCachedRunners != null && lastCachedRunners!!.plus(ModelType.RUNNER.cacheFor).isAfter(now))
             return
         lastCachedRunners = now
-        query(type = ModelType.RUNNER)
+        getRunners()
     }
 }
 

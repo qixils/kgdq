@@ -24,10 +24,29 @@ data class ModelType<M : Model>(
 
         fun get(id: String): ModelType<*>? = types[id.replaceFirst("tracker.", "")]
 
+        /**
+         * A donation incentive or the top-level parent of a bid war.
+         */
         val BID = register(ModelType("bid", Bid::class, Bid.serializer(), Duration.ofMinutes(5)))
+
+        /**
+         * An option in a bid war. May also include the top-level parent of user-submittable bid wars.
+         */
         val BID_TARGET = register(ModelType("bidtarget", Bid::class, Bid.serializer(), Duration.ofMinutes(5)))
+
+        /**
+         * An event.
+         */
         val EVENT = register(ModelType("event", Event::class, Event.serializer(), Duration.ofMinutes(5)))
+
+        /**
+         * A speedrun.
+         */
         val RUN = register(ModelType("run", Run::class, Run.serializer(), Duration.ofMinutes(5), aliases = listOf("speedrun")))
+
+        /**
+         * A speedrunner.
+         */
         val RUNNER = register(ModelType("runner", Runner::class, Runner.serializer(), Duration.ofDays(1), strictCache = false))
         // TODO: donations, donors
     }
