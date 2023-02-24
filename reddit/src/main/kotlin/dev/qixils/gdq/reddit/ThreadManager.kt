@@ -170,15 +170,13 @@ class ThreadManager(
     suspend fun run() {
         logger.info("Running thread manager for ${config.organization.shortName}")
 
-        // Generate body
-        val body = generateBody().toString()
-
         // Update thread
         try {
+            // Generate body
+            val body = generateBody().toString()
             // Wait until 3 seconds have elapsed since the last update to avoid rate limiting
-            while (lastUpdate.isAfter(Instant.now().minusSeconds(3))) {
+            while (lastUpdate.isAfter(Instant.now().minusSeconds(3)))
                 delay(1000)
-            }
             // Perform update
             lastUpdate = Instant.now()
             reddit.submission(config.threadId).edit(body)

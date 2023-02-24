@@ -2,11 +2,12 @@ package dev.qixils.gdq.reddit
 
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.time.withTimeout
 import net.dean.jraw.RedditClient
 import net.dean.jraw.http.OkHttpNetworkAdapter
 import net.dean.jraw.http.UserAgent
-import net.dean.jraw.oauth.Credentials
 import net.dean.jraw.oauth.OAuthHelper
+import okhttp3.OkHttpClient
 import org.slf4j.LoggerFactory
 import org.spongepowered.configurate.CommentedConfigurationNode
 import org.spongepowered.configurate.ConfigurateException
@@ -14,6 +15,7 @@ import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
 import org.spongepowered.configurate.objectmapping.ObjectMapper
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader
 import java.nio.file.Paths
+import java.time.Duration
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -71,7 +73,14 @@ object ThreadMaster {
 
         // init reddit
         val userAgent = UserAgent("bot", "dev.qixils.gdq", "1.0.0", "noellekiq")
-        reddit = OAuthHelper.automatic(OkHttpNetworkAdapter(userAgent), config.credentials.toCredentials())
+        val timeout = Duration.ofSeconds(30)
+        val client = OkHttpClient.Builder()
+            .connectTimeout(timeout)
+            .callTimeout(timeout)
+            .readTimeout(timeout)
+            .writeTimeout(timeout)
+            .build()
+        reddit = OAuthHelper.automatic(OkHttpNetworkAdapter(userAgent, client), config.credentials.toCredentials())
     }
 
     @JvmStatic
@@ -80,7 +89,7 @@ object ThreadMaster {
         logger.info("Loading threads...")
         val managers = config.threads.map { ThreadManager(reddit, it) }
         scheduler.scheduleAtFixedRate({
-            runBlocking { managers.forEach { launch { it.run() } } }
+            runBlocking { managers.forEach { launch { withTimeout(Duration.ofMinutes(3)) { it.run() } } } }
         }, 0, config.waitMinutes, TimeUnit.MINUTES)
     }
 }
