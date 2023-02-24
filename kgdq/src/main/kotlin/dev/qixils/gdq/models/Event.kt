@@ -9,6 +9,7 @@ import kotlinx.serialization.Transient
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 
 @Serializable
 data class Event(
@@ -38,10 +39,14 @@ data class Event(
     override suspend fun loadData(api: GDQ, id: Int) {
         // datetime fallback
         if (_starttime == null || _endtime == null) {
+            if (api.eventEndedAtExpiration[id]?.isBefore(Instant.now()) == true)
+                api.eventEndedAt.remove(id)
             if (!api.eventStartedAt.containsKey(id) || !api.eventEndedAt.containsKey(id)) {
                 val runs = api.getRuns(event = id).sortedBy { it.value.order }
                 api.eventStartedAt[id] = runs.firstOrNull()?.value?.startTime ?: Instant.EPOCH
                 api.eventEndedAt[id] = runs.lastOrNull()?.value?.endTime ?: Instant.EPOCH
+                if (api.eventEndedAt[id] != Instant.EPOCH && api.eventEndedAt[id]!!.isAfter(Instant.now()))
+                    api.eventEndedAtExpiration[id] = Instant.now().plus(1, ChronoUnit.DAYS)
             }
             _starttime = api.eventStartedAt[id]
             _endtime = api.eventEndedAt[id]

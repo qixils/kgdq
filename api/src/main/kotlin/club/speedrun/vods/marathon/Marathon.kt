@@ -3,12 +3,6 @@
 package club.speedrun.vods.marathon
 
 import club.speedrun.vods.db
-import club.speedrun.vods.db.Filter.Companion.and
-import club.speedrun.vods.db.Filter.Companion.eq
-import club.speedrun.vods.db.Filter.Companion.id
-import club.speedrun.vods.db.Filter.Companion.or
-import club.speedrun.vods.db.Update.Companion.join
-import club.speedrun.vods.db.Update.Companion.set
 import club.speedrun.vods.httpClient
 import club.speedrun.vods.json
 import club.speedrun.vods.plugins.UserError
@@ -39,6 +33,33 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
+import kotlin.collections.ArrayList
+import kotlin.collections.List
+import kotlin.collections.MutableList
+import kotlin.collections.associate
+import kotlin.collections.associateWith
+import kotlin.collections.distinctBy
+import kotlin.collections.emptyList
+import kotlin.collections.filter
+import kotlin.collections.first
+import kotlin.collections.firstOrNull
+import kotlin.collections.forEach
+import kotlin.collections.forEachIndexed
+import kotlin.collections.getOrNull
+import kotlin.collections.isNotEmpty
+import kotlin.collections.joinToString
+import kotlin.collections.lastOrNull
+import kotlin.collections.listOf
+import kotlin.collections.map
+import kotlin.collections.mutableListOf
+import kotlin.collections.mutableMapOf
+import kotlin.collections.plus
+import kotlin.collections.removeFirst
+import kotlin.collections.set
+import kotlin.collections.sortedBy
+import kotlin.collections.sortedByDescending
+import kotlin.collections.sortedWith
+import kotlin.collections.toMutableList
 
 abstract class Marathon(val api: GDQ) {
     private val logger = LoggerFactory.getLogger("Marathon")
@@ -348,9 +369,11 @@ class EventDataCacher(private val api: GDQ) : Hook<Event> {
 
 class EventOverrideUpdater(private val api: GDQ) : Hook<Event> {
     override fun handle(item: Wrapper<Event>) {
-        api.db.events.updateOne(
-            and(id(item.value.short), or(EventOverrides::startedAt eq null, EventOverrides::endedAt eq null)),
-            join(EventOverrides::startedAt set item.value.startedAt, EventOverrides::endedAt set item.value.endedAt)
-        )
+        val overrides = api.db.getOrCreateEventOverrides(item)
+        if (overrides.startedAt == null)
+            api.eventStartedAt[item.id] = item.value.startedAt
+        if (overrides.endedAt == null && item.value.endedAt.isBefore(Instant.now()))
+            api.eventEndedAt[item.id] = item.value.endedAt
+        api.db.events.update(overrides)
     }
 }
