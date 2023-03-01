@@ -7,7 +7,9 @@ export interface Event {
     targetAmount: number, // donation target
     minimumDonation: number, // minimum donation amount
     paypalCurrency: string,
-    datetime: string, // start time of event in ISO 8601 format
+    startTime: string, // start time of event in ISO 8601 format
+    endTime: string, // end time of event in ISO 8601 format
+    timeStatus: string, // status of event (either UPCOMING, IN_PROGRESS, or FINISHED)
     timezone: string, // timezone of event
     locked: boolean, // whether editing is locked
     allowDonations: boolean, // whether donations are allowed
@@ -42,7 +44,7 @@ export interface Run {
     bids: Bid[], // the bids (bid wars, donation incentives) for this run
     vods: VOD[], // the VODs for this run
     src: string | null, // the speedrun.com slug for the game being run
-    scheduleStatus: string, // the status of the run in the schedule
+    timeStatus: string, // the status of the run in the schedule
 }
 
 export interface Runner {

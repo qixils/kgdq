@@ -45,7 +45,7 @@ class RunData{
     /**
      * The current status of the run in the schedule.
      */
-    val scheduleStatus: ScheduleStatus
+    val timeStatus: TimeStatus
 
     constructor(
         run: Wrapper<Run>,
@@ -85,12 +85,12 @@ class RunData{
         } else {
             setupTime = run.value.setupTime
         }
-        scheduleStatus = run {
+        timeStatus = run {
             val now = Instant.now()
             when {
-                now < startTime.minus(setupTime) -> ScheduleStatus.UPCOMING
-                now < endTime -> ScheduleStatus.IN_PROGRESS
-                else -> ScheduleStatus.FINISHED
+                now < startTime.minus(setupTime) -> TimeStatus.UPCOMING
+                now < endTime -> TimeStatus.IN_PROGRESS
+                else -> TimeStatus.FINISHED
             }
         }
     }
@@ -138,12 +138,12 @@ class RunData{
         } else {
             setupTime = trackerRun?.setupTime ?: Duration.ZERO
         }
-        scheduleStatus = run {
+        timeStatus = run {
             val now = Instant.now()
             when {
-                now < startTime.minus(setupTime) -> ScheduleStatus.UPCOMING
-                now < endTime -> ScheduleStatus.IN_PROGRESS
-                else -> ScheduleStatus.FINISHED
+                now < startTime.minus(setupTime) -> TimeStatus.UPCOMING
+                now < endTime -> TimeStatus.IN_PROGRESS
+                else -> TimeStatus.FINISHED
             }
         }
     }
@@ -170,7 +170,7 @@ class RunData{
     /**
      * Whether this is the current run being played at the event.
      */
-    val isCurrent: Boolean get() = scheduleStatus == ScheduleStatus.IN_PROGRESS
+    val isCurrent: Boolean get() = timeStatus == TimeStatus.IN_PROGRESS
 
     companion object {
         private val MARKDOWN_LINK: Pattern = Pattern.compile("\\[([^]]+)]\\(([^)]+)\\)")
@@ -287,50 +287,60 @@ data class BidData(
 }
 
 @Serializable
-data class EventData(
-    val id: Int,
-    val short: String,
-    val name: String,
-    val hashtag: String,
-    val charityName: String,
-    val targetAmount: Float,
-    val minimumDonation: Float,
-    val paypalCurrency: String,
-    @Serializable(with = InstantAsStringSerializer::class) val datetime: Instant,
-    @Serializable(with = ZoneIdSerializer::class) val timezone: ZoneId,
-    val locked: Boolean,
-    val allowDonations: Boolean,
-    val canonicalUrl: String,
-    val public: String,
-    val amount: Float,
-    val count: Int,
-    val max: Float,
-    val avg: Double,
-    var horaroEvent: String? = null,
-    var horaroSchedule: String? = null,
-) {
-    constructor(event: Wrapper<Event>) : this(
-        id = event.id,
-        short = event.value.short,
-        name = event.value.name,
-        hashtag = event.value.hashtag,
-        charityName = event.value.charityName,
-        targetAmount = event.value.targetAmount,
-        minimumDonation = event.value.minimumDonation,
-        paypalCurrency = event.value.paypalCurrency,
-        datetime = event.value.startedAt,
-        timezone = event.value.timezone,
-        locked = event.value.locked,
-        allowDonations = event.value.allowDonations,
-        canonicalUrl = event.value.canonicalUrl,
-        public = event.value.public,
-        amount = event.value.amount,
-        count = event.value.count,
-        max = event.value.max,
-        avg = event.value.avg,
-        horaroEvent = event.value.horaroEvent,
-        horaroSchedule = event.value.horaroSchedule,
-    )
+class EventData {
+    val id: Int
+    val short: String
+    val name: String
+    val hashtag: String
+    val charityName: String
+    val targetAmount: Float
+    val minimumDonation: Float
+    val paypalCurrency: String
+    @Serializable(with = InstantAsStringSerializer::class) val startTime: Instant
+    @Serializable(with = InstantAsStringSerializer::class) val endTime: Instant
+    val timeStatus: TimeStatus
+    @Serializable(with = ZoneIdSerializer::class) val timezone: ZoneId
+    val locked: Boolean
+    val allowDonations: Boolean
+    val canonicalUrl: String
+    val public: String
+    val amount: Float
+    val count: Int
+    val max: Float
+    val avg: Double
+    var horaroEvent: String? = null
+    var horaroSchedule: String? = null
+
+    constructor(event: Wrapper<Event>) {
+        id = event.id
+        short = event.value.short
+        name = event.value.name
+        hashtag = event.value.hashtag
+        charityName = event.value.charityName
+        targetAmount = event.value.targetAmount
+        minimumDonation = event.value.minimumDonation
+        paypalCurrency = event.value.paypalCurrency
+        startTime = event.value.startTime
+        endTime = event.value.endTime
+        timezone = event.value.timezone
+        locked = event.value.locked
+        allowDonations = event.value.allowDonations
+        canonicalUrl = event.value.canonicalUrl
+        public = event.value.public
+        amount = event.value.amount
+        count = event.value.count
+        max = event.value.max
+        avg = event.value.avg
+        horaroEvent = event.value.horaroEvent
+        horaroSchedule = event.value.horaroSchedule
+
+        val now = Instant.now()
+        timeStatus = when {
+            now < startTime -> TimeStatus.UPCOMING
+            now < endTime -> TimeStatus.IN_PROGRESS
+            else -> TimeStatus.FINISHED
+        }
+    }
 
     suspend fun horaroSchedule(): FullSchedule? {
         if (horaroEvent == null || horaroSchedule == null) return null
@@ -340,7 +350,7 @@ data class EventData(
     val horaroUrl get() = "https://horaro.org/$horaroEvent/$horaroSchedule"
 }
 
-enum class ScheduleStatus {
+enum class TimeStatus {
     UPCOMING,
     IN_PROGRESS,
     FINISHED,

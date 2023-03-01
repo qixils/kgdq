@@ -62,28 +62,28 @@ data class Event(
      *
      * @see zonedStartTime
      */
-    val startedAt: Instant get() = _starttime!!
+    val startTime: Instant get() = _starttime!!
 
     /**
      * The [Instant] at which the event will end.
      *
      * @see zonedEndTime
      */
-    val endedAt: Instant get() = _endtime!!
+    val endTime: Instant get() = _endtime!!
 
     /**
      * The [ZonedDateTime] at which the event will start.
      *
-     * @see startedAt
+     * @see startTime
      */
-    val zonedStartTime: ZonedDateTime get() = startedAt.atZone(timezone)
+    val zonedStartTime: ZonedDateTime get() = startTime.atZone(timezone)
 
     /**
      * The [ZonedDateTime] at which the event will end.
      *
-     * @see endedAt
+     * @see endTime
      */
-    val zonedEndTime: ZonedDateTime get() = endedAt.atZone(timezone)
+    val zonedEndTime: ZonedDateTime get() = endTime.atZone(timezone)
 
     /**
      * The public-facing URL of the event from the donation tracker website.

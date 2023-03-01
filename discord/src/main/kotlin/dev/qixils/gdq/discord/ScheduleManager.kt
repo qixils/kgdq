@@ -167,12 +167,12 @@ class ScheduleManager(
         timestamp = Instant.now()
         footer(name = "Last Updated")
 
-        if (event.datetime > Instant.now()) {
+        if (event.startTime > Instant.now()) {
             field {
                 name = "Starting Soon!"
                 value = "The event will start " +
-                        TimeFormat.RELATIVE.format(event.datetime) + " on " +
-                        TimeFormat.DATE_TIME_SHORT.format(event.datetime) + "."
+                        TimeFormat.RELATIVE.format(event.startTime) + " on " +
+                        TimeFormat.DATE_TIME_SHORT.format(event.startTime) + "."
                 inline = false
             }
         } else if (runTicker.isNotEmpty()) {

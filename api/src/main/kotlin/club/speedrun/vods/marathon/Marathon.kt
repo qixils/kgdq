@@ -33,33 +33,7 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
-import kotlin.collections.ArrayList
-import kotlin.collections.List
-import kotlin.collections.MutableList
-import kotlin.collections.associate
-import kotlin.collections.associateWith
-import kotlin.collections.distinctBy
-import kotlin.collections.emptyList
-import kotlin.collections.filter
-import kotlin.collections.first
-import kotlin.collections.firstOrNull
-import kotlin.collections.forEach
-import kotlin.collections.forEachIndexed
-import kotlin.collections.getOrNull
-import kotlin.collections.isNotEmpty
-import kotlin.collections.joinToString
-import kotlin.collections.lastOrNull
-import kotlin.collections.listOf
-import kotlin.collections.map
-import kotlin.collections.mutableListOf
-import kotlin.collections.mutableMapOf
-import kotlin.collections.plus
-import kotlin.collections.removeFirst
 import kotlin.collections.set
-import kotlin.collections.sortedBy
-import kotlin.collections.sortedByDescending
-import kotlin.collections.sortedWith
-import kotlin.collections.toMutableList
 
 abstract class Marathon(val api: GDQ) {
     private val logger = LoggerFactory.getLogger("Marathon")
@@ -155,7 +129,7 @@ abstract class Marathon(val api: GDQ) {
         event: Wrapper<Event>,
         eventOverrides: EventOverrides,
     ): List<RunData> = coroutineScope {
-        val vodsFinalized = event.value.endedAt.isBefore(Instant.now().minus(7, ChronoUnit.DAYS))
+        val vodsFinalized = event.value.endTime.isBefore(Instant.now().minus(7, ChronoUnit.DAYS))
         val vods: Deferred<List<List<VOD>>> = async {
             if (!eventOverrides.redditMergedIn || !vodsFinalized)
                 getRedditVODs(event.value.short)
@@ -275,7 +249,7 @@ abstract class Marathon(val api: GDQ) {
     }
 
     suspend fun getEventsData(query: EventList? = null): List<EventData> {
-        return getEvents(query).map { EventData(it) }.sortedBy { it.datetime }
+        return getEvents(query).map { EventData(it) }.sortedBy { it.startTime }
     }
 
     fun route(): Route.() -> Unit = {
@@ -371,9 +345,9 @@ class EventOverrideUpdater(private val api: GDQ) : Hook<Event> {
     override fun handle(item: Wrapper<Event>) {
         val overrides = api.db.getOrCreateEventOverrides(item)
         if (overrides.startedAt == null)
-            api.eventStartedAt[item.id] = item.value.startedAt
-        if (overrides.endedAt == null && item.value.endedAt.isBefore(Instant.now()))
-            api.eventEndedAt[item.id] = item.value.endedAt
+            api.eventStartedAt[item.id] = item.value.startTime
+        if (overrides.endedAt == null && item.value.endTime.isBefore(Instant.now()))
+            api.eventEndedAt[item.id] = item.value.endTime
         api.db.events.update(overrides)
     }
 }

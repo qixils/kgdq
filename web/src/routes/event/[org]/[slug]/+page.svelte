@@ -2,39 +2,41 @@
     import type {Event, Run} from 'src/gdq';
     import {page} from "$app/stores";
     import VODs from "$lib/VODs.svelte";
-
-    // TODO: something is causing ESA APIs to get spammed really hard
-    // TODO: handle the case where the event is not found
-    let event_promise: Promise<Event> = fetch(`https://vods.speedrun.club/api/v2/marathons/${$page.params.org}/events?id=${$page.params.slug}`)
-        .then(r => r.json() /* todo: handle decode error */).then(r => r[0]);
-    let runs_promise: Promise<Run[]> = fetch(`https://vods.speedrun.club/api/v2/marathons/${$page.params.org}/runs?event=${$page.params.slug}`)
-        .then(r => r.json() /* todo: handle decode error */)
+    import {Formatters} from "$lib/Formatters";
 
     let money_format = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });
+
+    let event_promise: Promise<Event> = fetch(`https://vods.speedrun.club/api/v2/marathons/${$page.params.org}/events?id=${$page.params.slug}`).then(r => {
+        if (r.status !== 200) {
+            return Promise.reject(new Error(`failed to fetch data (error ${r.status})`));
+        }
+        return r.json().then(r => {
+            if (r.length === 0) {
+                return Promise.reject(new Error("not found"));
+            }
+            let event: Event = r[0];
+            money_format = new Intl.NumberFormat(undefined, { style: 'currency', currency: event.paypalCurrency });
+            return r[0];
+        });
+    });
+    let runs_promise: Promise<Run[]> = fetch(`https://vods.speedrun.club/api/v2/marathons/${$page.params.org}/runs?event=${$page.params.slug}`).then(r => {
+        if (r.status !== 200) {
+            return Promise.reject(new Error(`failed to fetch data (error ${r.status})`));
+        }
+        return r.json();
+    });
+
     function money(n: number) {
         let res = money_format.format(n);
-        if (res.endsWith('.00')) {
+        if (res.endsWith('.00') || res.endsWith(',00')) {
             res = res.slice(0, -3);
         }
         return res;
     }
-
-    let date_header_format = new Intl.DateTimeFormat(undefined, { dateStyle: 'full' });
-    function date_header(dt: string) {
-        return date_header_format.format(new Date(dt));
-    }
-    let date_hero_format = new Intl.DateTimeFormat(undefined, { dateStyle: 'long' });
-    function date_hero(dt: string) {
-        return date_hero_format.format(new Date(dt));
-    }
-    let time_format = new Intl.DateTimeFormat(undefined, { timeStyle: 'short' });
-    function time(dt: string) {
-        return time_format.format(new Date(dt));
-    }
 </script>
 
 <svelte:head>
-    <title></title>
+    <title></title> <!-- TODO -->
 </svelte:head>
 
 <section>
@@ -47,12 +49,14 @@
                     <h1 class="text-4xl font-bold">{event.name}</h1>
                     <p class="py-4">
                         {event.short.toUpperCase()} <!-- TODO: this looks bad for some events (namely ESA) -->
-                        {#await runs_promise}
-                            began on {date_hero(event.datetime)}
-                        {:then runs}
-                            ran from {date_hero(event.datetime)} to {date_hero(runs[runs.length - 1].endTime)}
-                        {/await}
-                        and raised {money(event.amount)} for {event.charityName}.
+                        {#if event.timeStatus === "UPCOMING"}
+                            will run from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raise money
+                        {:else if event.timeStatus === "IN_PROGRESS"}
+                            is running from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and has raised {money(event.amount)}
+                        {:else}
+                            ran from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raised {money(event.amount)}
+                        {/if}
+                        for {event.charityName}.
                     </p>
                     <p>
                         Below you can find the schedule for the event and click on the play icon to the left of each run
@@ -72,14 +76,14 @@
                     <li data-content="" class="step {step_color} text-base-content" style="z-index: -{run_index}">
                         <div class="flex w-full align-center gap-2">
                             <p class="text-center block my-auto basis-8 font-light md:basis-10 md:font-normal flex-shrink-0" style="position: relative; top:-.175rem;">
-                                {time(run.startTime)}
+                                {Formatters.time(run.startTime)}
                             </p>
                             <div class="text-left p-2 bg-base-300 block flex-grow">
                                 {#if run_index === 0 || new Date(run.startTime).getDay() !== new Date(runs[run_index - 1].startTime).getDay()}
                                     {#if run_index > 0}
                                         <hr class="border-neutral/50" style="position: relative; top:-.6rem;">
                                     {/if}
-                                    <p class="text-base md:text-lg bg-primary text-primary-content p-2 pl-3 rounded-t font-semibold">{date_header(run.startTime)}</p>
+                                    <p class="text-base md:text-lg bg-primary text-primary-content p-2 pl-3 rounded-t font-semibold">{Formatters.date_header(run.startTime)}</p>
                                     <hr class="border-primary/70 border-2 mb-3">
                                 {/if}
                                 <p>
@@ -167,7 +171,11 @@
                     </li>
                 {/each}
             </ul>
+        {:catch run_error}
+            <p class="error">Error loading runs: {run_error.message}</p>
         {/await}
+    {:catch event_error}
+        <p class="error">Error loading event: {event_error.message}</p>
     {/await}
 </section>
 
@@ -187,5 +195,9 @@
 
     .bid-body {
         @apply block my-auto flex-grow text-xs md:text-sm;
+    }
+
+    .error {
+        @apply block bg-error text-error-content p-2 rounded m-auto w-fit my-4;
     }
 </style>
