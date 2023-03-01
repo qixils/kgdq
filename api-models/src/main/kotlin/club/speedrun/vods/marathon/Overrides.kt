@@ -50,7 +50,7 @@ data class RunOverrides(
 data class EventOverrides(
     override val id: String,
     @Serializable(with = InstantAsSecondsSerializer::class) var startedAt: Instant? = null,
-    @Serializable(with = InstantAsSecondsSerializer::class) var endedAt: Instant? = null, // TODO: cache this less readily
+    @Serializable(with = InstantAsSecondsSerializer::class) var endedAt: Instant? = null,
     var redditMergedIn: Boolean = false,
 ) : Identified {
     constructor(event: Wrapper<Event>) : this(

@@ -3,6 +3,7 @@ package club.speedrun.vods.db
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.cbor.Cbor
+import org.slf4j.LoggerFactory
 import java.nio.file.Paths
 import java.util.concurrent.Executors
 import kotlin.io.path.deleteIfExists
@@ -16,6 +17,7 @@ class Collection<T : Identified>(private val serializer: KSerializer<T>, vararg 
     private val cache = mutableMapOf<String, T>()
 
     companion object {
+        private val logger = LoggerFactory.getLogger(Collection::class.java)
         private val cbor = Cbor{}
         private val executor = Executors.newSingleThreadExecutor()
         private val sanitizer = Regex("[^a-zA-Z0-9_-]")
@@ -46,7 +48,15 @@ class Collection<T : Identified>(private val serializer: KSerializer<T>, vararg 
     private fun save(id: String) {
         val obj = cache[id] ?: return
         val bytes = cbor.encodeToByteArray(serializer, obj)
-        executor.execute { pathOf(id).writeBytes(bytes) }
+        executor.execute {
+            val path = pathOf(id)
+            logger.debug("Saving $obj ($id) to $path (${bytes.size} bytes)")
+            try {
+                path.writeBytes(bytes)
+            } catch (e: Exception) {
+                logger.error("Failed to save $obj", e)
+            }
+        }
     }
 
     fun update(obj: T) {

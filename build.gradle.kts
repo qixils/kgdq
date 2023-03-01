@@ -14,13 +14,17 @@ allprojects {
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
+    val javaVer = JavaVersion.VERSION_17
+    java.sourceCompatibility = javaVer
+    java.targetCompatibility = javaVer
+
     dependencies {
         api("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
     }
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions {
-            jvmTarget = "18"
+            jvmTarget = javaVer.majorVersion
         }
         kotlinOptions.freeCompilerArgs += "-opt-in=dev.qixils.gdq.InternalGdqApi"
         kotlinOptions.freeCompilerArgs += "-opt-in=dev.qixils.horaro.InternalHoraroApi"
