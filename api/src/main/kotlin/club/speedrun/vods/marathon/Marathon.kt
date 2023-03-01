@@ -30,6 +30,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
@@ -331,12 +332,12 @@ fun RunData.loadSrcGame(overrides: RunOverrides?) {
 
 class EventDataCacher(private val api: GDQ) : Hook<Event> {
     override fun handle(item: Wrapper<Event>) {
-        if (!api.eventStartedAt.containsKey(item.id) || !api.eventEndedAt.containsKey(item.id)) {
-            val overrides = api.db.getOrCreateEventOverrides(item)
-            if (overrides.startedAt != null)
-                api.eventStartedAt[item.id] = overrides.startedAt!!
-            if (overrides.endedAt != null)
-                api.eventEndedAt[item.id] = overrides.endedAt!!
+        val overrides = api.db.getOrCreateEventOverrides(item)
+        if (overrides.startedAt != null)
+            api.eventStartedAt[item.id] = overrides.startedAt
+        if (overrides.endedAt != null) {
+            api.eventEndedAt[item.id] = overrides.endedAt
+            api.eventEndedAtExpiration.remove(item.id)
         }
     }
 }
@@ -346,7 +347,7 @@ class EventOverrideUpdater(private val api: GDQ) : Hook<Event> {
         val overrides = api.db.getOrCreateEventOverrides(item)
         if (overrides.startedAt == null)
             overrides.startedAt = item.value.startTime
-        if (overrides.endedAt == null && item.value.endTime.isBefore(Instant.now()))
+        if (overrides.endedAt == null && item.value.endTime.plus(Duration.ofHours(1)).isBefore(Instant.now()))
             overrides.endedAt = item.value.endTime
         api.db.events.update(overrides)
     }

@@ -50,7 +50,7 @@ class Collection<T : Identified>(private val serializer: KSerializer<T>, vararg 
         val bytes = cbor.encodeToByteArray(serializer, obj)
         executor.execute {
             val path = pathOf(id)
-            logger.debug("Saving $obj ($id) to $path (${bytes.size} bytes)")
+            logger.debug("Saving $obj to $path (${bytes.size} bytes)")
             try {
                 path.writeBytes(bytes)
             } catch (e: Exception) {

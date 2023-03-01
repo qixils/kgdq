@@ -37,6 +37,35 @@ open class GDQ(
     val eventEndedAt = mutableMapOf<Int, Instant?>()
     val eventEndedAtExpiration = mutableMapOf<Int, Instant>()
 
+    fun handleEventExpiration(id: Int) {
+        if (id !in eventEndedAtExpiration) return
+        if (eventEndedAtExpiration[id]!!.isBefore(Instant.now())) {
+            eventEndedAtExpiration.remove(id)
+            eventEndedAt.remove(id)
+        }
+    }
+
+    fun updateEvent(id: Int, startedAt: Instant?, endedAt: Instant?) {
+        eventStartedAt[id] = startedAt
+        eventEndedAt[id] = endedAt
+        if (startedAt == null || endedAt == null) return
+        val expires = Instant.now()
+            .coerceAtLeast(startedAt)
+            .plus(Duration.ofDays(1))
+            .coerceAtMost(endedAt.plus(Duration.ofHours(1)))
+        if (expires.isAfter(Instant.now()))
+            eventEndedAtExpiration[id] = expires
+        else
+            eventEndedAtExpiration.remove(id)
+    }
+
+    suspend fun updateEvent(id: Int) {
+        handleEventExpiration(id)
+        if (id in eventStartedAt || id in eventEndedAt) return
+        val runs = getRuns(event = id).sortedBy { it.value.order }
+        updateEvent(id, runs.firstOrNull()?.value?.startTime, runs.firstOrNull()?.value?.endTime)
+    }
+
     /**
      * Constructs a new GDQ instance with the provided API path.
      */

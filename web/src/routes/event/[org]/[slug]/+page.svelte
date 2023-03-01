@@ -66,6 +66,8 @@
             <ul class="steps steps-vertical block w-full max-w-screen-lg mx-auto overflow-x-hidden text-sm md:text-base">
                 {#each runs as run, run_index}
                     <Run {runs} {run_index} {formatter} />
+                {:else}
+                    <!-- TODO: message noting no runs have been scheduled yet if in future, else schedule is unknown -->
                 {/each}
             </ul>
         {:catch run_error}
