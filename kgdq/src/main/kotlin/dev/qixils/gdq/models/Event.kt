@@ -46,7 +46,7 @@ data class Event(
                 api.eventStartedAt[id] = runs.firstOrNull()?.value?.startTime ?: Instant.EPOCH
                 api.eventEndedAt[id] = runs.lastOrNull()?.value?.endTime ?: Instant.EPOCH
                 if (api.eventEndedAt[id] != Instant.EPOCH && api.eventEndedAt[id]!!.isAfter(Instant.now()))
-                    api.eventEndedAtExpiration[id] = Instant.now().plus(1, ChronoUnit.DAYS)
+                    api.eventEndedAtExpiration[id] = (Instant.now().coerceAtLeast(api.eventStartedAt[id]!!)).plus(1, ChronoUnit.DAYS)
             }
             _starttime = api.eventStartedAt[id]
             _endtime = api.eventEndedAt[id]
