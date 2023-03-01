@@ -22,6 +22,7 @@ class RunData{
     @Transient var horaroSource: dev.qixils.horaro.models.Run? = null
     var id: Int? = null
     var horaroId: String? = null
+    // TODO: export RunOverrides ID for maps/sets/etc
     val event: Int
     val name: String
     val displayName: String

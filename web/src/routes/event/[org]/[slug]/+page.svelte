@@ -1,10 +1,12 @@
+<!-- TODO: enable some preloading (mostly to init the head block server-side) -->
+<!-- TODO: support displaying multiple "events" (e.g. ESA Stream 1 & 2) on the same page -->
+
 <script lang="ts">
     import type {Event, Run} from 'src/gdq';
     import {page} from "$app/stores";
-    import VODs from "$lib/VODs.svelte";
     import {Formatters} from "$lib/Formatters";
 
-    let money_format = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });
+    let formatter = new Formatters("USD");
 
     let event_promise: Promise<Event> = fetch(`https://vods.speedrun.club/api/v2/marathons/${$page.params.org}/events?id=${$page.params.slug}`).then(r => {
         if (r.status !== 200) {
@@ -15,7 +17,7 @@
                 return Promise.reject(new Error("not found"));
             }
             let event: Event = r[0];
-            money_format = new Intl.NumberFormat(undefined, { style: 'currency', currency: event.paypalCurrency });
+            formatter = new Formatters(event.paypalCurrency);
             return r[0];
         });
     });
@@ -25,18 +27,10 @@
         }
         return r.json();
     });
-
-    function money(n: number) {
-        let res = money_format.format(n);
-        if (res.endsWith('.00') || res.endsWith(',00')) {
-            res = res.slice(0, -3);
-        }
-        return res;
-    }
 </script>
 
 <svelte:head>
-    <title></title> <!-- TODO -->
+    <!-- TODO -->
 </svelte:head>
 
 <section>
@@ -52,9 +46,9 @@
                         {#if event.timeStatus === "UPCOMING"}
                             will run from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raise money
                         {:else if event.timeStatus === "IN_PROGRESS"}
-                            is running from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and has raised {money(event.amount)}
+                            is running from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and has raised {formatter.money(event.amount)}
                         {:else}
-                            ran from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raised {money(event.amount)}
+                            ran from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raised {formatter.money(event.amount)}
                         {/if}
                         for {event.charityName}.
                     </p>
@@ -71,104 +65,7 @@
         {:then runs}
             <ul class="steps steps-vertical block w-full max-w-screen-lg mx-auto overflow-x-hidden text-sm md:text-base">
                 {#each runs as run, run_index}
-                    <!-- TODO: move to a component -->
-                    {@const step_color = run.scheduleStatus === "UPCOMING" ? "" : (run.scheduleStatus === "IN_PROGRESS" ? "step-primary" : "step-secondary")}
-                    <li data-content="" class="step {step_color} text-base-content" style="z-index: -{run_index}">
-                        <div class="flex w-full align-center gap-2">
-                            <p class="text-center block my-auto basis-8 font-light md:basis-10 md:font-normal flex-shrink-0" style="position: relative; top:-.175rem;">
-                                {Formatters.time(run.startTime)}
-                            </p>
-                            <div class="text-left p-2 bg-base-300 block flex-grow">
-                                {#if run_index === 0 || new Date(run.startTime).getDay() !== new Date(runs[run_index - 1].startTime).getDay()}
-                                    {#if run_index > 0}
-                                        <hr class="border-neutral/50" style="position: relative; top:-.6rem;">
-                                    {/if}
-                                    <p class="text-base md:text-lg bg-primary text-primary-content p-2 pl-3 rounded-t font-semibold">{Formatters.date_header(run.startTime)}</p>
-                                    <hr class="border-primary/70 border-2 mb-3">
-                                {/if}
-                                <p>
-                                    {#if run.vods.length > 0}
-                                        <VODs run={run} />
-                                    {/if}
-                                    <span style="position: relative; top:-.1em;">
-                                    <b>{run.name}</b
-                                    >{#if run.src !== null && run.src !== undefined}
-                                        <sup>
-                                            <a href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer">[src]</a>
-                                        </sup>
-                                    {/if}
-                                        {#if run.category !== ""}
-                                        <span class="text-base-content/80">&nbsp; {run.category}</span>
-                                    {/if}
-                                </span>
-                                </p>
-                                <p>
-                                <span class="material-symbols-rounded text-sm">timer</span
-                                ><span class="post-icon">&nbsp;{run.runTime}&nbsp;&nbsp;&nbsp;</span
-                                >{#if run.console !== ""
-                                }<span class="material-symbols-rounded text-sm">stadia_controller</span
-                                ><span class="post-icon">&nbsp;{run.console}</span>{/if}
-                                </p>
-                                <p class="runners">
-                                <span class="material-symbols-rounded text-sm">{run.runners.length === 1 ? 'person' : 'group'}</span
-                                ><span class="post-icon">
-                                    {#each run.runners as runner, index}
-                                        {#if index > 0}
-                                            ,
-                                        {/if}
-                                        {#if runner.url !== null && runner.url !== undefined}
-                                            <a href={runner.url} target="_blank" rel="noopener noreferrer">{runner.name}</a>
-                                        {:else}
-                                            {runner.name}
-                                        {/if}
-                                    {/each}
-                                </span>
-                                </p>
-                                {#each run.bids as bid}
-                                    <div class="flex flex-center gap-2 py-1">
-                                        {#if bid.isTarget}
-                                            <!--
-                                            Since Tailwind only generates classes as necessary and my code doesn't write out
-                                            the full names of the classes being used, this comment is here to ensure that
-                                            all of the classes used are generated. So without further ado,
-                                            text-success text-warning text-error
-                                            bg-success-content bg-warning-content bg-error-content
-                                            -->
-                                            <!-- TODO: move to a component -->
-                                            {@const percent = Math.round((bid.donationTotal / bid.goal) * 100)}
-                                            {@const color = percent >= 100 ? "success" : (bid.state === "OPENED" ? "warning" : "error")}
-                                            <p class="block my-auto"><span class="radial-progress text-[.65rem] text-{color} bg-{color}-content" style="--value:{percent}; --size:2.2rem;">{percent}%</span></p>
-                                            <div class="bid-body">
-                                                <p>
-                                                    <span class="font-semibold">{bid.name}&nbsp;</span>
-                                                    <span class="text-base-content/50">{money(bid.donationTotal)} / {money(bid.goal)}</span>
-                                                </p>
-                                                <p>{bid.description}</p>
-                                            </div>
-                                        {:else}
-                                            <p class="block my-auto"><span class="radial-progress text-[.65rem] text-primary bg-primary/30" style="--value:100; --size:2.2rem;"></span></p>
-                                            <div class="bid-body">
-                                                <p>
-                                                    <span class="font-semibold">{bid.name}&nbsp;</span>
-                                                    <span class="text-base-content/50">{money(bid.donationTotal)}</span>
-                                                </p>
-                                                <p>{bid.description}</p>
-                                                <p class="text-base-content/80">
-                                                    <span class="font-semibold">Top Options:</span>
-                                                    {#each bid.children.slice(0,3) as child, index}
-                                                        {#if index > 0}
-                                                            ,
-                                                        {/if}
-                                                        <span class:underline={index===0}>{child.name}</span>
-                                                    {/each}
-                                                </p>
-                                            </div>
-                                        {/if}
-                                    </div>
-                                {/each}
-                            </div>
-                        </div>
-                    </li>
+                    <Run {runs} {run_index} {formatter} />
                 {/each}
             </ul>
         {:catch run_error}
@@ -178,26 +75,3 @@
         <p class="error">Error loading event: {event_error.message}</p>
     {/await}
 </section>
-
-<style>
-    a {
-        @apply text-accent;
-    }
-
-    a:hover {
-        @apply text-accent-focus;
-    }
-
-    .post-icon {
-        position: relative;
-        top: -0.15rem;
-    }
-
-    .bid-body {
-        @apply block my-auto flex-grow text-xs md:text-sm;
-    }
-
-    .error {
-        @apply block bg-error text-error-content p-2 rounded m-auto w-fit my-4;
-    }
-</style>
