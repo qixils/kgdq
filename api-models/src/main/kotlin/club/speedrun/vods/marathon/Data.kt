@@ -2,7 +2,12 @@ package club.speedrun.vods.marathon
 
 import club.speedrun.vods.naturalJoinToString
 import dev.qixils.gdq.InternalGdqApi
-import dev.qixils.gdq.models.*
+import dev.qixils.gdq.models.Bid
+import dev.qixils.gdq.models.BidState
+import dev.qixils.gdq.models.Event
+import dev.qixils.gdq.models.Run
+import dev.qixils.gdq.models.Runner
+import dev.qixils.gdq.models.Wrapper
 import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import dev.qixils.gdq.serializers.ZoneIdSerializer
@@ -28,7 +33,7 @@ class RunData{
     val displayName: String
     val twitchName: String
     val console: String
-    val commentators: String
+    val commentators: MutableList<String>
     val description: String
     @Serializable(with = InstantAsStringSerializer::class) val startTime: Instant
     @Serializable(with = InstantAsStringSerializer::class) val endTime: Instant
@@ -63,7 +68,7 @@ class RunData{
         displayName = run.value.displayName
         twitchName = run.value.twitchName
         console = run.value.console
-        commentators = run.value.commentators
+        commentators = run.value.commentators.toMutableList()
         description = run.value.description
         order = run.value.order
         coop = run.value.coop
@@ -113,7 +118,7 @@ class RunData{
         displayName = trackerRun?.displayName ?: ""
         twitchName = trackerRun?.twitchName ?: horaroRun.getValue("Game (Twitch)") ?: "" // this could be stored from RabbitMQ, but I can't be bothered
         console = trackerRun?.console ?: horaroRun.getValue("Platform") ?: horaroRun.getValue("Console") ?: ""
-        commentators = trackerRun?.commentators ?: ""
+        commentators = trackerRun?.commentators ?: mutableListOf()
         description = trackerRun?.description ?: ""
         this.order = order
         coop = trackerRun?.coop ?: false

@@ -8,9 +8,8 @@ plugins {
 }
 
 dependencies {
-    api("org.jetbrains.kotlinx:kotlinx-serialization-core:$serialization_version")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization_version")
     api("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kjunit_version")
     testImplementation("junit:junit:$junit_version")
 }
