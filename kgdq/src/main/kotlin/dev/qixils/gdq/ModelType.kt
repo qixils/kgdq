@@ -2,6 +2,7 @@ package dev.qixils.gdq
 
 import dev.qixils.gdq.models.Bid
 import dev.qixils.gdq.models.Event
+import dev.qixils.gdq.models.Headset
 import dev.qixils.gdq.models.Model
 import dev.qixils.gdq.models.Run
 import dev.qixils.gdq.models.Runner
@@ -62,6 +63,11 @@ data class ModelType<M : Model>(
          */
         val RUNNER = register(ModelType("runner", Runner::class, Runner.serializer(), CacheType.RUNNER))
 
-        // TODO: https://github.com/GamesDoneQuick/donation-tracker/blob/master/tracker/search_filters.py
+        /**
+         * A person wearing a headset (i.e. commentators, hosts).
+         */
+        val HEADSET = register(ModelType("headset", Headset::class, Headset.serializer(), CacheType.HEADSET))
+
+        // TODO: https://github.com/GamesDoneQuick/donation-tracker/blob/master/tracker/search_filters.py _ModelMap
     }
 }

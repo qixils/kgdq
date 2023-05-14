@@ -1,11 +1,16 @@
 package dev.qixils.gdq.models
 
 import dev.qixils.gdq.GDQ
+import dev.qixils.gdq.ModelType
 import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import java.time.Duration
 import java.time.Instant
 
@@ -17,8 +22,8 @@ data class Run(
     @SerialName("twitch_name") val twitchName: String = "",
     @SerialName("deprecated_runners") val deprecatedRunners: String,
     val console: String,
-    @Serializable(with = HeadsetAdapter::class) val commentators: List<Headset>,
-    @Serializable(with = HeadsetAdapter::class) val hosts: List<Headset>,
+    @SerialName("commentators") private val rawCommentators: JsonElement,
+    private val hostIds: List<Int>,
     val description: String,
     @Serializable(with = InstantAsStringSerializer::class) @SerialName("starttime") private val _startTime: Instant? = null,
     @Serializable(with = InstantAsStringSerializer::class) @SerialName("endtime") private val _endTime: Instant? = null,
@@ -49,6 +54,8 @@ data class Run(
     @Transient private var id: Int? = null
     @Transient private var _event: Wrapper<Event>? = null
     @Transient private var _runners: List<Wrapper<Runner>>? = null
+    @Transient private var _commentators: List<Wrapper<Headset>>? = null
+    @Transient private var _hosts: List<Wrapper<Headset>>? = null
 
     override suspend fun loadData(api: GDQ, id: Int) {
         this.api = api
@@ -68,7 +75,27 @@ data class Run(
 
     suspend fun runners(): List<Wrapper<Runner>> {
         if (_runners == null)
-            _runners = runnerIds.map { api!!.getRunner(it)!! }
+            _runners = runnerIds.mapNotNull { api?.getRunner(it) }
         return _runners!!
+    }
+
+    suspend fun commentators(): List<Wrapper<Headset>> {
+        if (_commentators == null) {
+            _commentators = when (rawCommentators) {
+                is JsonPrimitive ->
+                    rawCommentators.contentOrNull?.split(", ?".toRegex())?.map(String::trim)?.filter(String::isNotEmpty)?.map { Wrapper(ModelType.HEADSET, 0, Headset(it)) } ?: emptyList()
+                is JsonArray ->
+                    rawCommentators.mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.toIntOrNull()?.let { id -> api!!.getHeadset(id) } }
+                else ->
+                    throw IllegalStateException("Unknown commentators type: ${rawCommentators::class.simpleName}")
+            }
+        }
+        return _commentators!!
+    }
+
+    suspend fun hosts(): List<Wrapper<Headset>> {
+        if (_hosts == null)
+            _hosts = hostIds.mapNotNull { api?.getHeadset(it) }
+        return _hosts!!
     }
 }

@@ -221,11 +221,12 @@ open class GDQ(
         event: Int? = null,
         runner: Int? = null,
         run: Int? = null,
+        name: String? = null,
         offset: Int? = null,
         preLoad: Hook<M>? = null,
         postLoad: Hook<M>? = null,
     ): List<Wrapper<M>> {
-        return query(Query(type, id, event, runner, run, offset), preLoad, postLoad)
+        return query(Query(type=type, id=id, event=event, runner=runner, run=run, name=name, offset=offset), preLoad, postLoad)
     }
 
     /**
@@ -343,6 +344,22 @@ open class GDQ(
     }
 
     /**
+     * Gets a [Headset] by its ID.
+     *
+     * @param id the ID of the headset to get
+     * @param preLoad a hook to run before the headset is loaded
+     * @param postLoad a hook to run after the headset is loaded
+     * @return the headset, or null if it doesn't exist
+     */
+    suspend fun getHeadset(
+        id: Int,
+        preLoad: Hook<Headset>? = null,
+        postLoad: Hook<Headset>? = null,
+    ): Wrapper<Headset>? {
+        return get(ModelType.HEADSET, id, preLoad, postLoad)
+    }
+
+    /**
      * Searches for [Event]s.
      *
      * @param offset   optional: the offset to start at
@@ -454,5 +471,23 @@ open class GDQ(
         postLoad: Hook<Bid>? = null,
     ): List<Wrapper<Bid>> {
         return query(ModelType.BID_TARGET, event = event, run = run, offset = offset, preLoad = preLoad, postLoad = postLoad)
+    }
+
+    /**
+     * Searches for [Headset]s.
+     *
+     * @param name     optional: the name to search for headsets by
+     * @param offset   optional: the offset to start at
+     * @param preLoad  optional: a hook to run before each headset is loaded
+     * @param postLoad optional: a hook to run after each headset is loaded
+     * @return a list of headsets matching the search query
+     */
+    suspend fun getHeadsets(
+        name: String? = null,
+        offset: Int? = null,
+        preLoad: Hook<Headset>? = null,
+        postLoad: Hook<Headset>? = null,
+    ): List<Wrapper<Headset>> {
+        return query(ModelType.HEADSET, name = name, offset = offset, preLoad = preLoad, postLoad = postLoad)
     }
 }
