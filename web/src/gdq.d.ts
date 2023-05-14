@@ -31,8 +31,8 @@ export interface Run {
     console: string, // the console the game is played on
     commentators: string, // the commentators for the run
     description: string, // the description of the run
-    startTime: string, // the start time of the run in ISO 8601 format
-    endTime: string, // the end time of the run in ISO 8601 format
+    startTime: string | null, // the start time of the run in ISO 8601 format
+    endTime: string | null, // the end time of the run in ISO 8601 format
     runTime: string, // the run time (or estimated run time) of the run in h:mm:ss format
     setupTime: string, // the setup time of the run in h:mm:ss format
     order: number, // the order of the run in the schedule
@@ -44,7 +44,7 @@ export interface Run {
     bids: Bid[], // the bids (bid wars, donation incentives) for this run
     vods: VOD[], // the VODs for this run
     src: string | null, // the speedrun.com slug for the game being run
-    timeStatus: string, // the status of the run in the schedule
+    timeStatus: string | null, // the status of the run in the schedule
 }
 
 export interface Runner {

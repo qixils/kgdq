@@ -30,7 +30,8 @@
 </script>
 
 <svelte:head>
-    <!-- TODO -->
+    <!-- TODO: add head -->
+    <!-- also TODO: enable some preloading to init this server-side -->
 </svelte:head>
 
 <section>
@@ -67,7 +68,13 @@
                 {#each runs as run, run_index}
                     <Run {runs} {run_index} {formatter} />
                 {:else}
-                    <!-- TODO: message noting no runs have been scheduled yet if in future, else schedule is unknown -->
+                    <p class="info">
+                        {#if event.timeStatus === "UPCOMING"}
+                            No runs have been scheduled for this event yet.
+                        {:else}
+                            No runs were found for this event.
+                        {/if}
+                    </p>
                 {/each}
             </ul>
         {:catch run_error}
