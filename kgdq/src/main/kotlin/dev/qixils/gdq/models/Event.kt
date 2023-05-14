@@ -39,8 +39,10 @@ data class Event(
         // datetime fallback
         if (_starttime == null || _endtime == null) {
             api.updateEvent(id)
-            _starttime = api.eventStartedAt[id]
-            _endtime = api.eventEndedAt[id]
+            if (_starttime == null)
+                _starttime = api.eventStartedAt[id]
+            if (_endtime == null)
+                _endtime = api.eventEndedAt[id]
         }
 
         // canonical URL fallback
@@ -53,28 +55,28 @@ data class Event(
      *
      * @see zonedStartTime
      */
-    val startTime: Instant get() = _starttime!!
+    val startTime: Instant? get() = _starttime
 
     /**
      * The [Instant] at which the event will end.
      *
      * @see zonedEndTime
      */
-    val endTime: Instant get() = _endtime!!
+    val endTime: Instant? get() = _endtime
 
     /**
      * The [ZonedDateTime] at which the event will start.
      *
      * @see startTime
      */
-    val zonedStartTime: ZonedDateTime get() = startTime.atZone(timezone)
+    val zonedStartTime: ZonedDateTime? get() = startTime?.atZone(timezone)
 
     /**
      * The [ZonedDateTime] at which the event will end.
      *
      * @see endTime
      */
-    val zonedEndTime: ZonedDateTime get() = endTime.atZone(timezone)
+    val zonedEndTime: ZonedDateTime? get() = endTime?.atZone(timezone)
 
     /**
      * The public-facing URL of the event from the donation tracker website.

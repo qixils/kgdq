@@ -130,7 +130,7 @@ abstract class Marathon(val api: GDQ) {
         event: Wrapper<Event>,
         eventOverrides: EventOverrides,
     ): List<RunData> = coroutineScope {
-        val vodsFinalized = event.value.endTime.isBefore(Instant.now().minus(7, ChronoUnit.DAYS))
+        val vodsFinalized = event.value.endTime == null || event.value.endTime!!.isBefore(Instant.now().minus(7, ChronoUnit.DAYS))
         val vods: Deferred<List<List<VOD>>> = async {
             if (!eventOverrides.redditMergedIn || !vodsFinalized)
                 getRedditVODs(event.value.short)
@@ -347,7 +347,7 @@ class EventOverrideUpdater(private val api: GDQ) : Hook<Event> {
         val overrides = api.db.getOrCreateEventOverrides(item)
         if (overrides.startedAt == null)
             overrides.startedAt = item.value.startTime
-        if (overrides.endedAt == null && item.value.endTime.plus(Duration.ofHours(1)).isBefore(Instant.now()))
+        if (overrides.endedAt == null && item.value.endTime != null && item.value.endTime!!.plus(Duration.ofHours(1)).isBefore(Instant.now()))
             overrides.endedAt = item.value.endTime
         api.db.events.update(overrides)
     }

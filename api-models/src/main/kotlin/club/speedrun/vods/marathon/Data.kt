@@ -302,9 +302,9 @@ class EventData {
     val targetAmount: Float
     val minimumDonation: Float
     val paypalCurrency: String
-    @Serializable(with = InstantAsStringSerializer::class) val startTime: Instant
-    @Serializable(with = InstantAsStringSerializer::class) val endTime: Instant
-    val timeStatus: TimeStatus
+    @Serializable(with = InstantAsStringSerializer::class) val startTime: Instant?
+    @Serializable(with = InstantAsStringSerializer::class) val endTime: Instant?
+    val timeStatus: TimeStatus?
     @Serializable(with = ZoneIdSerializer::class) val timezone: ZoneId
     val locked: Boolean
     val allowDonations: Boolean
@@ -342,6 +342,7 @@ class EventData {
 
         val now = Instant.now()
         timeStatus = when {
+            startTime == null || endTime == null -> null
             now < startTime -> TimeStatus.UPCOMING
             now < endTime -> TimeStatus.IN_PROGRESS
             else -> TimeStatus.FINISHED
