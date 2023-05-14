@@ -3,7 +3,6 @@ package dev.qixils.gdq.models
 import dev.qixils.gdq.GDQ
 import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
-import dev.qixils.gdq.serializers.LegacyStringAdapter
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -18,7 +17,8 @@ data class Run(
     @SerialName("twitch_name") val twitchName: String = "",
     @SerialName("deprecated_runners") val deprecatedRunners: String,
     val console: String,
-    @Serializable(with = LegacyStringAdapter::class) val commentators: List<String>,
+    @Serializable(with = HeadsetAdapter::class) val commentators: List<Headset>,
+    @Serializable(with = HeadsetAdapter::class) val hosts: List<Headset>,
     val description: String,
     @Serializable(with = InstantAsStringSerializer::class) @SerialName("starttime") private val _startTime: Instant? = null,
     @Serializable(with = InstantAsStringSerializer::class) @SerialName("endtime") private val _endTime: Instant? = null,

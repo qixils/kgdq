@@ -5,6 +5,7 @@ import dev.qixils.gdq.InternalGdqApi
 import dev.qixils.gdq.models.Bid
 import dev.qixils.gdq.models.BidState
 import dev.qixils.gdq.models.Event
+import dev.qixils.gdq.models.Headset
 import dev.qixils.gdq.models.Run
 import dev.qixils.gdq.models.Runner
 import dev.qixils.gdq.models.Wrapper
@@ -33,7 +34,8 @@ class RunData{
     val displayName: String
     val twitchName: String
     val console: String
-    val commentators: MutableList<String>
+    val commentators: MutableList<Headset>
+    val hosts: MutableList<Headset>
     val description: String
     @Serializable(with = InstantAsStringSerializer::class) val startTime: Instant
     @Serializable(with = InstantAsStringSerializer::class) val endTime: Instant
@@ -69,6 +71,7 @@ class RunData{
         twitchName = run.value.twitchName
         console = run.value.console
         commentators = run.value.commentators.toMutableList()
+        hosts = run.value.hosts.toMutableList()
         description = run.value.description
         order = run.value.order
         coop = run.value.coop
@@ -119,6 +122,7 @@ class RunData{
         twitchName = trackerRun?.twitchName ?: horaroRun.getValue("Game (Twitch)") ?: "" // this could be stored from RabbitMQ, but I can't be bothered
         console = trackerRun?.console ?: horaroRun.getValue("Platform") ?: horaroRun.getValue("Console") ?: ""
         commentators = trackerRun?.commentators ?: mutableListOf()
+        hosts = trackerRun?.hosts ?: mutableListOf()
         description = trackerRun?.description ?: ""
         this.order = order
         coop = trackerRun?.coop ?: false

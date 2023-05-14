@@ -29,7 +29,8 @@ export interface Run {
     displayName: string, // generally the name of the game
     twitchName: string, // the name of the game on Twitch
     console: string, // the console the game is played on
-    commentators: string, // the commentators for the run
+    commentators: Headset[], // the commentators for the run
+    hosts: Headset[], // the hosts for the run
     description: string, // the description of the run
     startTime: string | null, // the start time of the run in ISO 8601 format
     endTime: string | null, // the end time of the run in ISO 8601 format
@@ -55,6 +56,11 @@ export interface Runner {
     pronouns: string, // the pronouns of the runner
     public: string, // the public display name of the runner
     url: string, // the runner's primary social media URL
+}
+
+export interface Headset {
+    name: String, // the name of a person with a headset
+    pronouns: String, // their pronouns
 }
 
 export interface Bid {
