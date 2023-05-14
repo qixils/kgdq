@@ -148,15 +148,10 @@ abstract class Marathon(val api: GDQ) {
             )
         ).sortedBy { it.value.order }
 
-        val bids = (
-            // TODO: pagination (if not ESA...)
-            api.getBidTargets(
-                run = query.id?.toInt(),
-                event = event.id
-            ) + api.getBids( // ensures the parents of hardcoded bid wars are loaded
-                run = query.id?.toInt(),
-                event = event.id
-            )
+        // TODO: pagination (if not ESA...)
+        val bids = api.getBids(
+            run = query.id?.toInt(),
+            event = event.id
         ).distinctBy { it.id }
 
         // compute bid data

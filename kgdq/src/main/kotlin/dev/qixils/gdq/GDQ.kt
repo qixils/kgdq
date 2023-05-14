@@ -30,7 +30,7 @@ open class GDQ(
         coerceInputValues = true
     }
     private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(20)).build()
-    private val modelCache: MutableMap<Pair<ModelType<*>, Int>, Pair<Wrapper<*>, Instant>> = mutableMapOf()
+    private val modelCache: MutableMap<Pair<CacheType, Int>, Pair<Wrapper<*>, Instant>> = mutableMapOf()
     private val responseCache: MutableMap<String, Pair<List<Wrapper<*>>, Instant>> = mutableMapOf()
     protected var lastCachedRunners: Instant? = null
     val eventStartedAt = mutableMapOf<Int, Instant?>()
@@ -150,7 +150,7 @@ open class GDQ(
 
         // cache models
         val now = Instant.now()
-        models.forEach { modelCache[it.modelType to it.id] = it to now }
+        models.forEach { modelCache[it.modelType.cacheType to it.id] = it to now }
         responseCache[query] = models to now
 
         // return
@@ -176,7 +176,7 @@ open class GDQ(
         // load from cache if possible
         var output: List<Wrapper<M>> = emptyList()
         if (query.id != null) {
-            val pair = query.type to query.id
+            val pair = query.type.cacheType to query.id
             if (modelCache.containsKey(pair)) {
                 val (wrapper, cachedAt) = modelCache[pair]!!
                 @Suppress("UNCHECKED_CAST") // the type is correct it's ok
@@ -307,6 +307,22 @@ open class GDQ(
         preLoad: Hook<Bid>? = null,
         postLoad: Hook<Bid>? = null,
     ): Wrapper<Bid>? {
+        return get(ModelType.ALL_BIDS, id, preLoad, postLoad)
+    }
+
+    /**
+     * Gets a [Bid Parent][ModelType.BID] by its ID.
+     *
+     * @param id the ID of the bid parent to get
+     * @param preLoad a hook to run before the bid parent is loaded
+     * @param postLoad a hook to run after the bid parent is loaded
+     * @return the bid parent, or null if it doesn't exist
+     */
+    suspend fun getBidParent(
+        id: Int,
+        preLoad: Hook<Bid>? = null,
+        postLoad: Hook<Bid>? = null,
+    ): Wrapper<Bid>? {
         return get(ModelType.BID, id, preLoad, postLoad)
     }
 
@@ -384,13 +400,33 @@ open class GDQ(
      * Searches for [Bid]s.
      *
      * @param event    optional: the event to search for bids in
-     * @param run      optional: the run to search for bids for
+     * @param run      optional: the run to search for bids in
      * @param offset   optional: the offset to start at
      * @param preLoad  optional: a hook to run before each bid is loaded
      * @param postLoad optional: a hook to run after each bid is loaded
      * @return a list of bids matching the search query
      */
     suspend fun getBids(
+        event: Int? = null,
+        run: Int? = null,
+        offset: Int? = null,
+        preLoad: Hook<Bid>? = null,
+        postLoad: Hook<Bid>? = null,
+    ): List<Wrapper<Bid>> {
+        return query(ModelType.ALL_BIDS, event = event, run = run, offset = offset, preLoad = preLoad, postLoad = postLoad)
+    }
+
+    /**
+     * Searches for [Bid Parent][ModelType.BID]s.
+     *
+     * @param event    optional: the event to search for bid parents in
+     * @param run      optional: the run to search for bid parents for
+     * @param offset   optional: the offset to start at
+     * @param preLoad  optional: a hook to run before each bid parent is loaded
+     * @param postLoad optional: a hook to run after each bid parent is loaded
+     * @return a list of bid parents matching the search query
+     */
+    suspend fun getBidParents(
         event: Int? = null,
         run: Int? = null,
         offset: Int? = null,
