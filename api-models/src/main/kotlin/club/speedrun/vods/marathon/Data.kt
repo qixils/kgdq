@@ -70,8 +70,8 @@ class RunData{
         displayName = run.value.displayName
         twitchName = run.value.twitchName
         console = run.value.console
-        commentators = run.value.commentators.toMutableList()
-        hosts = run.value.hosts.toMutableList()
+        commentators = mutableListOf()
+        hosts = mutableListOf()
         description = run.value.description
         order = run.value.order
         coop = run.value.coop
@@ -171,6 +171,8 @@ class RunData{
                 ?.map { calculateHoraroFakeRunner(it) } ?: emptyList())
         } else {
             runners.addAll(trackerSource!!.runners().map { it.value })
+            commentators.addAll(trackerSource!!.commentators().map { it.value })
+            hosts.addAll(trackerSource!!.hosts().map { it.value })
         }
     }
 

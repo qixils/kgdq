@@ -18,6 +18,7 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
 const val root = "https://vods.speedrun.club"
@@ -57,4 +58,7 @@ fun Application.kgdqApiModule() {
     configureRouting()
     RabbitManager.declareQueue("cg_events_reddit_esa2022s1", "ESAMarathon", esa.api.db)
     RabbitManager.declareQueue("cg_events_reddit_esa2022s2", "ESAMarathon2", esa.api.db)
+    runBlocking {
+        marathons.forEach { it.api.cacheAll() }
+    }
 }

@@ -7,9 +7,12 @@ import club.speedrun.vods.httpClient
 import club.speedrun.vods.json
 import club.speedrun.vods.plugins.UserError
 import club.speedrun.vods.srcDb
+import dev.qixils.gdq.ESA
 import dev.qixils.gdq.GDQ
+import dev.qixils.gdq.HEK
 import dev.qixils.gdq.Hook
 import dev.qixils.gdq.ModelType
+import dev.qixils.gdq.RPGLB
 import dev.qixils.gdq.models.Bid
 import dev.qixils.gdq.models.Event
 import dev.qixils.gdq.models.Run
@@ -287,19 +290,8 @@ data class RunList(val id: String? = null, val event: String? = null, val runner
 
 class GDQMarathon : Marathon(GDQ())
 class ESAMarathon : Marathon(ESA())
-class HEKMarathon : Marathon(ESA("https://hekathon.esamarathon.com/search/", "hek"))
-class RPGLBMarathon : Marathon(GDQ("https://rpglimitbreak.com/tracker/search/", "rpglb"))
-
-class ESA(apiPath: String = "https://donations.esamarathon.com/search/", organization: String = "esa") : GDQ(apiPath, organization) {
-    override suspend fun cacheRunners() {
-        // TODO: remove this method (and this whole subclass TBH) when ESA fixes their API
-        val now = Instant.now()
-        if (lastCachedRunners != null && lastCachedRunners!!.plus(ModelType.RUNNER.cacheFor).isAfter(now))
-            return
-        lastCachedRunners = now
-        getRunners()
-    }
-}
+class HEKMarathon : Marathon(HEK())
+class RPGLBMarathon : Marathon(RPGLB())
 
 suspend fun Event.horaroSchedule(): FullSchedule? {
     if (horaroEvent == null || horaroSchedule == null) return null
@@ -313,16 +305,15 @@ fun RunData.loadSrcGame(overrides: RunOverrides?) {
         null
     else if (overrides?.src != null)
         overrides.src
-    else
-        run {
-            val gameName = when {
-                twitchName.isNotEmpty() -> twitchName
-                displayName.isNotEmpty() -> displayName
-                else -> name
-            }
-            excludedGameTitles.forEach { if (gameName.contains(it, true)) return@run null }
-            return@run srcDb.getGame(gameName).abbreviation
+    else run {
+        val gameName = when {
+            twitchName.isNotEmpty() -> twitchName
+            displayName.isNotEmpty() -> displayName
+            else -> name
         }
+        excludedGameTitles.forEach { if (gameName.contains(it, true)) return@run null }
+        srcDb.getGame(gameName).abbreviation
+    }
 }
 
 class EventDataCacher(private val api: GDQ) : Hook<Event> {

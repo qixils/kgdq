@@ -7,6 +7,7 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
+import java.lang.Integer.max
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -21,6 +22,7 @@ import java.time.Instant
 open class GDQ(
     apiPath: String = "https://gamesdonequick.com/tracker/search/",
     val organization: String = "gdq",
+    val supportedModels: Set<ModelType<*>> = ModelType.ALL,
 ) {
     private val logger = LoggerFactory.getLogger(GDQ::class.java)
     val apiPath: String
@@ -33,9 +35,16 @@ open class GDQ(
     private val modelCache: MutableMap<Pair<CacheType, Int>, Pair<Wrapper<*>, Instant>> = mutableMapOf()
     private val responseCache: MutableMap<String, Pair<List<Wrapper<*>>, Instant>> = mutableMapOf()
     protected var lastCachedRunners: Instant? = null
+    protected var lastCachedHeadset: Instant? = null
     val eventStartedAt = mutableMapOf<Int, Instant?>()
     val eventEndedAt = mutableMapOf<Int, Instant?>()
     val eventEndedAtExpiration = mutableMapOf<Int, Instant>()
+
+    /**
+     * The maximum number of items to return in a single request.
+     * Discovered automatically by [cacheRunners].
+     */
+    private var limit: Int? = null
 
     fun handleEventExpiration(id: Int) {
         if (id !in eventEndedAtExpiration) return
@@ -80,20 +89,55 @@ open class GDQ(
         this.apiPath = path
     }
 
-    protected open suspend fun cacheRunners() { // TODO: remove `protected open` when ESA fixes their API bug
+    protected open suspend fun cacheRunners() {
+        if (!supportedModels.contains(ModelType.RUNNER))
+            return
+
         // only cache runners every few hours
         val now = Instant.now()
-        if (lastCachedRunners != null && lastCachedRunners!!.plus(ModelType.RUNNER.cacheFor).isAfter(now))
+        if (lastCachedRunners != null && lastCachedRunners!!.plus(CacheType.RUNNER.duration).isAfter(now))
             return
         lastCachedRunners = now
 
         // cache runners
         var offset = 0
-        var runners: List<Wrapper<Runner>>
         do {
-            runners = getRunners(offset = offset)
+            val runners = getRunners(offset = offset)
             offset += runners.size
-        } while (runners.isNotEmpty())
+            if (runners.isEmpty())
+                break
+            if (limit != null && runners.size < limit!!)
+                break
+            limit = max(limit ?: 0, runners.size)
+        } while (true)
+    }
+
+    protected open suspend fun cacheHeadsets() {
+        if (!supportedModels.contains(ModelType.HEADSET))
+            return
+
+        // only cache headsets every few hours
+        val now = Instant.now()
+        if (lastCachedHeadset != null && lastCachedHeadset!!.plus(CacheType.HEADSET.duration).isAfter(now))
+            return
+        lastCachedHeadset = now
+
+        // cache headsets
+        var offset = 0
+        do {
+            val headsets = getHeadsets(offset = offset)
+            offset += headsets.size
+            if (headsets.isEmpty())
+                break
+            if (limit != null && headsets.size < limit!!)
+                break
+            limit = max(limit ?: 0, headsets.size)
+        } while (true)
+    }
+
+    suspend fun cacheAll() {
+        cacheRunners()
+        cacheHeadsets()
     }
 
     /**
@@ -165,16 +209,23 @@ open class GDQ(
      * @param postLoad a hook to run after a model is loaded
      * @return a list of models matching the query
      */
+    @OptIn(DelicateCoroutinesApi::class) // it's a little janky but it should be ok
     suspend fun <M : Model> query(
         query: Query<M>,
         preLoad: Hook<M>? = null,
         postLoad: Hook<M>? = null,
-    ): List<Wrapper<M>> = coroutineScope {
-        // ensure runners are cached (they're high in quantity but basically fixed)
-        val runnerCacheJob = launch { if (query.type == ModelType.RUNNER) cacheRunners() }
+    ): List<Wrapper<M>> {
+        if (!supportedModels.contains(query.type))
+            return emptyList()
+
+        // cache models that are large in quantity but don't change often
+        when (query.type.cacheType) {
+            CacheType.RUNNER -> GlobalScope.launch { cacheRunners() }
+            CacheType.HEADSET -> GlobalScope.launch { cacheHeadsets() }
+        }
 
         // load from cache if possible
-        var output: List<Wrapper<M>> = emptyList()
+        val output: List<Wrapper<M>>
         if (query.id != null) {
             val pair = query.type.cacheType to query.id
             if (modelCache.containsKey(pair)) {
@@ -182,24 +233,15 @@ open class GDQ(
                 @Suppress("UNCHECKED_CAST") // the type is correct it's ok
                 output = listOf(wrapper) as List<Wrapper<M>>
 
-                // return cached data if it hasn't expired, otherwise clear the output variable if strict caching is enabled
-                if (cachedAt.plus(query.type.cacheFor).isAfter(Instant.now())) {
-                    return@coroutineScope output
-                } else if (query.type.strictCache) {
-                    output = emptyList()
+                // return cached data if it hasn't expired or if the cache is not strict
+                if (cachedAt.plus(query.type.cacheFor).isAfter(Instant.now()) || !query.type.strictCache) {
+                    return output
                 }
             }
         }
 
-        // if output is not empty, then return it and allow cache to update in the background
-        if (output.isNotEmpty())
-            return@coroutineScope output
-
-        // wait for runners to be cached
-        runnerCacheJob.join()
-
         // return the result of the query
-        return@coroutineScope query(query.asQueryString(), query.type, query.type.serializer, preLoad, postLoad)
+        return query(query.asQueryString(), query.type, query.type.serializer, preLoad, postLoad)
     }
 
     /**
@@ -491,3 +533,22 @@ open class GDQ(
         return query(ModelType.HEADSET, name = name, offset = offset, preLoad = preLoad, postLoad = postLoad)
     }
 }
+
+/**
+ * A derivative of [GDQ] tailored for ESA.
+ */
+open class ESA(
+    apiPath: String = "https://donations.esamarathon.com/search/",
+    organization: String = "esa",
+) : GDQ(apiPath, organization, ModelType.ALL.minus(ModelType.HEADSET)) {
+    override suspend fun cacheRunners() {
+        val now = Instant.now()
+        if (lastCachedRunners != null && lastCachedRunners!!.plus(ModelType.RUNNER.cacheFor).isAfter(now))
+            return
+        lastCachedRunners = now
+        getRunners()
+    }
+}
+
+class HEK : ESA("https://hekathon.esamarathon.com/search/", "hek")
+class RPGLB : GDQ("https://rpglimitbreak.com/tracker/search/", "rpglb", ModelType.ALL.minus(ModelType.HEADSET))

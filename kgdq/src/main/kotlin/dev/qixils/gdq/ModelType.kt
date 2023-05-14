@@ -28,7 +28,18 @@ data class ModelType<M : Model>(
             return type
         }
 
+        /**
+         * Gets the model type for the given ID.
+         *
+         * @param id The ID of the model type.
+         * @return The model type, or `null` if not found.
+         */
         fun get(id: String): ModelType<*>? = types[id.replaceFirst("tracker.", "")]
+
+        /**
+         * The collection of all known model types.
+         */
+        val ALL: Set<ModelType<*>> get() = types.values.toSet()
 
         /**
          * Any type of bid.
@@ -56,7 +67,7 @@ data class ModelType<M : Model>(
         /**
          * A speedrun.
          */
-        val RUN = register(ModelType("run", Run::class, Run.serializer(), CacheType.BID))
+        val RUN = register(ModelType("run", Run::class, Run.serializer(), CacheType.BID, aliases = listOf("speedrun")))
 
         /**
          * A speedrunner.
