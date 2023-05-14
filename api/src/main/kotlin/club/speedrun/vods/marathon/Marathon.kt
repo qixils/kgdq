@@ -261,11 +261,8 @@ abstract class Marathon(val api: GDQ) {
                 throw UserError("A search parameter (id, event, or runner) is required.")
 
             // get event id and ensure it exists
-            val event: Wrapper<Event>? = query.event?.let { getEvent(it) }
-            if (event == null) {
-                call.respond(emptyList<RunData>())
-                return@get
-            }
+            val event: Wrapper<Event> = query.event?.let { getEvent(it) }
+                ?: throw UserError("Event ${query.event} does not exist.")
             val eventOverrides = api.db.getOrCreateEventOverrides(event)
 
             // get schedule
