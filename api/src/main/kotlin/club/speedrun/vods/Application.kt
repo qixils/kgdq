@@ -1,6 +1,11 @@
 package club.speedrun.vods
 
-import club.speedrun.vods.marathon.*
+import club.speedrun.vods.marathon.ESAMarathon
+import club.speedrun.vods.marathon.GDQMarathon
+import club.speedrun.vods.marathon.GdqDatabase
+import club.speedrun.vods.marathon.HEKMarathon
+import club.speedrun.vods.marathon.Marathon
+import club.speedrun.vods.marathon.RPGLBMarathon
 import club.speedrun.vods.plugins.configureHTTP
 import club.speedrun.vods.plugins.configureMonitoring
 import club.speedrun.vods.plugins.configureOAuth
@@ -20,6 +25,7 @@ val json = Json {
     isLenient = true
     ignoreUnknownKeys = true
     coerceInputValues = true
+    encodeDefaults = true
 }
 val gdq = GDQMarathon()
 val esa = ESAMarathon()
