@@ -330,7 +330,12 @@ class EventOverrideUpdater(private val api: GDQ) : Hook<Event> {
         val overrides = api.db.getOrCreateEventOverrides(item)
         if (overrides.startedAt == null)
             overrides.startedAt = item.value.startTime
-        if (overrides.endedAt == null && item.value.endTime != null && item.value.endTime!!.plus(Duration.ofHours(1)).isBefore(Instant.now()))
+        if (overrides.startedAt != null
+            && overrides.endedAt == null
+            && item.value.endTime != null
+            && overrides.startedAt!! < item.value.endTime!!
+            && item.value.endTime!!.plus(Duration.ofHours(1)).isBefore(Instant.now())
+            )
             overrides.endedAt = item.value.endTime
         api.db.events.update(overrides)
     }
