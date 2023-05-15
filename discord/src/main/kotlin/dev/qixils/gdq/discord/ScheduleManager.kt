@@ -28,7 +28,8 @@ import java.text.NumberFormat
 import java.time.Duration
 import java.time.Instant
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Currency
+import java.util.Locale
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -167,16 +168,16 @@ class ScheduleManager(
         timestamp = Instant.now()
         footer(name = "Last Updated")
 
-        if (event.startTime > Instant.now()) {
+        if (runTicker.isNotEmpty()) {
+            runTicker.forEachIndexed { index, run -> addRunTickerField(index, run) }
+        } else if (event.startTime!! > Instant.now()) {
             field {
                 name = "Starting Soon!"
                 value = "The event will start " +
-                        TimeFormat.RELATIVE.format(event.startTime) + " on " +
-                        TimeFormat.DATE_TIME_SHORT.format(event.startTime) + "."
+                        TimeFormat.RELATIVE.format(event.startTime!!) + " on " +
+                        TimeFormat.DATE_TIME_SHORT.format(event.startTime!!) + "."
                 inline = false
             }
-        } else if (runTicker.isNotEmpty()) {
-            runTicker.forEachIndexed { index, run -> addRunTickerField(index, run) }
         } else {
             field {
                 name = "Thanks for watching!"

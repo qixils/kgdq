@@ -1,3 +1,5 @@
+export type TimeStatus = 'UPCOMING' | 'IN_PROGRESS' | 'FINISHED';
+
 export interface Event {
     id: number,
     short: string, // event slug / short name
@@ -8,8 +10,8 @@ export interface Event {
     minimumDonation: number, // minimum donation amount
     paypalCurrency: string,
     startTime: string, // start time of event in ISO 8601 format
-    endTime: string, // end time of event in ISO 8601 format
-    timeStatus: string, // status of event (either UPCOMING, IN_PROGRESS, or FINISHED)
+    endTime: string | null, // end time of event in ISO 8601 format
+    timeStatus: TimeStatus | null, // status of event
     timezone: string, // timezone of event
     locked: boolean, // whether editing is locked
     allowDonations: boolean, // whether donations are allowed
@@ -34,6 +36,7 @@ export interface Run {
     description: string, // the description of the run
     startTime: string | null, // the start time of the run in ISO 8601 format
     endTime: string | null, // the end time of the run in ISO 8601 format
+    timeStatus: TimeStatus | null, // the status of the run in the schedule
     runTime: string, // the run time (or estimated run time) of the run in h:mm:ss format
     setupTime: string, // the setup time of the run in h:mm:ss format
     order: number, // the order of the run in the schedule
@@ -45,7 +48,6 @@ export interface Run {
     bids: Bid[], // the bids (bid wars, donation incentives) for this run
     vods: VOD[], // the VODs for this run
     src: string | null, // the speedrun.com slug for the game being run
-    timeStatus: string | null, // the status of the run in the schedule
 }
 
 export interface Runner {
@@ -63,10 +65,12 @@ export interface Headset {
     pronouns: String, // their pronouns
 }
 
+export type BidState = 'OPENED' | 'CLOSED';
+
 export interface Bid {
     children: Bid[], // the child bid options for this bid (if this is a bid war)
     name: string, // the name of the bid
-    state: string, // the state of the bid (either 'OPENED' or 'CLOSED')
+    state: BidState, // the state of the bid
     description: string, // the description of the bid
     shortDescription: string, // the one-line description of the bid
     goal: number | null, // the goal amount for the bid
@@ -79,8 +83,10 @@ export interface Bid {
     pinned: boolean, // whether this bid is pinned to the stream overlay
 }
 
+export type VODType = 'TWITCH' | 'YOUTUBE' | 'OTHER';
+
 export interface VOD {
-    type: string, // the type of VOD (either 'TWITCH', 'YOUTUBE', or 'OTHER')
+    type: VODType, // the type of VOD
     videoId: string | null, // the ID of the VOD video
     timestamp: string | null, // the timestamp of the VOD
     url: string, // the full URL of the VOD
