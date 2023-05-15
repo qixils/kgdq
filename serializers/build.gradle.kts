@@ -4,7 +4,7 @@ val kjunit_version: String by project
 val junit_version: String by project
 
 plugins {
-    kotlin("plugin.serialization") version "1.7.10"
+    kotlin("plugin.serialization") version "1.8.21"
 }
 
 dependencies {
