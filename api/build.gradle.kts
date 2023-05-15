@@ -37,7 +37,7 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages-jvm:2.2.3")
     implementation("io.ktor:ktor-server-compression-jvm:2.2.3")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:2.2.3")
-    implementation("io.ktor:ktor-server-cors-jvm:2.2.3")
+    implementation("io.ktor:ktor-server-cors-jvm:2.3.0")
     implementation("io.ktor:ktor-server-default-headers-jvm:2.2.3")
     implementation("io.ktor:ktor-server-call-logging-jvm:2.2.3")
     implementation("io.ktor:ktor-server-conditional-headers-jvm:2.2.3")
