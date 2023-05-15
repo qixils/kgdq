@@ -1,4 +1,3 @@
-<!-- TODO: enable some preloading (mostly to init the head block server-side) -->
 <!-- TODO: support displaying multiple "events" (e.g. ESA Stream 1 & 2) on the same page -->
 
 <script lang="ts">
