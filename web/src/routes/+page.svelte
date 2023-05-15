@@ -1,3 +1,5 @@
+<!-- TODO: homepage (everything here is just SvelteKit template) -->
+
 <script lang="ts">
 	import Counter from '$lib/Counter.svelte';
 </script>

@@ -2,85 +2,145 @@ export type TimeStatus = 'UPCOMING' | 'IN_PROGRESS' | 'FINISHED';
 
 export interface Event {
     id: number,
-    short: string, // event slug / short name
+    // event slug / short name
+    short: string,
     name: string,
     hashtag: string,
     charityName: string,
-    targetAmount: number, // donation target
-    minimumDonation: number, // minimum donation amount
+    // donation target
+    targetAmount: number,
+    // minimum donation amount
+    minimumDonation: number,
     paypalCurrency: string,
-    startTime: string, // start time of event in ISO 8601 format
-    endTime: string | null, // end time of event in ISO 8601 format
-    timeStatus: TimeStatus | null, // status of event
-    timezone: string, // timezone of event
-    locked: boolean, // whether editing is locked
-    allowDonations: boolean, // whether donations are allowed
-    canonicalUrl: string, // public URL of event
-    public: string, // public display name
-    amount: number, // total amount raised
-    count: number, // number of donations
-    max: number, // largest donation
-    avg: number, // average donation
+    // start time of event in ISO 8601 format
+    startTime: string,
+    // end time of event in ISO 8601 format
+    endTime: string | null,
+    // status of event
+    timeStatus: TimeStatus | null,
+    // timezone of event
+    timezone: string,
+    // whether editing is locked
+    locked: boolean,
+    // whether donations are allowed
+    allowDonations: boolean,
+    // public URL of event
+    canonicalUrl: string,
+    // public display name
+    public: string,
+    // total amount raised
+    amount: number,
+    // number of donations
+    count: number,
+    // largest donation
+    max: number,
+    // average donation
+    avg: number,
 }
 
 export interface Run {
     id: number | null,
     horaroId: string | null,
-    event: number, // ID of the event this run is for
-    name: string, // name of the run
-    displayName: string, // generally the name of the game
-    twitchName: string, // the name of the game on Twitch
-    console: string, // the console the game is played on
-    commentators: Headset[], // the commentators for the run
-    hosts: Headset[], // the hosts for the run
-    description: string, // the description of the run
-    startTime: string | null, // the start time of the run in ISO 8601 format
-    endTime: string | null, // the end time of the run in ISO 8601 format
-    timeStatus: TimeStatus | null, // the status of the run in the schedule
-    runTime: string, // the run time (or estimated run time) of the run in h:mm:ss format
-    setupTime: string, // the setup time of the run in h:mm:ss format
-    order: number, // the order of the run in the schedule
-    coop: boolean, // whether a multiplayer run is a co-op run (true) or a race (false)
-    category: string, // the speedrun category being run
-    releaseYear: number | null, // the year the game released
-    runners: Runner[], // the runners performing this run
-    runnersAsString: string, // the runners performing this run as a pre-formatted string
-    bids: Bid[], // the bids (bid wars, donation incentives) for this run
-    vods: VOD[], // the VODs for this run
-    src: string | null, // the speedrun.com slug for the game being run
+    // ID of the event this run is for
+    event: number,
+    // name of the run
+    name: string,
+    // generally the name of the game
+    displayName: string,
+    // the name of the game on Twitch
+    twitchName: string,
+    // the console the game is played on
+    console: string,
+    // the commentators for the run
+    commentators: Headset[],
+    // the hosts for the run
+    hosts: Headset[],
+    // the description of the run
+    description: string,
+    // the start time of the run in ISO 8601 format
+    startTime: string | null,
+    // the end time of the run in ISO 8601 format
+    endTime: string | null,
+    // the status of the run in the schedule
+    timeStatus: TimeStatus | null,
+    // the run time (or estimated run time) of the run in h:mm:ss format
+    runTime: string,
+    // the setup time of the run in h:mm:ss format
+    setupTime: string,
+    // the order of the run in the schedule
+    order: number,
+    // whether a multiplayer run is a co-op run (true) or a race (false)
+    coop: boolean,
+    // the speedrun category being run
+    category: string,
+    // the year the game released
+    releaseYear: number | null,
+    // the runners performing this run
+    runners: Runner[],
+    // the runners performing this run as a pre-formatted string
+    runnersAsString: string,
+    // the bids (bid wars, donation incentives) for this run
+    bids: Bid[],
+    // the VODs for this run
+    vods: VOD[],
+    // the speedrun.com slug for the game being run
+    src: string | null,
 }
 
 export interface Runner {
-    name: string, // the name of the runner
-    stream: string, // the stream URL of the runner
-    twitter: string, // the Twitter handle of the runner
-    youtube: string, // the YouTube channel name of the runner
-    pronouns: string, // the pronouns of the runner
-    public: string, // the public display name of the runner
-    url: string, // the runner's primary social media URL
+    // the name of the runner
+    name: string,
+    // the stream URL of the runner
+    stream: string,
+    // the Twitter handle of the runner
+    twitter: string,
+    // the YouTube channel name of the runner
+    youtube: string,
+    // the pronouns of the runner
+    pronouns: string,
+    // the public display name of the runner
+    public: string,
+    // the runner's primary social media URL
+    url: string,
 }
 
+// a person with a headset
 export interface Headset {
-    name: String, // the name of a person with a headset
-    pronouns: String, // their pronouns
+    // their name
+    name: String,
+    // their pronouns
+    pronouns: String,
 }
 
 export type BidState = 'OPENED' | 'CLOSED';
 
 export interface Bid {
-    children: Bid[], // the child bid options for this bid (if this is a bid war)
-    name: string, // the name of the bid
-    state: BidState, // the state of the bid
-    description: string, // the description of the bid
-    shortDescription: string, // the one-line description of the bid
-    goal: number | null, // the goal amount for the bid
-    isTarget: boolean, // whether this bid is a donation incentive
-    allowUserOptions: boolean, // whether this bid allows users to enter their own options
-    optionMaxLength: number | null, // the maximum length of a bid option
-    revealedAt: string | null, // the time the bid was revealed in ISO 8601 format
-    donationTotal: number, // the total amount raised for this bid
-    donationCount: number, // the number of donations for this bid
-    pinned: boolean, // whether this bid is pinned to the stream overlay
+    // the child bid options for this bid (if this is a bid war)
+    children: Bid[],
+    // the name of the bid
+    name: string,
+    // the state of the bid
+    state: BidState,
+    // the description of the bid
+    description: string,
+    // the one-line description of the bid
+    shortDescription: string,
+    // the goal amount for the bid
+    goal: number | null,
+    // whether this bid is a donation incentive
+    isTarget: boolean,
+    // whether this bid allows users to enter their own options
+    allowUserOptions: boolean,
+    // the maximum length of a bid option
+    optionMaxLength: number | null,
+    // the time the bid was revealed in ISO 8601 format
+    revealedAt: string | null,
+    // the total amount raised for this bid
+    donationTotal: number,
+    // the number of donations for this bid
+    donationCount: number,
+    // whether this bid is pinned to the stream overlay
+    pinned: boolean,
 }
 
 export type VODType = 'TWITCH' | 'YOUTUBE' | 'OTHER';

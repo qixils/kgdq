@@ -2,6 +2,7 @@
 
 <script lang="ts">
     import type {Event, Run} from 'src/gdq';
+    import RunComponent from "$lib/RunComponent.svelte";
     import {page} from "$app/stores";
     import {Formatters} from "$lib/Formatters";
 
@@ -65,7 +66,7 @@
         {:then runs}
             <ul class="steps steps-vertical block w-full max-w-screen-lg mx-auto overflow-x-hidden text-sm md:text-base">
                 {#each runs as run, run_index}
-                    <Run {runs} {run_index} {formatter} />
+                    <RunComponent {runs} {run_index} {formatter} />
                 {:else}
                     <p class="info">
                         {#if event.timeStatus === "UPCOMING"}
