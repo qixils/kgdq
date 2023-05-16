@@ -19,7 +19,7 @@
     "@typescript-eslint/parser": "^5.27.0",
     "eslint": "^8.40.0",
     "eslint-plugin-svelte3": "^4.0.0",
-    "svelte": "^3.46.0",
+    "svelte": "^3.59.1",
     "svelte-check": "^2.7.1",
     "svelte-preprocess": "^4.10.7",
     "tslib": "^2.3.1",
