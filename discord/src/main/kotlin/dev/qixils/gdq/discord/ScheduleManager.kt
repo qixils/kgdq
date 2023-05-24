@@ -35,7 +35,8 @@ class ScheduleManager(
     private val db = bot.db.getCollection(ChannelData.serializer(), ChannelData.COLLECTION_NAME)
     private val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
     private val client = SvcClient()
-    private val marathon = client.getMarathonClient(config.organization.name.lowercase(Locale.ENGLISH))
+    private val marathonClient = client.getMarathonClient(config.org.lowercase(Locale.ENGLISH))
+    private val marathon = runBlocking { marathonClient.get(stats = false) }
 
     companion object {
         private val logger = LoggerFactory.getLogger(ScheduleManager::class.java)
@@ -43,7 +44,7 @@ class ScheduleManager(
     }
 
     init {
-        logger.debug("Starting schedule manager for ${config.organization.name}'s ${config.id}...")
+        logger.debug("Starting schedule manager for ${config.org}'s ${config.id}...")
         scheduler.scheduleAtFixedRate(this::runWrapper, 0, config.waitMinutes, TimeUnit.MINUTES)
     }
 
@@ -183,7 +184,7 @@ class ScheduleManager(
         // Get channel data
         val channelData = db.get(owningChannel.id) ?: ChannelData(owningChannel.id)
         // Get or create thread
-        val threadKey = "${config.organization.name}-${event.id}"
+        val threadKey = "${config.org}-${event.id}"
         val thread: ThreadChannel
         if (threadKey in channelData.threads) {
             thread = owningChannel.guild.getThreadChannelById(channelData.threads[threadKey]!!) ?: run {
@@ -228,15 +229,15 @@ class ScheduleManager(
         // Send new messages
         newMessagesCopy.forEach { it.send(thread) }
         // Log
-        logger.info("Updated schedule for ${config.organization.name}'s ${event.short} in #${owningChannel.name} ($channelId)")
+        logger.info("Updated schedule for ${config.org}'s ${event.short} in #${owningChannel.name} ($channelId)")
     }
 
     private suspend fun run() = coroutineScope {
-        logger.info("Started schedule manager for ${config.organization.name}'s ${config.id}")
+        logger.info("Started schedule manager for ${config.org}'s ${config.id}")
 
         // Get event and run data
-        val runs = async { marathon.getRuns(event = config.id) }
-        val event = marathon.getEvent(config.id) ?: throw IllegalStateException("Event ${config.id} by ${config.organization.name} not found")
+        val runs = async { marathonClient.getRuns(event = config.id) }
+        val event = marathonClient.getEvent(config.id) ?: throw IllegalStateException("Event ${config.id} by ${config.org} not found")
 
         // Initialize misc utility vals
         val moneyFormatter = NumberFormat.getCurrencyInstance(Locale.US)

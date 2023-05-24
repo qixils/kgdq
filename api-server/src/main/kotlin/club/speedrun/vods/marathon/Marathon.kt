@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 import java.util.regex.Pattern
 import kotlin.collections.set
 
@@ -57,6 +58,10 @@ abstract class Marathon(
      * The homepage URL of this organization.
      */
     override val homepageUrl: String,
+    /**
+     * The short name of this organization.
+     */
+    override val shortName: String = id.uppercase(Locale.US),
     /**
      * Whether this organization supports automatic VOD link generation.
      */
@@ -277,16 +282,21 @@ abstract class Marathon(
     }
 
     suspend fun getEventsData(query: EventList? = null, skipLoad: Boolean = false): List<EventData> {
-        return getEvents(query, skipLoad).map { EventData(it) }.sortedBy { it.startTime }
+        return getEvents(query, skipLoad).map { EventData(this, it) }.sortedBy { it.startTime }
     }
 
-    suspend fun getOrganizationData(): OrganizationData {
-        return OrganizationData(this, getEventsData(skipLoad = true))
+    suspend fun getOrganizationData(stats: Boolean = true): OrganizationData {
+        val events = if (stats) getEventsData(skipLoad = false) else null
+        return OrganizationData(this, events)
+    }
+
+    suspend fun getOrganizationData(query: Organization): OrganizationData {
+        return getOrganizationData(query.stats)
     }
 
     fun route(): Route.() -> Unit = {
-        get {
-            call.respond(getOrganizationData())
+        get<Organization> { query ->
+            call.respond(getOrganizationData(query))
         }
 
         get<EventList> { query ->
@@ -316,6 +326,9 @@ abstract class Marathon(
     }
 }
 
+@Location("/")
+data class Organization(val stats: Boolean = true)
+
 @Location("/events")
 data class EventList(val id: String? = null) // TODO: move to subroute
 
@@ -330,7 +343,7 @@ class ESAMarathon : Marathon(ESA(), "esa", "European Speedrunner Assembly", "htt
     override fun getDonationUrl(event: EventData): String = "https://donations.esamarathon.com/donate/${event.short}"
     override fun getScheduleUrl(event: EventData): String = event.horaroUrl
 }
-class HEKMarathon : Marathon(HEK(), "hek", "Hekathon", "https://hekathon.com/") {
+class HEKMarathon : Marathon(HEK(), "hek", "Hekathon", "https://hekathon.com/", shortName = "Hekathon") {
     override fun getDonationUrl(event: EventData): String = "https://hekathon.esamarathon.com/donate/${event.short}"
     override fun getScheduleUrl(event: EventData): String = event.horaroUrl
 }

@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalSerializationApi::class)
+
 package club.speedrun.vods.marathon
 
 import club.speedrun.vods.naturalJoinToString
@@ -14,6 +16,8 @@ import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import dev.qixils.gdq.serializers.ZoneIdSerializer
 import dev.qixils.horaro.Horaro
 import dev.qixils.horaro.models.FullSchedule
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import java.time.Duration
@@ -322,8 +326,10 @@ class EventData {
     val avg: Double
     var horaroEvent: String? = null
     var horaroSchedule: String? = null
+    val donationUrl: String
+    val scheduleUrl: String
 
-    constructor(event: Wrapper<Event>) {
+    constructor(organization: OrganizationConfig, event: Wrapper<Event>) {
         id = event.id
         short = event.value.short
         name = event.value.name
@@ -354,6 +360,9 @@ class EventData {
             now < endTime -> TimeStatus.IN_PROGRESS
             else -> TimeStatus.FINISHED
         }
+
+        donationUrl = organization.getDonationUrl(this)
+        scheduleUrl = organization.getScheduleUrl(this)
     }
 
     suspend fun horaroSchedule(): FullSchedule? {
@@ -375,6 +384,10 @@ interface OrganizationConfig {
      * The identifier of this organization.
      */
     val id: String
+    /**
+     * The short name of this organization.
+     */
+    val shortName: String
     /**
      * The display name of this organization.
      */
@@ -400,16 +413,20 @@ interface OrganizationConfig {
 @Serializable
 class OrganizationData {
     val displayName: String
+    val shortName: String
     val homepageUrl: String
     val autoVODs: Boolean
-    val amountRaised: Double
-    val donationCount: Int
+    @EncodeDefault(EncodeDefault.Mode.NEVER) var amountRaised: Double? = null
+    @EncodeDefault(EncodeDefault.Mode.NEVER) var donationCount: Int? = null
 
-    constructor(organization: OrganizationConfig, events: List<EventData>) {
+    constructor(organization: OrganizationConfig, events: List<EventData>?) {
         displayName = organization.displayName
+        shortName = organization.shortName
         homepageUrl = organization.homepageUrl
         autoVODs = organization.autoVODs
-        amountRaised = events.sumOf { it.amount }
-        donationCount = events.sumOf { it.count }
+        if (events != null) {
+            amountRaised = events.sumOf { it.amount }
+            donationCount = events.sumOf { it.count }
+        }
     }
 }

@@ -3,6 +3,7 @@
 package club.speedrun.vods.plugins
 
 import club.speedrun.vods.*
+import club.speedrun.vods.marathon.Organization
 import club.speedrun.vods.marathon.VOD
 import club.speedrun.vods.marathon.VodSuggestion
 import io.ktor.http.*
@@ -86,8 +87,8 @@ fun Application.configureRouting() {
                 }
 
                 route("/marathons") {
-                    get {
-                        val deferreds = marathons.associate { it.id to async { it.getOrganizationData() } }
+                    get<Organization> {query ->
+                        val deferreds = marathons.associate { it.id to async { it.getOrganizationData(query) } }
                         call.respond(deferreds.mapValues { it.value.await() })
                     }
 
