@@ -11,7 +11,6 @@ import club.speedrun.vods.plugins.configureMonitoring
 import club.speedrun.vods.plugins.configureOAuth
 import club.speedrun.vods.plugins.configureRouting
 import club.speedrun.vods.rabbit.RabbitManager
-import dev.qixils.gdq.GDQ
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
 import io.ktor.serialization.kotlinx.json.*
@@ -49,15 +48,14 @@ fun getDB(organization: String): GdqDatabase {
     return databaseManagers.getOrPut(organization) { GdqDatabase(organization) }
 }
 
-val GDQ.db: GdqDatabase get() = getDB(organization)
 fun Application.kgdqApiModule() {
     configureHTTP()
     configureMonitoring()
     install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) { json(json) }
     configureOAuth()
     configureRouting()
-    RabbitManager.declareQueue("cg_events_reddit_esa2022s1", "ESAMarathon", esa.api.db)
-    RabbitManager.declareQueue("cg_events_reddit_esa2022s2", "ESAMarathon2", esa.api.db)
+    RabbitManager.declareQueue("cg_events_reddit_esa2022s1", "ESAMarathon", esa.db)
+    RabbitManager.declareQueue("cg_events_reddit_esa2022s2", "ESAMarathon2", esa.db)
     runBlocking {
         marathons.forEach { it.api.cacheAll() }
     }

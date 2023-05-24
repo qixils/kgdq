@@ -316,9 +316,9 @@ class EventData {
     val allowDonations: Boolean
     val canonicalUrl: String
     val public: String
-    val amount: Float
+    val amount: Double
     val count: Int
-    val max: Float
+    val max: Double
     val avg: Double
     var horaroEvent: String? = null
     var horaroSchedule: String? = null
@@ -368,4 +368,48 @@ enum class TimeStatus {
     UPCOMING,
     IN_PROGRESS,
     FINISHED,
+}
+
+interface OrganizationConfig {
+    /**
+     * The identifier of this organization.
+     */
+    val id: String
+    /**
+     * The display name of this organization.
+     */
+    val displayName: String
+    /**
+     * The homepage URL of this organization.
+     */
+    val homepageUrl: String
+    /**
+     * Whether this organization supports automatic VOD link generation.
+     */
+    val autoVODs: Boolean
+    /**
+     * Creates the URL of the donation page for a given event.
+     */
+    fun getDonationUrl(event: EventData): String
+    /**
+     * Creates the URL of the schedule page for a given event.
+     */
+    fun getScheduleUrl(event: EventData): String
+}
+
+@Serializable
+class OrganizationData {
+    val displayName: String
+    val homepageUrl: String
+    val autoVODs: Boolean
+    val amountRaised: Double
+    val donationCount: Int
+
+    constructor(organization: OrganizationConfig, events: List<EventData>) {
+        displayName = organization.displayName
+        homepageUrl = organization.homepageUrl
+        autoVODs = organization.autoVODs
+        amountRaised = events.sumOf { it.amount }
+        donationCount = events.sumOf { it.count }
+    }
 }

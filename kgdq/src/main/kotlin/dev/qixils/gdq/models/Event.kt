@@ -28,17 +28,22 @@ data class Event(
     @SerialName("allow_donations") val allowDonations: Boolean = !locked,
     @SerialName("canonical_url") private var _canonicalUrl: String? = null,
     val public: String,
-    val amount: Float,
+    val amount: Double,
     val count: Int,
-    val max: Float,
+    val max: Double,
     val avg: Double,
     @SerialName("horaro_name") private val horaroName: String? = null,
 ) : Model {
 
+    @Transient private var skipLoad = false
+    override fun skipLoad() {
+        skipLoad = true
+    }
+
     override suspend fun loadData(api: GDQ, id: Int) {
         // datetime fallback
         if (_starttime == null || _endtime == null) {
-            api.updateEvent(id)
+            api.updateEvent(id, skipLoad)
             if (_starttime == null)
                 _starttime = api.eventStartedAt[id]
             if (_endtime == null)

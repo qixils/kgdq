@@ -20,8 +20,13 @@ import java.time.Instant
  */
 @Suppress("HttpUrlsUsage")
 open class GDQ(
+    /**
+     * The base URL of the GDQ donation tracker API.
+     */
     apiPath: String = "https://gamesdonequick.com/tracker/search/",
-    val organization: String = "gdq",
+    /**
+     * The types of models supported by this instance of the donation tracker.
+     */
     val supportedModels: Set<ModelType<*>> = ModelType.ALL,
 ) {
     private val logger = LoggerFactory.getLogger(GDQ::class.java)
@@ -68,8 +73,9 @@ open class GDQ(
             eventEndedAtExpiration.remove(id)
     }
 
-    suspend fun updateEvent(id: Int) {
+    suspend fun updateEvent(id: Int, skipLoad: Boolean = false) {
         handleEventExpiration(id)
+        if (skipLoad) return
         if (id in eventStartedAt && id in eventEndedAt) return
         val runs = getRuns(event = id).sortedBy { it.value.order }
         updateEvent(id, runs.firstOrNull()?.value?.startTime, runs.lastOrNull()?.value?.endTime)
@@ -538,9 +544,8 @@ open class GDQ(
  * A derivative of [GDQ] tailored for ESA.
  */
 open class ESA(
-    apiPath: String = "https://donations.esamarathon.com/search/",
-    organization: String = "esa",
-) : GDQ(apiPath, organization, ModelType.ALL.minus(ModelType.HEADSET)) {
+    apiPath: String = "https://donations.esamarathon.com/search/"
+) : GDQ(apiPath, ModelType.ALL.minus(ModelType.HEADSET)) {
     override suspend fun cacheRunners() {
         val now = Instant.now()
         if (lastCachedRunners != null && lastCachedRunners!!.plus(ModelType.RUNNER.cacheFor).isAfter(now))
@@ -550,5 +555,5 @@ open class ESA(
     }
 }
 
-class HEK : ESA("https://hekathon.esamarathon.com/search/", "hek")
-class RPGLB : GDQ("https://rpglimitbreak.com/tracker/search/", "rpglb", ModelType.ALL.minus(ModelType.HEADSET))
+class HEK : ESA("https://hekathon.esamarathon.com/search/")
+class RPGLB : GDQ("https://rpglimitbreak.com/tracker/search/", ModelType.ALL.minus(ModelType.HEADSET))

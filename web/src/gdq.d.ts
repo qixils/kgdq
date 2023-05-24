@@ -1,3 +1,16 @@
+export interface Organization {
+    // the name of the organization
+    displayName: string,
+    // the homepage of the organization
+    homepageUrl: string,
+    // whether this organization supports automatic VOD link generation
+    autoVODs: boolean,
+    // the amount of money this organization has raised in total
+    amountRaised: number,
+    // the number of donations this organization has received in total
+    donationCount: number,
+}
+
 export type TimeStatus = 'UPCOMING' | 'IN_PROGRESS' | 'FINISHED';
 
 export interface Event {

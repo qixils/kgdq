@@ -15,6 +15,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.util.pipeline.*
+import kotlinx.coroutines.async
 import kotlinx.serialization.SerializationException
 import java.time.Duration
 
@@ -86,15 +87,17 @@ fun Application.configureRouting() {
 
                 route("/marathons") {
                     get {
-                        call.respond(marathons.map { it.api.organization })
+                        val deferreds = marathons.associate { it.id to async { it.getOrganizationData() } }
+                        call.respond(deferreds.mapValues { it.value.await() })
                     }
 
                     marathons.forEach {
-                        route("/${it.api.organization}", it.route())
+                        route("/${it.id}", it.route())
                     }
 
                     get("/events") {
-                        call.respond(marathons.map { it.api.organization to it.getEventsData() })
+                        val deferreds = marathons.associate { it.id to async { it.getEventsData() } }
+                        call.respond(deferreds.mapValues { it.value.await() })
                     }
                 }
 
@@ -110,15 +113,15 @@ fun Application.configureRouting() {
                         // parse VOD from URL
                         val vod = VOD.fromUrl(body.url)
                         // get marathon
-                        val marathon = marathons.firstOrNull { it.api.organization.equals(body.organization, true) }
-                            ?: throw UserError("Invalid organization; must be one of: ${marathons.joinToString { it.api.organization }}")
+                        val marathon = marathons.firstOrNull { it.id.equals(body.organization, true) }
+                            ?: throw UserError("Invalid organization; must be one of: ${marathons.joinToString { it.id }}")
                         // get override
-                        val run = marathon.api.db.getRunOverrides(gdqId = body.gdqId, horaroId = body.horaroId)
+                        val run = marathon.db.getRunOverrides(gdqId = body.gdqId, horaroId = body.horaroId)
                             ?: throw UserError("Invalid run ID")
                         // add suggestion
                         run.vodSuggestions.add(VodSuggestion(vod, user.id))
                         // update override
-                        marathon.api.db.runs.update(run)
+                        marathon.db.runs.update(run)
                         // respond
                         call.respond(HttpStatusCode.OK)
                     }
@@ -133,15 +136,15 @@ fun Application.configureRouting() {
                         // parse VOD from URL
                         val vod = VOD.fromUrl(body.url)
                         // get marathon
-                        val marathon = marathons.firstOrNull { it.api.organization.equals(body.organization, true) }
-                            ?: throw UserError("Invalid organization; must be one of: ${marathons.joinToString { it.api.organization }}")
+                        val marathon = marathons.firstOrNull { it.id.equals(body.organization, true) }
+                            ?: throw UserError("Invalid organization; must be one of: ${marathons.joinToString { it.id }}")
                         // get override
-                        val run = marathon.api.db.getRunOverrides(gdqId = body.gdqId, horaroId = body.horaroId)
+                        val run = marathon.db.getRunOverrides(gdqId = body.gdqId, horaroId = body.horaroId)
                             ?: throw UserError("Invalid run ID")
                         // add VOD
                         run.vods.add(vod)
                         // update override
-                        marathon.api.db.runs.update(run)
+                        marathon.db.runs.update(run)
                         // respond
                         call.respond(HttpStatusCode.OK)
                     }
@@ -159,15 +162,15 @@ fun Application.configureRouting() {
                         // parse duration from time
                         val duration = Duration.ofSeconds(body.time)
                         // get marathon
-                        val marathon = marathons.firstOrNull { it.api.organization.equals(body.organization, true) }
-                            ?: throw UserError("Invalid organization; must be one of: ${marathons.joinToString { it.api.organization }}")
+                        val marathon = marathons.firstOrNull { it.id.equals(body.organization, true) }
+                            ?: throw UserError("Invalid organization; must be one of: ${marathons.joinToString { it.id }}")
                         // get override
-                        val run = marathon.api.db.getRunOverrides(gdqId = body.gdqId, horaroId = body.horaroId)
+                        val run = marathon.db.getRunOverrides(gdqId = body.gdqId, horaroId = body.horaroId)
                             ?: throw UserError("Invalid run ID")
                         // set time
                         run.runTime = duration
                         // update override
-                        marathon.api.db.runs.update(run)
+                        marathon.db.runs.update(run)
                         // respond
                         call.respond(HttpStatusCode.OK)
                     }
