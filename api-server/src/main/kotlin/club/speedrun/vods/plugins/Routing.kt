@@ -32,7 +32,7 @@ private suspend fun getUser(call: ApplicationCall): User? {
 
 private suspend fun getDiscordUser(call: ApplicationCall): DiscordUser? {
     return try {
-        rootDb.getFromSession(call.sessions.get()!!)!!.discord!!.fetchUserOrNull()!!
+        rootDb.getFromSession(call.sessions.get()!!)!!.discord!!.fetchUserOrThrow()
     } catch (e: Exception) {
         call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "You are not authenticated"))
         null
