@@ -348,8 +348,9 @@ class EventData {
 
         val now = Instant.now()
         timeStatus = when {
-            startTime == null || endTime == null -> null
+            startTime == null -> null
             now < startTime -> TimeStatus.UPCOMING
+            endTime == null -> TimeStatus.IN_PROGRESS
             now < endTime -> TimeStatus.IN_PROGRESS
             else -> TimeStatus.FINISHED
         }
