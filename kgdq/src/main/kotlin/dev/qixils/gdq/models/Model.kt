@@ -16,4 +16,9 @@ interface Model {
      */
     fun skipLoad() {
     }
+
+    /**
+     * Returns whether this model skipped loading its data.
+     */
+    val skippedLoad get() = false
 }

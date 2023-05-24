@@ -185,23 +185,27 @@ open class GDQ(
         val models = json
             .decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
             .toMutableList()
+        val jobs = mutableListOf<Job>()
 
         // load data
         coroutineScope {
             models.forEach {
                 preLoad?.handle(it)
                 it.value.loadData(this@GDQ, it.id)
-                postLoad?.let { pl -> launch { pl.handle(it) } } // run post-load in background
+                postLoad?.let { pl -> jobs.add(launch { pl.handle(it) }) } // run post-load in background
             }
         }
+        jobs.joinAll()
 
         // remove invalid models
         models.removeIf { !it.value.isValid() }
 
         // cache models
-        val now = Instant.now()
-        models.forEach { modelCache[it.modelType.cacheType to it.id] = it to now }
-        responseCache[query] = models to now
+        if (models.none { it.value.skippedLoad }) {
+            val now = Instant.now()
+            models.forEach { modelCache[it.modelType.cacheType to it.id] = it to now }
+            responseCache[query] = models to now
+        }
 
         // return
         return models

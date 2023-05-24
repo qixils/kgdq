@@ -39,6 +39,7 @@ data class Event(
     override fun skipLoad() {
         skipLoad = true
     }
+    override val skippedLoad: Boolean get() = skipLoad
 
     override suspend fun loadData(api: GDQ, id: Int) {
         // datetime fallback
