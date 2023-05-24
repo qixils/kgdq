@@ -1,14 +1,18 @@
 export interface Organization {
     // the name of the organization
     displayName: string,
+    // the short name of the organization
+    shortName: string,
     // the homepage of the organization
     homepageUrl: string,
     // whether this organization supports automatic VOD link generation
     autoVODs: boolean,
-    // the amount of money this organization has raised in total
-    amountRaised: number,
-    // the number of donations this organization has received in total
-    donationCount: number,
+    // the amount of money this organization has raised in total.
+    // may be missing if the endpoint was fetched with `stats=false`.
+    amountRaised?: number,
+    // the number of donations this organization has received in total.
+    // may be missing if the endpoint was fetched with `stats=false`.
+    donationCount?: number,
 }
 
 export type TimeStatus = 'UPCOMING' | 'IN_PROGRESS' | 'FINISHED';
@@ -49,6 +53,10 @@ export interface Event {
     max: number,
     // average donation
     avg: number,
+    // the URL to donate to this event
+    donationUrl: string,
+    // the URL for this event's official schedule
+    scheduleUrl: string,
 }
 
 export interface Run {
