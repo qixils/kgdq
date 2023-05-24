@@ -20,7 +20,7 @@
 </main>
 
 <footer>
-  <p>Copyright &copy; 2023 <a href="https://github.com/qixils">Qixils</a> and <a href="https://github.com/dunkyl">Dunkyl 🔣🔣</a></p>
+  <p>Copyright &copy; 2023 <a href="https://github.com/qixils">Lexi</a> and <a href="https://github.com/dunkyl">Dunkyl 🔣🔣</a></p>
   <p>This project is open source. Check it out <a href="https://github.com/qixils/kgdq">on GitHub</a>!</p>
   <p>Data generously provided by <a href="/organizations">the organizations that run the events</a>.</p>
 </footer>
