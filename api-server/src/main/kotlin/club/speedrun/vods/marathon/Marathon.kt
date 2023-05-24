@@ -317,7 +317,7 @@ abstract class Marathon(
 }
 
 @Location("/events")
-data class EventList(val id: String? = null)
+data class EventList(val id: String? = null) // TODO: move to subroute
 
 @Location("/runs")
 data class RunList(val id: String? = null, val event: String? = null, val runner: Int? = null)

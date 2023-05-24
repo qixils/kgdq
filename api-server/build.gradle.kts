@@ -23,7 +23,7 @@ dependencies {
     implementation(libs.twitch4j.helix)
     implementation(libs.bundles.ktor.server)
     implementation(libs.bundles.ktor.client)
-    testImplementation(libs.kotlin.test.junit)
     implementation(libs.kotlinx.serialization.cbor)
+    testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.ktor.server.tests.jvm)
 }

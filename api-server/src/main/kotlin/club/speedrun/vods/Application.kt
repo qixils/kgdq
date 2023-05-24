@@ -12,7 +12,7 @@ import club.speedrun.vods.plugins.configureOAuth
 import club.speedrun.vods.plugins.configureRouting
 import club.speedrun.vods.rabbit.RabbitManager
 import io.ktor.client.*
-import io.ktor.client.engine.apache.*
+import io.ktor.client.engine.okhttp.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -34,7 +34,7 @@ val rpglb = RPGLBMarathon()
 val marathons: List<Marathon> = listOf(gdq, esa, hek, rpglb)
 val rootDb = RootDatabase()
 val srcDb = SrcDatabase()
-val httpClient = HttpClient(Apache) {
+val httpClient = HttpClient(OkHttp) {
     install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) { json(json) }
 }
 

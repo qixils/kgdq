@@ -1,5 +1,6 @@
 package dev.qixils.gdq.discord
 
+import club.speedrun.vods.client.SvcClient
 import club.speedrun.vods.marathon.BidData
 import club.speedrun.vods.marathon.EventData
 import club.speedrun.vods.marathon.RunData
@@ -11,19 +12,12 @@ import dev.qixils.gdq.models.BidState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageType
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel
 import net.dv8tion.jda.api.utils.TimeFormat
 import org.slf4j.LoggerFactory
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.text.NumberFormat
 import java.time.Duration
 import java.time.Instant
@@ -40,13 +34,8 @@ class ScheduleManager(
 ) {
     private val db = bot.db.getCollection(ChannelData.serializer(), ChannelData.COLLECTION_NAME)
     private val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
-    private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build()
-    private val apiRoot = "https://vods.speedrun.club/api/v2/marathons/${config.organization.name.lowercase(Locale.ENGLISH)}/"
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        coerceInputValues = true
-    }
+    private val client = SvcClient()
+    private val marathon = client.getMarathonClient(config.organization.name.lowercase(Locale.ENGLISH))
 
     companion object {
         private val logger = LoggerFactory.getLogger(ScheduleManager::class.java)
@@ -56,15 +45,6 @@ class ScheduleManager(
     init {
         logger.debug("Starting schedule manager for ${config.organization.name}'s ${config.id}...")
         scheduler.scheduleAtFixedRate(this::runWrapper, 0, config.waitMinutes, TimeUnit.MINUTES)
-    }
-
-    private suspend fun <M> get(query: String, serializer: KSerializer<M>): M {
-        // TODO: i should really have a client for using the vods.speedrun.club API
-        val uri = URI(apiRoot + query)
-        logger.debug("GET $uri")
-        val request = HttpRequest.newBuilder(uri).GET().build()
-        val response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-        return json.decodeFromString(serializer, response.await().body())
     }
 
     private fun runWrapper() {
@@ -255,9 +235,8 @@ class ScheduleManager(
         logger.info("Started schedule manager for ${config.organization.name}'s ${config.id}")
 
         // Get event and run data
-        val runs = async { get("runs?event=${config.id}", ListSerializer(RunData.serializer())) }
-        val event = get("events?id=${config.id}", ListSerializer(EventData.serializer()))
-            .firstOrNull() ?: throw IllegalStateException("Event ${config.id} by ${config.organization.name} not found")
+        val runs = async { marathon.getRuns(event = config.id) }
+        val event = marathon.getEvent(config.id) ?: throw IllegalStateException("Event ${config.id} by ${config.organization.name} not found")
 
         // Initialize misc utility vals
         val moneyFormatter = NumberFormat.getCurrencyInstance(Locale.US)

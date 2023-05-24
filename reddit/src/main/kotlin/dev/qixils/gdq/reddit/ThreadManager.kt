@@ -1,5 +1,6 @@
 package dev.qixils.gdq.reddit
 
+import club.speedrun.vods.client.SvcClient
 import club.speedrun.vods.marathon.EventData
 import club.speedrun.vods.marathon.RunData
 import club.speedrun.vods.marathon.VOD
@@ -7,32 +8,18 @@ import club.speedrun.vods.marathon.VODType
 import club.speedrun.vods.naturalJoinTo
 import dev.qixils.gdq.models.Runner
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.future.await
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
 import net.dean.jraw.RedditClient
 import org.slf4j.LoggerFactory
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
-import java.time.Duration
 import java.time.Instant
-import java.util.*
+import java.util.Locale
 
 class ThreadManager(
     private val reddit: RedditClient,
     private val config: ThreadConfig,
 ) {
     private val logger = LoggerFactory.getLogger(ThreadManager::class.java)
-    private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build()
-    private val apiRoot = "https://vods.speedrun.club/api/v2/marathons/${config.organization.name.lowercase(Locale.ENGLISH)}/"
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        coerceInputValues = true
-    }
+    private val client = SvcClient()
+    private val marathon = client.getMarathonClient(config.organization.name.lowercase(Locale.ENGLISH))
 
     init {
         logger.debug("Loaded thread manager for ${config.organization.shortName}")
@@ -53,10 +40,8 @@ class ThreadManager(
 
     private suspend fun generateSubBody(body: StringBuilder, eventConfig: EventConfig): CharSequence {
         // Get event and run data
-        val event = get("events?id=${eventConfig.eventId}", ListSerializer(EventData.serializer()))
-            .firstOrNull()
-            ?: throw IllegalStateException("Event ${eventConfig.eventId} by ${config.organization.shortName} not found")
-        val runs = get("runs?event=${eventConfig.eventId}", ListSerializer(RunData.serializer()))
+        val event = marathon.getEvent(eventConfig.eventId) ?: throw IllegalStateException("Event ${eventConfig.eventId} by ${config.organization.shortName} not found")
+        val runs = marathon.getRuns(eventConfig.eventId)
 
         // Generate body
         generateSubHeader(body, event, eventConfig)
@@ -157,14 +142,6 @@ class ThreadManager(
         if (run.isCurrent)
             time.insert(0, '*').append('*')
         return time
-    }
-
-    private suspend fun <M> get(query: String, serializer: KSerializer<M>): M {
-        val uri = URI(apiRoot + query)
-        logger.debug("GET $uri")
-        val request = HttpRequest.newBuilder(uri).GET().build()
-        val response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-        return json.decodeFromString(serializer, response.await().body())
     }
 
     suspend fun run() {

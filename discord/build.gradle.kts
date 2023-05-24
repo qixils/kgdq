@@ -18,13 +18,11 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":api-models"))
+    implementation(project(":api-client-kotlin"))
     implementation(libs.jda)
     implementation(libs.jda.ktx)
     implementation(libs.configurate.yaml)
     implementation(libs.configurate.extra.kotlin)
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.serialization.json)
     implementation(libs.logback)
 }
 

@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":api-models"))
+    implementation(project(":api-client-kotlin"))
     implementation(libs.jraw)
     implementation(libs.okhttp)
     implementation(libs.configurate.yaml)
