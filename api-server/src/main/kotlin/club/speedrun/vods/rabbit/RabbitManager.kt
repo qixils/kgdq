@@ -7,7 +7,11 @@ import com.github.twitch4j.helix.TwitchHelixBuilder
 import com.github.twitch4j.helix.domain.StreamList
 import com.github.twitch4j.helix.domain.VideoList
 import com.netflix.hystrix.HystrixCommand
-import com.rabbitmq.client.*
+import com.rabbitmq.client.CancelCallback
+import com.rabbitmq.client.Channel
+import com.rabbitmq.client.ConnectionFactory
+import com.rabbitmq.client.DeliverCallback
+import com.rabbitmq.client.Delivery
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking

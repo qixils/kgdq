@@ -1,7 +1,7 @@
 rootProject.name = "kgdq-parent"
 include(":discord")
 include(":kgdq")
-include(":api")
+include(":api-server")
 include(":api-models")
 include(":horaro")
 include(":serializers")
