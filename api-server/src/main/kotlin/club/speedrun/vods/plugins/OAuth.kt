@@ -54,11 +54,15 @@ fun Application.configureOAuth() {
                         call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "You are not authenticated"))
                         return@get
                     }
-                    val oauth = DiscordOAuth.from(principal)
-                    val user = rootDb.getOrCreateFromDiscord(oauth)
-                    call.sessions.set(user.session())
-                    val redirect = redirects[principal.state!!] ?: "/"
-                    call.respondRedirect(redirect)
+                    try {
+                        val oauth = DiscordOAuth.from(principal)
+                        val user = rootDb.getOrCreateFromDiscord(oauth)
+                        call.sessions.set(user.session())
+                        val redirect = redirects[principal.state!!] ?: "/"
+                        call.respondRedirect(redirect)
+                    } catch (e: Exception) {
+                        call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Failed to authenticate"))
+                    }
                 }
             }
         }

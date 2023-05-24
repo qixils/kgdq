@@ -5,13 +5,19 @@ import club.speedrun.vods.db.Database
 class RootDatabase : Database("api") {
     private val users = getCollection(User.serializer(), User.COLLECTION_NAME)
 
-    fun getFromDiscord(data: DiscordOAuth): User? = users.find { it.discord?.user?.id == data.user.id }
     fun getFromDiscord(id: Long): User? = users.find { it.discord?.user?.id == id }
     fun getFromDiscord(id: String): User? {
-        val longId = id.toLongOrNull() ?: return null
-        return users.find { it.discord?.user?.id == longId }
+        return getFromDiscord(id.toLongOrNull() ?: return null)
     }
-    fun getFromDiscord(user: DiscordUser): User? = users.find { it.discord?.user?.id == user.id }
+    fun getFromDiscord(user: DiscordUser): User? = getFromDiscord(user.id)
+    fun getFromDiscord(data: DiscordOAuth): User? {
+        val oauth = getFromDiscord(data.user ?: return null)
+        if (oauth != null) {
+            oauth.discord = data
+            users.update(oauth)
+        }
+        return oauth
+    }
 
     fun getOrCreateFromDiscord(data: DiscordOAuth): User {
         val user = getFromDiscord(data)

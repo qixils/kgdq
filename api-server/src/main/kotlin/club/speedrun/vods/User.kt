@@ -89,6 +89,7 @@ data class DiscordOAuth(
         accessToken = data.accessToken
         refreshToken = data.refreshToken
         expiresIn = data.expiresIn
+        rootDb.getFromDiscord(this) // triggers an update to the database with the new tokens
     }
 
     private suspend fun user(): DiscordUser {
@@ -99,8 +100,10 @@ data class DiscordOAuth(
     }
 
     companion object {
-        fun from(data: OAuthAccessTokenResponse.OAuth2): DiscordOAuth {
-            return DiscordOAuth(data.accessToken, data.refreshToken, data.expiresIn, Instant.now().epochSecond)
+        suspend fun from(data: OAuthAccessTokenResponse.OAuth2): DiscordOAuth {
+            val oauth = DiscordOAuth(data.accessToken, data.refreshToken, data.expiresIn, Instant.now().minusSeconds(10).epochSecond)
+            oauth.fetchUserOrThrow()
+            return oauth
         }
     }
 }
