@@ -1,59 +1,16 @@
-<!-- TODO: homepage (everything here is just SvelteKit template) -->
-
 <script lang="ts">
 	import Counter from '$lib/Counter.svelte';
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<title>Speedrun VOD Club</title>
+	<meta name="description" content="TODO KGDQ meta tags" />
 </svelte:head>
 
-<section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset="svelte-welcome.webp" type="image/webp" />
-				<img src="svelte-welcome.png" alt="Welcome" />
-			</picture>
-		</span>
+<p>This site is a way to find VODs of speedruns that are avaiable online from charity marathon streams.</p>
 
-		to your new<br />SvelteKit app
-	</h1>
+<p>"VOD" is short for <em>Video On Demand</em>, it means a record of the livestream that can be viewed any time after the event.</p>
 
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
+<h2>Featured VODs</h2>
 
-	<Counter />
-</section>
-
-<style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 1;
-	}
-
-	h1 {
-		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
-	}
-</style>
+<p>TODO?</p>

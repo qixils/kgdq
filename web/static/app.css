@@ -1,0 +1,83 @@
+html {
+    font-family: Verdana, sans-serif;
+    color: #EEF;
+    background-color: #001;
+    min-height: 100vh;
+}
+
+body {
+    max-width: 900px;
+    margin: 0 auto;
+    min-height: 100vh; /* Fallback for browsers that do not support stretch */
+    min-height: stretch; /* Extend to bottom edge of viewport */
+
+    display: grid;
+    grid-template-rows:
+            auto  /* header */
+            1fr   /*  main  */
+            auto  /* footer */ ;
+}
+
+header {
+    padding: 1em;
+}
+
+header h1 {
+    color: #EEF;
+}
+
+header a {
+    text-decoration: none;
+}
+
+a {
+    color: #AAF;
+}
+
+a:visited {
+    color: #BBE;
+}
+
+a:hover {
+    color: white;
+}
+
+a[target='_blank']::after {
+    content: ' ↗';
+}
+
+
+header nav ul {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+header nav li {
+    list-style-type: none;
+    margin: 0 10px;
+}
+
+main {
+    padding: 1em;
+}
+
+footer {
+    padding: 1em;
+    font-size: small;
+    color: #669;
+    text-align: right;
+}
+
+.time-status {
+    outline-width: 2px;
+    border-radius: 5px;
+    outline-style: solid;
+    padding: 5px;
+    margin: 5px;
+}
+
+.time-status.upcoming {
+    outline-color: #FFC107;
+    color: #FFC107;
+}
