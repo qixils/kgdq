@@ -350,7 +350,7 @@ class EventData {
         timeStatus = when {
             startTime == null -> null
             now < startTime -> TimeStatus.UPCOMING
-            endTime == null -> TimeStatus.IN_PROGRESS
+            endTime == null -> TimeStatus.FINISHED
             now < endTime -> TimeStatus.IN_PROGRESS
             else -> TimeStatus.FINISHED
         }
