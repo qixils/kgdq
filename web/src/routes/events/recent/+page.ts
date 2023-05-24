@@ -1,5 +1,5 @@
 import {fetchAllEvents} from "$lib/kgdq";
-import type { Event } from "../../../gdq";
+
 export async function load() {
     return { events: // wrapped as object since I guess svelte doesn't serialize arrays as arrays
             (await fetchAllEvents())

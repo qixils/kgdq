@@ -17,7 +17,7 @@
 </script>
 
 <div>
-    {#if event.timeStatus != "FINISHED"}
+    {#if event.timeStatus !== "FINISHED"}
         <span class="time-status {event.timeStatus.toLowerCase().replace('_', '-')}">
             { toTitleCase(event.timeStatus).replace('_', ' ') }
         </span>

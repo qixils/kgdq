@@ -1,7 +1,3 @@
-<script lang="ts">
-	import Counter from '$lib/Counter.svelte';
-</script>
-
 <svelte:head>
 	<title>Speedrun VOD Club</title>
 	<meta name="description" content="TODO KGDQ meta tags" />
