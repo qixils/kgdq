@@ -23,7 +23,7 @@ data class Run(
     @SerialName("deprecated_runners") val deprecatedRunners: String,
     val console: String,
     @SerialName("commentators") private val rawCommentators: JsonElement,
-    @SerialName("hosts") private val hostIds: List<Int>,
+    @SerialName("hosts") private val hostIds: List<Int> = emptyList(),
     val description: String,
     @Serializable(with = InstantAsStringSerializer::class) @SerialName("starttime") private val _startTime: Instant? = null,
     @Serializable(with = InstantAsStringSerializer::class) @SerialName("endtime") private val _endTime: Instant? = null,

@@ -41,9 +41,9 @@ import kotlin.collections.set
 
 abstract class Marathon(val api: GDQ) {
     private val logger = LoggerFactory.getLogger("Marathon")
-    private val eventIdCache = mutableMapOf<String, Int>()
+    val eventIdCache = mutableMapOf<String, Int>()
     private val eventCacher = EventDataCacher(api)
-    private val eventUpdater = EventOverrideUpdater(api)
+    private val eventUpdater = EventOverrideUpdater(this)
 
     private suspend inline fun <reified T> getRedditWiki(id: String, logErrors: Boolean = true): List<T> {
         val response = httpClient.get("https://www.reddit.com/r/VODThread/wiki/$id.json") {
@@ -325,8 +325,10 @@ class EventDataCacher(private val api: GDQ) : Hook<Event> {
     }
 }
 
-class EventOverrideUpdater(private val api: GDQ) : Hook<Event> {
+class EventOverrideUpdater(private val marathon: Marathon) : Hook<Event> {
+    private val api = marathon.api
     override fun handle(item: Wrapper<Event>) {
+        marathon.eventIdCache[item.value.short] = item.id
         val overrides = api.db.getOrCreateEventOverrides(item)
         if (overrides.startedAt == null)
             overrides.startedAt = item.value.startTime
