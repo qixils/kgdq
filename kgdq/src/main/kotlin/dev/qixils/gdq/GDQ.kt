@@ -70,7 +70,7 @@ open class GDQ(
 
     suspend fun updateEvent(id: Int) {
         handleEventExpiration(id)
-        if (id in eventStartedAt || id in eventEndedAt) return
+        if (id in eventStartedAt && id in eventEndedAt) return
         val runs = getRuns(event = id).sortedBy { it.value.order }
         updateEvent(id, runs.firstOrNull()?.value?.startTime, runs.lastOrNull()?.value?.endTime)
     }

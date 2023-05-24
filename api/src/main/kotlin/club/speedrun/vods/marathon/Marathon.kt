@@ -330,13 +330,17 @@ class EventOverrideUpdater(private val marathon: Marathon) : Hook<Event> {
     override fun handle(item: Wrapper<Event>) {
         marathon.eventIdCache[item.value.short] = item.id
         val overrides = api.db.getOrCreateEventOverrides(item)
-        if (overrides.startedAt == null)
+        val now = Instant.now()
+        if (overrides.startedAt == null
+            && item.value.startTime != null
+            && item.value.startTime!!.isBefore(now)
+            )
             overrides.startedAt = item.value.startTime
         if (overrides.startedAt != null
             && overrides.endedAt == null
             && item.value.endTime != null
             && overrides.startedAt!! < item.value.endTime!!
-            && item.value.endTime!!.plus(Duration.ofHours(1)).isBefore(Instant.now())
+            && item.value.endTime!!.plus(Duration.ofHours(1)).isBefore(now)
             )
             overrides.endedAt = item.value.endTime
         api.db.events.update(overrides)
