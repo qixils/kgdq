@@ -1,6 +1,10 @@
 package club.speedrun.vods.plugins
 
-import club.speedrun.vods.*
+import club.speedrun.vods.DiscordOAuth
+import club.speedrun.vods.UserSession
+import club.speedrun.vods.httpClient
+import club.speedrun.vods.root
+import club.speedrun.vods.rootDb
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -18,7 +22,7 @@ fun Application.configureOAuth() {
 
     install(Authentication) {
         oauth("auth-oauth-discord") {
-            urlProvider = { "$root/api/auth/discord/callback" }
+            urlProvider = { "$root/api/v2/auth/discord/callback" }
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "discord",
@@ -38,7 +42,7 @@ fun Application.configureOAuth() {
     }
 
     routing {
-        route("/api/auth/discord") {
+        route("/api/v2/auth/discord") {
             authenticate("auth-oauth-discord") {
                 get("/login") {
                     // Redirects to 'authorizeUrl' automatically

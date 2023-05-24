@@ -55,7 +55,7 @@ fun Application.configureRouting() {
         }
         exception<AuthenticationException> { call, cause ->
             if (cause.redirect) {
-                val redirectUrl = URLBuilder("$root/api/auth/discord/login").run {
+                val redirectUrl = URLBuilder("$root/api/v2/auth/discord/login").run {
                     parameters.append("redirectUrl", root + call.request.uri)
                     build()
                 }
@@ -72,10 +72,6 @@ fun Application.configureRouting() {
 
     routing {
         route("/api") {
-            route("/auth") {
-                get("/user") { call.respond(getDiscordUser(call) ?: return@get) } // debug
-            }
-
             route("/v1") {
                 route("/gdq", gdq.route())
                 route("/esa", esa.route())
@@ -84,6 +80,10 @@ fun Application.configureRouting() {
             }
 
             route("/v2") {
+                route("/auth") {
+                    get("/user") { call.respond(getDiscordUser(call) ?: return@get) } // debug
+                }
+
                 route("/marathons") {
                     get {
                         call.respond(marathons.map { it.api.organization })
