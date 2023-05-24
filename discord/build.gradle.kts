@@ -1,14 +1,7 @@
-val jda_version: String by project
-val jda_ktx_version: String by project
-val configurate_version: String by project
-val coroutines_version: String by project
-val serialization_version: String by project
-val logback_version: String by project
-
 plugins {
     application
-    kotlin("plugin.serialization") version "1.8.21"
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+    kotlin("plugin.serialization")
+    id("com.github.johnrengelman.shadow")
 }
 
 application {
@@ -26,13 +19,13 @@ repositories {
 
 dependencies {
     implementation(project(":api-models"))
-    implementation("net.dv8tion:JDA:$jda_version")
-    implementation("com.github.minndevelopment:jda-ktx:$jda_ktx_version")
-    implementation("org.spongepowered:configurate-yaml:$configurate_version")
-    implementation("org.spongepowered:configurate-extra-kotlin:$configurate_version")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization_version")
-    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation(libs.jda)
+    implementation(libs.jda.ktx)
+    implementation(libs.configurate.yaml)
+    implementation(libs.configurate.extra.kotlin)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.logback)
 }
 
 description = "Discord bot for managing the GDQ schedule channel"

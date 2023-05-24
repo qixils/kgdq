@@ -1,10 +1,7 @@
-val kotlin_version: String by project
-
-// TODO: move dependency versions to gradle/libs.versions.toml for dependabot
-
 plugins {
     kotlin("jvm") version "1.8.21" apply true
     kotlin("plugin.serialization") version "1.8.21" apply false
+    id("com.github.johnrengelman.shadow") version "7.1.2" apply false
 }
 
 allprojects {
@@ -21,10 +18,10 @@ subprojects {
     java.targetCompatibility = javaVer
 
     dependencies {
-        api("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
+        api("org.jetbrains.kotlin:kotlin-stdlib:1.8.21")
     }
 
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    tasks.compileKotlin {
         kotlinOptions {
             jvmTarget = javaVer.majorVersion
         }

@@ -1,0 +1,51 @@
+[versions]
+ktor = "2.2.2"
+kotlin = "1.8.21"
+configurate = "4.1.2"
+coroutines = "1.6.4"
+serialization = "1.4.1"
+
+[libraries]
+logback = { module = "ch.qos.logback:logback-classic", version = "1.4.3" }
+amqp-client = { module = "com.rabbitmq:amqp-client", version = "5.16.0" }
+twitch4j-helix = { module = "com.github.twitch4j:twitch4j-helix", version = "1.10.0" }
+ktor-server-core-jvm = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
+ktor-server-auth-jvm = { module = "io.ktor:ktor-server-auth-jvm", version.ref = "ktor" }
+ktor-server-locations-jvm = { module = "io.ktor:ktor-server-locations-jvm", version.ref = "ktor" }
+ktor-server-sessions-jvm = { module = "io.ktor:ktor-server-sessions-jvm", version.ref = "ktor" }
+ktor-server-host-common-jvm = { module = "io.ktor:ktor-server-host-common-jvm", version.ref = "ktor" }
+ktor-server-status-pages-jvm = { module = "io.ktor:ktor-server-status-pages-jvm", version.ref = "ktor" }
+ktor-server-compression-jvm = { module = "io.ktor:ktor-server-compression-jvm", version.ref = "ktor" }
+ktor-server-content-negotiation-jvm = { module = "io.ktor:ktor-server-content-negotiation-jvm", version.ref = "ktor" }
+ktor-server-cors-jvm = { module = "io.ktor:ktor-server-cors-jvm", version.ref = "ktor" }
+ktor-server-default-headers-jvm = { module = "io.ktor:ktor-server-default-headers-jvm", version.ref = "ktor" }
+ktor-server-call-logging-jvm = { module = "io.ktor:ktor-server-call-logging-jvm", version.ref = "ktor" }
+ktor-server-conditional-headers-jvm = { module = "io.ktor:ktor-server-conditional-headers-jvm", version.ref = "ktor" }
+ktor-server-netty-jvm = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
+ktor-client-core-jvm = { module = "io.ktor:ktor-client-core-jvm", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-apache-jvm = { module = "io.ktor:ktor-client-apache-jvm", version.ref = "ktor" }
+ktor-serialization-kotlinx-json-jvm = { module = "io.ktor:ktor-serialization-kotlinx-json-jvm", version.ref = "ktor" }
+ktor-server-tests-jvm = { module = "io.ktor:ktor-server-tests-jvm", version.ref = "ktor" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+junit = { module = "junit:junit", version = "4.13.2" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-jdk8 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8", version.ref = "coroutines" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+kotlinx-serialization-cbor = { module = "org.jetbrains.kotlinx:kotlinx-serialization-cbor", version.ref = "serialization" }
+slf4j = { module = "org.slf4j:slf4j-api", version = "2.0.7" }
+jda = { module = "net.dv8tion:JDA", version = "5.0.0-beta.9" }
+jda-ktx = { module = "com.github.minndevelopment:jda-ktx", version = "fc7d7de58a" }
+configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate" }
+configurate-extra-kotlin = { module = "org.spongepowered:configurate-extra-kotlin", version.ref = "configurate" }
+jraw = { module = "com.github.dukestreet.JRAW:lib", version = "8e2305db29" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version = "4.10.0" }
+
+[bundles]
+ktor-server = ["ktor-server-core-jvm", "ktor-server-auth-jvm", "ktor-server-locations-jvm", "ktor-server-sessions-jvm", "ktor-server-host-common-jvm", "ktor-server-status-pages-jvm", "ktor-server-compression-jvm", "ktor-server-content-negotiation-jvm", "ktor-server-cors-jvm", "ktor-server-default-headers-jvm", "ktor-server-call-logging-jvm", "ktor-server-conditional-headers-jvm", "ktor-server-netty-jvm", "ktor-serialization-kotlinx-json-jvm"]
+ktor-client = ["ktor-client-core-jvm", "ktor-client-content-negotiation", "ktor-client-apache-jvm", "ktor-serialization-kotlinx-json-jvm"]
+
+[plugins]
+# TODO: these don't seem to be working, something about implicit something or others
