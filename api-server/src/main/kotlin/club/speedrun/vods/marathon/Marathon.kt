@@ -28,7 +28,6 @@ import io.ktor.server.locations.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.*
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -326,7 +325,7 @@ abstract class Marathon(
     }
 }
 
-@Location("/")
+@Location("")
 data class Organization(val stats: Boolean = true)
 
 @Location("/events")

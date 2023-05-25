@@ -1,16 +1,19 @@
 <!-- TODO: support displaying multiple "events" (e.g. ESA Stream 1 & 2) on the same page -->
 
 <script lang="ts">
-    import {Event, SvcClient} from 'vods.speedrun.club-client';
+    import {Event, Run, SvcClient} from 'vods.speedrun.club-client';
     import RunComponent from "$lib/RunComponent.svelte";
     import {page} from "$app/stores";
     import {Formatters} from "$lib/Formatters";
     import {BASE_URL, fake_status} from "$lib/kgdq";
+    import {onMount} from "svelte";
 
     export let data: { event: Event };
     let SVC = new SvcClient(BASE_URL, fetch);
     let event: Event = data.event; // slight backwards compat
     let formatter = new Formatters(event.paypalCurrency);
+    let runs: Run[] = [];
+    let run_error: Error | null = null;
 
     function niceShortName(event: Event) {
         let ESA_RE = /^esa([sw])(\d+)(?:s(\d+))?$/i;
@@ -25,6 +28,14 @@
         }
         return event.short.toUpperCase();
     }
+
+    onMount(async () => {
+        try {
+            runs = await SVC.getRuns($page.params.org, $page.params.slug);
+        } catch (e) {
+            run_error = e;
+        }
+    });
 
 </script>
 
@@ -50,9 +61,9 @@
         <p>Below you can find the schedule for the event and click on the play icon to the left of each run to watch back the run's VOD</p>
     </div>
 
-    {#await SVC.getRuns($page.params.org, $page.params.slug)}
-        <div class="loading"></div>
-    {:then runs}
+    {#if runs.length === 0 && run_error === null}
+        <div class="loading">loading!!!</div>
+    {:else if runs.length > 0}
         <ul class="event-runs">
 
             {#each runs as run, run_index}
@@ -102,7 +113,7 @@
                 </p>
             {/each}
         </ul>
-    {:catch run_error}
+    {:else}
         <p class="error">Error loading runs: {run_error.message}</p>
-    {/await}
+    {/if}
 </section>
