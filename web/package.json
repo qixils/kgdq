@@ -28,7 +28,7 @@
     "tslib": "^2.5.2",
     "typescript": "^5.0.4",
     "vite": "^4.3.8",
-    "vods.speedrun.club-client": "^1.0.1"
+    "vods.speedrun.club-client": "^1.0.2"
   },
   "type": "module",
   "dependencies": {

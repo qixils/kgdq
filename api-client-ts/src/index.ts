@@ -647,3 +647,8 @@ export class MarathonClient {
         return this.svc.getRun(this.organization, id);
     }
 }
+
+/**
+ * An instance of the SvcClient class using the default base URL.
+ */
+export const svc = new SvcClient();
