@@ -507,7 +507,12 @@ export class SvcClient {
      * @returns A Promise that resolves to the response data.
      */
     private get<T>(url: string | URL): Promise<T> {
-        return fetch(`${this.baseUrl}/${url}`).then(res => res.json());
+        return fetch(`${this.baseUrl}/${url}`).then(res => {
+            if (res.status >= 400) {
+                throw new Error(`Request failed with status code ${res.status}`);
+            }
+            return res.json();
+        });
     }
 
     /**
