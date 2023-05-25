@@ -1,6 +1,7 @@
 import {SvcClient} from "vods.speedrun.club-client";
+import {BASE_URL} from "$lib/kgdq";
 
-const svc = new SvcClient();
+const svc = new SvcClient(BASE_URL);
 declare const epoch = "1970-01-01T00:00:00Z";
 
 export async function load() {

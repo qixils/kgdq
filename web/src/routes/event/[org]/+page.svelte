@@ -2,8 +2,9 @@
     import {Organization, SvcClient} from "vods.speedrun.club-client";
     import {page} from "$app/stores";
     import {Formatters} from "$lib/Formatters";
+    import {BASE_URL} from "$lib/kgdq";
 
-    const svc = new SvcClient();
+    const svc = new SvcClient(BASE_URL);
     export let data: { org: Organization };
 </script>
 
