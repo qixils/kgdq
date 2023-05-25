@@ -648,7 +648,5 @@ export class MarathonClient {
     }
 }
 
-/**
- * An instance of the SvcClient class using the default base URL.
- */
-export const svc = new SvcClient();
+const svc = new SvcClient();
+export { svc };
