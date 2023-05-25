@@ -4,15 +4,15 @@
     import {Formatters} from "$lib/Formatters";
     import {BASE_URL} from "$lib/kgdq";
 
-    const svc = new SvcClient(BASE_URL);
     export let data: { org: Organization };
+    let SVC = new SvcClient(BASE_URL, fetch);
 </script>
 
 
 
 <h1>Events by { data.org.displayName }</h1>
 
-{#await svc.getEvents($page.params.org)}
+{#await SVC.getEvents($page.params.org)}
     <p>loading...</p>
 {:then events}
     {#each events as event}

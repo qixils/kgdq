@@ -494,11 +494,18 @@ export class SvcClient {
     private readonly baseUrl: string;
 
     /**
+     * The function to use to fetch URLs.
+     */
+    private readonly fetchFunction: typeof fetch;
+
+    /**
      * Creates an instance of SvcClient.
      * @param baseUrl The base URL of the service. Defaults to the public instance 'https://vods.speedrun.club/api/v2'.
+     * @param fetchFunction The function to use to fetch URLs. Defaults to the global fetch function.
      */
-    constructor(baseUrl: string = 'https://vods.speedrun.club/api/v2') {
+    constructor(baseUrl: string = 'https://vods.speedrun.club/api/v2', fetchFunction: typeof fetch = fetch) {
         this.baseUrl = baseUrl;
+        this.fetchFunction = fetchFunction;
     }
 
     /**
@@ -507,7 +514,9 @@ export class SvcClient {
      * @returns A Promise that resolves to the response data.
      */
     private get<T>(url: string | URL): Promise<T> {
-        return fetch(`${this.baseUrl}/${url}`).then(res => {
+        // prepend the base URL if the URL is relative (i.e. a string)
+        const calculatedUrl = typeof url === 'string' ? `${this.baseUrl}/${url}` : url;
+        return this.fetchFunction(calculatedUrl).then(res => {
             if (res.status >= 400) {
                 throw new Error(`Request failed with status code ${res.status}`);
             }
@@ -615,7 +624,7 @@ export class SvcClient {
      * @returns A Promise that resolves to an array of Run objects representing the runs.
      */
     getRuns(organization: string, event?: string, runner?: number): Promise<Run[]> {
-        const url = new URL(`marathons/${organization}/runs`, this.baseUrl);
+        const url = new URL(`marathons/${organization}/runs`, this.baseUrl + '/');
         if (event) url.searchParams.append('event', event);
         if (runner) url.searchParams.append('runner', runner.toString());
         return this.get(url);
