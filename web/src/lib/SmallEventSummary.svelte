@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Event } from 'src/gdq';
+    import type {Event} from 'vods.speedrun.club-client';
     import {Formatters} from "$lib/Formatters";
 
     export let org: string;

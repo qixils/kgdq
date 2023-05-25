@@ -1,6 +1,6 @@
 <script lang="ts">
     import {Formatters} from "$lib/Formatters";
-    import type {Bid} from "src/gdq";
+    import type {Bid} from "vods.speedrun.club-client";
 
     export let bid: Bid;
     export let formatter: Formatters;

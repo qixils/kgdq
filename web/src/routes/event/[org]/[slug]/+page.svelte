@@ -1,7 +1,7 @@
 <!-- TODO: support displaying multiple "events" (e.g. ESA Stream 1 & 2) on the same page -->
 
 <script lang="ts">
-    import type {Event, Run} from 'src/gdq';
+    import type {Event, Run} from 'vods.speedrun.club-client';
     import RunComponent from "$lib/RunComponent.svelte";
     import {page} from "$app/stores";
     import {Formatters} from "$lib/Formatters";
@@ -107,7 +107,7 @@
                     {#if run_index === 0 || new Date(run.startTime).getDay() !== new Date(last_run.startTime).getDay()}
 
                         <li class='event-day {
-                            (this_run_status != "UPCOMING" || last_run_status === "FINISHED") ? "finished" : ""
+                            (this_run_status !== "UPCOMING" || last_run_status === "FINISHED") ? "finished" : ""
                             }'> <!-- fill line for day if the next displayed run is at least next up  -->
                             <div class="schedule-bar-bit"></div>
                             <h2>{ Formatters.date_weekday_date(run.startTime) }</h2>

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type {VOD} from "src/gdq";
+    import type {VOD} from "vods.speedrun.club-client";
 
     export let vod: VOD;
     export let index: number;

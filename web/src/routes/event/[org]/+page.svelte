@@ -1,21 +1,17 @@
 <script lang="ts">
-    import { fetchEvents } from "$lib/kgdq";
+    import {Organization, SvcClient} from "vods.speedrun.club-client";
     import {page} from "$app/stores";
     import {Formatters} from "$lib/Formatters";
 
-    let org_names = {
-      gdq: 'Games Done Quick',
-    };
-
-    let org_name = org_names[$page.params.org];
-
+    const svc = new SvcClient();
+    export let data: { org: Organization };
 </script>
 
 
 
-<h1>Events by { org_name }</h1>
+<h1>Events by { data.org.displayName }</h1>
 
-{#await fetchEvents($page.params.org)}
+{#await svc.getEvents($page.params.org)}
     <p>loading...</p>
 {:then events}
     {#each events as event}
@@ -32,7 +28,7 @@
                 <p>Benefiting {event.charityName}</p>
             {/if}
 
-            <a href="{ event.canonicalUrl }" target="_blank">Event website on the { org_name } website</a>
+            <a href="{event.scheduleUrl}" target="_blank">Official schedule on the {data.org.shortName} website</a>
         </div>
     {/each}
 {:catch error}

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type {Run} from "src/gdq";
+    import type {Run} from "vods.speedrun.club-client";
     import VODEntry from "$lib/VODEntry.svelte";
 
     export let run: Run;

@@ -1,7 +1,7 @@
 <script lang="ts">
     import {Formatters} from "$lib/Formatters";
     import VODs from "$lib/VODs.svelte";
-    import type {Run} from "src/gdq";
+    import type {Run} from "vods.speedrun.club-client";
     import BidTarget from "$lib/BidTarget.svelte";
     import BidWar from "$lib/BidWar.svelte";
     import {fake_status} from "$lib/kgdq";
