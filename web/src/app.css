@@ -1,0 +1,293 @@
+html {
+    font-family: Verdana, sans-serif;
+
+    --bg-bg: #001;
+    --text-quiet: #88A;
+
+    --run-in-progress: #5e7;
+    --run-finished: #d2a;
+    --run-nothing: #001;
+
+    --bid-full: var(--run-in-progress);
+    --bid-open: #dda;
+    --bid-closed: #d36;
+
+    color: #EEF;
+    background-color: var(--bg-bg);
+    min-height: 100vh;
+}
+
+body {
+    max-width: 900px;
+    margin: 0 auto;
+    min-height: 100vh; /* Fallback for browsers that do not support stretch */
+    min-height: stretch; /* Extend to bottom edge of viewport */
+
+    display: grid;
+    grid-template-rows:
+            auto  /* header */
+            1fr   /*  main  */
+            auto  /* footer */ ;
+}
+
+header {
+    padding: 1em;
+}
+
+header h1 {
+    color: #EEF;
+}
+
+header a {
+    text-decoration: none;
+}
+
+a {
+    color: #AAF;
+}
+
+a:visited {
+    color: #BBE;
+}
+
+a:hover {
+    color: white;
+}
+
+a[target='_blank']::after {
+    content: ' ↗';
+}
+
+header nav ul {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+header nav li {
+    list-style-type: none;
+    margin: 0 10px;
+}
+
+main {
+    padding: 1em;
+}
+
+footer {
+    padding: 1em;
+    font-size: small;
+    color: #669;
+    text-align: right;
+}
+
+.material-symbols-rounded {
+    font-family: "Material Symbols Rounded";
+    font-size: 14pt;
+}
+
+.loading {
+    color: #FFC107;
+    font-size: 200%;
+    text-align: center;
+    margin: 1em;
+    content: "Loading...";
+}
+
+
+.time-status {
+    outline-width: 2px;
+    border-radius: 5px;
+    outline-style: solid;
+    padding: 5px;
+    margin: 5px;
+}
+
+.time-status.upcoming {
+    outline-color: #FFC107;
+    color: #FFC107;
+}
+
+.event-runs {
+    border-top: 2px solid #669;
+    padding: 0;
+}
+
+.event-runs > li {
+    display: grid;
+    --bar-width: 80px;
+    grid-template-columns: var(--bar-width) calc(1.5 * 5ch) 1fr;
+    margin: 5px;
+}
+
+.run {
+    background-color: #20252e;
+    box-shadow: inset #fff8 0 0 2px;
+    border-radius: 2px;
+}
+
+.run.in-progress {
+    border-right: 0.5px solid var(--run-in-progress);
+}
+
+.run-schedule-time {
+    font-size: 150%;
+    text-align: center;
+    word-break: break-all;
+    margin: auto 0;
+    color: var(--text-quiet);
+}
+
+.run-content {
+    margin-left: 1em;
+}
+
+.run-category {
+    color: var(--text-quiet);
+}
+
+
+.event-day {
+    font-weight: bold;
+    display: block;
+}
+
+.event-day h2 {
+    grid-column: 2 / span 2;
+}
+
+
+.schedule-bar-bit {
+    --bar-size: 40px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+
+}
+
+.schedule-bar-bit::before, .schedule-bar-bit::after {
+    content: " ";
+    display: block;
+    background-color: #001;
+}
+
+.next-up .schedule-bar-bit::before {
+    background: linear-gradient(180deg, #d2a 0%, #001 30%);
+}
+
+.in-progress .schedule-bar-bit::before {
+    background: linear-gradient(180deg, #d2a 0%, #5e7 30%, #5e7 70%, #001 100%);
+}
+
+.in-progress .schedule-bar-bit::after {
+    background-color: #5e7;
+}
+
+.finished .schedule-bar-bit::before,
+.finished .schedule-bar-bit::after {
+    background-color: #d2a;
+}
+
+/* lines that appear next to runs */
+.schedule-bar-bit::before {
+    width: calc(var(--bar-size)/4);
+    height: calc(100% + 10px);
+    position: absolute;
+
+}
+
+/* first day area */
+li:first-child > .schedule-bar-bit::before {
+    display: none;
+}
+
+/* where the line starts */
+li:nth-child(2) > .schedule-bar-bit::before {
+    width: calc(var(--bar-size)/4);
+    height: calc(50% + var(--bar-size)/4);
+    bottom: 0;
+    position: absolute;
+    border-top-left-radius: calc(var(--bar-size)/8);
+    border-top-right-radius: calc(var(--bar-size)/8);
+}
+
+/* where the line ends */
+li:last-child > .schedule-bar-bit::before {
+    width: calc(var(--bar-size)/4);
+    height: calc(50% + var(--bar-size)/4);
+    top: 0;
+    position: absolute;
+    border-bottom-left-radius: calc(var(--bar-size)/8);
+    border-bottom-right-radius: calc(var(--bar-size)/8);
+}
+
+
+/* circles that appear next to runs */
+.run > .schedule-bar-bit::after {
+    width: var(--bar-size);
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    z-index: 1; /*  only really affect appearance of very last IN_PROGRESS run  */
+}
+
+sup {
+    position: relative;
+    top: -0.5em;
+}
+
+.run-name {
+    font-size: 120%;
+}
+
+
+.radial-progress {
+    --thickness: 4px;
+    position: relative;
+    --size: calc(2*var(--size));
+    display: inline-grid;
+    height: var(--size);
+    aspect-ratio: 1/1;
+    place-content: center;
+    border-radius: 9999px;
+    background-color: transparent;
+    vertical-align: middle;
+    box-sizing: content-box;
+
+    margin: 0.5em;
+}
+
+.radial-progress::before,
+.radial-progress::after {
+    position: absolute;
+    border-radius: 9999px;
+    content: "";
+}
+
+.radial-progress::before {
+    display: block;
+    width: var(--size);
+    aspect-ratio: 1/1;
+    inset: 0px;
+    background: radial-gradient(farthest-side, currentColor 98%, #0000) top/var(--thickness) var(--thickness) no-repeat, conic-gradient(currentColor calc(var(--value) * 1%), #0000 0);
+    -webkit-mask: radial-gradient(farthest-side, #0000 calc(99% - var(--thickness)), #000 calc(100% - var(--thickness)));
+    mask: radial-gradient(farthest-side, #0000 calc(99% - var(--thickness)), #000 calc(100% - var(--thickness)));
+}
+
+.radial-progress::after {
+    display: block;
+    aspect-ratio: 1/1;
+    inset: calc(50% - var(--thickness) / 2);
+    transform: rotate(calc(var(--value) * 3.6deg - 90deg)) translate(calc(var(--size) / 2 - 50%));
+    background-color: currentColor;
+}
+
+.bid {
+    grid-template-columns: auto 1fr;
+    display: grid;
+    align-items: center;
+}
+
+.bid-body {
+    margin: 0 0.5em;
+}

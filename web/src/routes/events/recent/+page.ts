@@ -6,6 +6,6 @@ export async function load() {
                 .filter(({event}) => event.timeStatus === "FINISHED")
                 // From most recent to least recent
                 // endTime is assumed to be not null because the events have finished
-                .sort(({event: a}, {event: b}) => -(a.endTime!).localeCompare(b.endTime!) )
+                .sort(({event: a}, {event: b}) => -(a.endTime || a.startTime).localeCompare(b.endTime || b.startTime))
     };
 }

@@ -6,11 +6,12 @@
     let vodCount = new Map();
 </script>
 
-<div class="dropdown">
-    <label tabindex="0"><span class="hover:bg-info-content rounded-box material-symbols-rounded text-sm text-info">play_circle</span></label>
-    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-56">
+<details class="dropdown">
+    <summary>VODs</summary>
+    <label tabindex="0"><span class="material-symbols-rounded">play_circle</span></label>
+    <ul tabindex="0">
         {#each run.vods as vod}
             <VODEntry vod={vod} index={vodCount.set(vod.type, (vodCount.get(vod.type) ?? -1) + 1).get(vod.type)} />
         {/each}
     </ul>
-</div>
+</details>

@@ -6,15 +6,15 @@
     export let formatter: Formatters;
 </script>
 
-<p class="block my-auto"><span class="radial-progress text-[.65rem] text-primary bg-primary/30" style="--value:100; --size:2.2rem;"></span></p>
+<span class="radial-progress" style="--value:100; --size:70px;">BID WAR</span>
 <div class="bid-body">
     <p>
-        <span class="font-semibold">{bid.name}&nbsp;</span>
-        <span class="text-base-content/50">{formatter.money(bid.donationTotal)}</span>
+        <b>{bid.name}&nbsp;</b>
+        <span class="bid-contributions">{formatter.money(bid.donationTotal)}</span>
     </p>
     <p>{bid.description}</p>
-    <p class="text-base-content/80">
-        <span class="font-semibold">Top Options:</span>
+    <p>
+        <b>Top Options:</b>
         {#each bid.children.slice(0,3) as child, index}
             {#if index > 0}
                 ,

@@ -1,12 +1,13 @@
-<!--<script lang="ts">-->
-<!--  import "../app.postcss";-->
-<!--</script>-->
+<script lang="ts">
+  // import "../app.postcss";
+  import "../app.css";
+</script>
 
 <header>
   <a href="/"><h1>Speedrun VOD Club</h1></a>
   <nav>
     <ul>
-      <li><a href="/">Home</a></li>
+<!--      <li><a href="/">Home</a></li>-->
       <li><a href="/events/upcoming">Upcoming Events</a></li>
       <li><a href="/events/recent">Recent Events</a></li>
       <li><a href="/organizations">Organizations</a></li>

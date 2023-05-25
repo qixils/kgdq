@@ -12,7 +12,7 @@
     <p>Commonly known as GDQ, very popular and hosts <abbr title="Awesome Games Done Quick">AGDQ</abbr> and <abbr title="Summer Games Done Quick">SGDQ</abbr> every winter and summer in the US.</p>
     <ul>
         <li><a href="https://gamesdonequick.com" target="_blank">GDQ Homepage</a></li>
-        <li><a href="/events/gdq">View GDQ-hosted events</a></li>
+        <li><a href="/event/gdq">View GDQ-hosted events</a></li>
     </ul>
 </section>
 
@@ -30,7 +30,7 @@
     <p></p>
     <ul>
         <li><a href="" target="_blank">HEK Homepage</a></li>
-        <li><a href="/events/">View GDQ hosted events</a></li>
+        <li><a href="/event/">View GDQ hosted events</a></li>
     </ul>
 </section>
 
@@ -39,6 +39,6 @@
     <p></p>
     <ul>
         <li><a href="" target="_blank">RPGLB Homepage</a></li>
-        <li><a href="/events/">View GDQ hosted events</a></li>
+        <li><a href="/event/">View GDQ hosted events</a></li>
     </ul>
 </section>

@@ -17,6 +17,12 @@ export class Formatters {
         return date_hero_format.format(new Date(dt));
     }
 
+    static date_weekday_date(dt: string) {
+        return new Intl.DateTimeFormat(undefined,
+            { weekday: "long", month: "long", day: "numeric", }
+        ).format(new Date(dt));
+    }
+
     static time(dt: string) {
         return time_format.format(new Date(dt));
     }

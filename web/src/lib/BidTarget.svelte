@@ -14,14 +14,14 @@
      * bg-success-content bg-warning-content bg-error-content
      */
     let percent = Math.round((bid.donationTotal / bid.goal) * 100);
-    let color = percent >= 100 ? "success" : (bid.state === "OPENED" ? "warning" : "error");
+    let color = percent >= 100 ? "var(--bid-full)" : (bid.state === "OPENED" ? "var(--bid-open)" : "var(--bid-closed)");
 </script>
 
-<p class="block my-auto"><span class="radial-progress text-[.65rem] text-{color} bg-{color}-content" style="--value:{percent}; --size:2.2rem;">{percent}%</span></p>
+<span class="radial-progress" style="--value:{percent}; --size:70px; color:{color}">{percent}%</span>
 <div class="bid-body">
     <p>
-        <span class="font-semibold">{bid.name}&nbsp;</span>
-        <span class="text-base-content/50">{formatter.money(bid.donationTotal)} / {formatter.money(bid.goal)}</span>
+        <b>{bid.name}&nbsp;</b>
+        <span class="bid-contributions">{ formatter.money(bid.donationTotal) } / { formatter.money(bid.goal) }</span>
     </p>
     <p>{bid.description}</p>
 </div>

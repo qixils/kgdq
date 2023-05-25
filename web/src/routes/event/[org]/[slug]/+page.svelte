@@ -5,6 +5,7 @@
     import RunComponent from "$lib/RunComponent.svelte";
     import {page} from "$app/stores";
     import {Formatters} from "$lib/Formatters";
+    import {fake_status} from "$lib/kgdq";
 
     let formatter = new Formatters("USD");
 
@@ -18,6 +19,7 @@
             }
             let event: Event = r[0];
             formatter = new Formatters(event.paypalCurrency);
+            console.log(event);
             return r[0];
         });
     });
@@ -27,6 +29,21 @@
         }
         return r.json();
     });
+
+    function niceShortName(event: Event) {
+        let ESA_RE = /^esa([sw])(\d+)(?:s(\d+))?$/i;
+        let match = event.short.match(ESA_RE);
+        if (match) {
+            let [_, season, year, stream_number] = match;
+            let season_nice = season === "s" ? "Summer" : "Winter";
+            if (stream_number) {
+                return `ESA ${season_nice} ${year} S${stream_number}`;
+            }
+            return `ESA ${season_nice} ${year}`;
+        }
+        return event.short.toUpperCase();
+    }
+
 </script>
 
 <svelte:head>
@@ -36,39 +53,69 @@
 
 <section>
     {#await event_promise}
-        <div class="text-center my-3"><button class="btn loading">loading</button></div>
+        <div class="loading"></div>
     {:then event}
-        <div class="hero bg-base-200 mt-2">
-            <div class="hero-content text-center">
-                <div>
-                    <h1 class="text-4xl font-bold">{event.name}</h1>
-                    <p class="py-4">
-                        {event.short.toUpperCase()} <!-- TODO: this looks bad for some events (namely ESA) -->
-                        {#if event.timeStatus === "UPCOMING"}
-                            will run from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raise money
-                        {:else if event.timeStatus === "IN_PROGRESS"}
-                            is running from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and has raised {formatter.money(event.amount)}
-                        {:else}
-                            ran from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raised {formatter.money(event.amount)}
-                        {/if}
-                        for {event.charityName}.
-                    </p>
-                    <p>
-                        Below you can find the schedule for the event and click on the play icon to the left of each run
-                        to watch back the run's VOD.
-                    </p>
-                </div>
-            </div>
+        <div class="event-description">
+            <h1>{ event.name }</h1>
+            <p>
+                { niceShortName(event) }
+
+                {#if event.timeStatus === "UPCOMING"}
+                    will run from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raise money
+                {:else if event.timeStatus === "IN_PROGRESS"}
+                    is running from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and has raised {formatter.money(event.amount)}
+                {:else}
+                    ran from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raised {formatter.money(event.amount)}
+                {/if}
+                for {event.charityName}.
+            </p>
+            <p>Below you can find the schedule for the event and click on the play icon to the left of each run to watch back the run's VOD</p>
         </div>
 
         {#await runs_promise}
-            <div class="text-center my-3"><button class="btn loading">loading</button></div>
+            <div class="loading"></div>
         {:then runs}
-            <ul class="steps steps-vertical block w-full max-w-screen-lg mx-auto overflow-x-hidden text-sm md:text-base">
+            <ul class="event-runs">
+
                 {#each runs as run, run_index}
+
+                    <script>
+                    /*
+                        Possible states for schedule bar bit:
+                        - First day marker, not yet that day
+                        - First day marker, that day but not yet started first run
+                        - First day marker, that day and started
+                        - Run, not yet started and the previous run is not finished
+                        - Run, not yet started and the previous run is finished (intermission)
+                        - Run, started and not yet finished
+                        - Run, finished
+                        - Day marker, not yet that day but previous run is in progress and will finish after midnight
+                        - Day marker, not yet that day but previous run is finished (before midnight)
+                        - Day marker, not yet that day
+                        - Day marker, that day but not yet started
+                        - Day marker, that day and started first run of the day
+
+                        Key predicates:
+                    */
+                    </script>
+
+                    { @const last_run = runs[run_index - 1] }
+                    { @const last_run_status = fake_status(last_run, run_index - 1) }
+                    { @const this_run_status = fake_status(run, run_index ) }
+                    <!--{ @const is_today = true }-->
+
+                    {#if run_index === 0 || new Date(run.startTime).getDay() !== new Date(last_run.startTime).getDay()}
+
+                        <li class='event-day {
+                            (this_run_status != "UPCOMING" || last_run_status === "FINISHED") ? "finished" : ""
+                            }'> <!-- fill line for day if the next displayed run is at least next up  -->
+                            <div class="schedule-bar-bit"></div>
+                            <h2>{ Formatters.date_weekday_date(run.startTime) }</h2>
+                        </li>
+                    {/if}
                     <RunComponent {runs} {run_index} {formatter} />
                 {:else}
-                    <p class="info">
+                    <p>
                         {#if event.timeStatus === "UPCOMING"}
                             No runs have been scheduled for this event yet.
                         {:else}

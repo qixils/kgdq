@@ -1,8 +1,8 @@
 <script lang="ts">
-    import type { Event } from '../gdq';
+    import type { Event } from 'src/gdq';
     import {Formatters} from "$lib/Formatters";
 
-    export let slug: string;
+    export let org: string;
 
     export let event: Event;
 
@@ -22,14 +22,14 @@
             { toTitleCase(event.timeStatus).replace('_', ' ') }
         </span>
     {/if}
-    <a href="/events/{slug}">
+    <a href="/event/{org}/{event.short}">
         {event.name}
     </a>
     <span class="event-time-info">
         {#if event.timeStatus === "UPCOMING"}
             Begins {Formatters.date_hero(event.startTime)} at {Formatters.time(event.startTime)}
         {:else if event.timeStatus === "FINISHED"}
-            Ended {Formatters.date_hero(event.endTime)}
+            Ended {Formatters.date_hero(event.endTime || event.startTime)}
         {/if}
     </span>
 </div>

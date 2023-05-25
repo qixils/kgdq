@@ -1,8 +1,8 @@
 <script lang="ts">
-    import type { Event } from "../../../gdq";
+    import type { Event } from "src/gdq";
     import SmallEventSummary from "$lib/SmallEventSummary.svelte";
 
-    export let data: { events: [slug: string, Event][]};
+    export let data: { events: {org: string, event: Event}[]};
 
 </script>
 
@@ -14,9 +14,9 @@
 <h1>Current and Upcoming Events</h1>
 
 <ul>
-    {#each data.events as {slug, event}}
+    {#each data.events as {org, event}}
         <li>
-            <SmallEventSummary  slug={slug} event={event} />
+            <SmallEventSummary  org={org} event={event} />
         </li>
     {/each}
 </ul>
