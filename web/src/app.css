@@ -14,14 +14,16 @@ html {
 
     color: #EEF;
     background-color: var(--bg-bg);
+}
+
+html, body, .page-container {
+    margin: 0;
     min-height: 100vh;
 }
 
-body {
+.page-container {
     max-width: 900px;
     margin: 0 auto;
-    min-height: 100vh; /* Fallback for browsers that do not support stretch */
-    min-height: stretch; /* Extend to bottom edge of viewport */
 
     display: grid;
     grid-template-rows:
