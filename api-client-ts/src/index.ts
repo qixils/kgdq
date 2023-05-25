@@ -37,6 +37,17 @@ export interface Organization {
 }
 
 /**
+ * An organization containing its ID.
+ */
+export interface IdentifiedOrganization extends Organization {
+
+    /**
+     * The ID of the organization.
+     */
+    id: string;
+}
+
+/**
  * The status of a timed object.
  * The object can either be upcoming, in progress, or finished.
  */
@@ -156,6 +167,17 @@ export interface Event {
      * The URL for the event's official schedule.
      */
     scheduleUrl: string;
+}
+
+/**
+ * An event containing the owning organization's ID.
+ */
+export interface OrganizedEvent extends Event {
+
+    /**
+     * The ID of the organization that owns this event.
+     */
+    organization: string;
 }
 
 /**
@@ -516,6 +538,16 @@ export class SvcClient {
     }
 
     /**
+     * Retrieves all known marathon organizations, optionally with statistics.
+     * @param stats Whether to include statistics. Defaults to true.
+     * @returns A Promise that resolves to an array of Organization objects.
+     */
+    getMarathonsFlat(stats: boolean = true): Promise<IdentifiedOrganization[]> {
+        const promise: Promise<Object> = this.get(`marathons?stats=${stats}`);
+        return promise.then(res => Object.entries(res).map(([id, org]) => ({ id, ...org })));
+    }
+
+    /**
      * Retrieves a specific marathon by ID, optionally with statistics.
      * @param id The ID of the marathon to retrieve.
      * @param stats Whether to include statistics. Defaults to true.
@@ -531,6 +563,24 @@ export class SvcClient {
      */
     getAllEvents(): Promise<Map<string, Event[]>> {
         return this.getAsMap(`marathons/events`);
+    }
+
+    /**
+     * Retrieves every event for every organization.
+     * @returns A Promise that resolves to an array of Event objects.
+     */
+    getAllEventsFlat(): Promise<OrganizedEvent[]> {
+        const promise: Promise<Object> = this.get(`marathons/events`);
+        return promise.then(res => {
+            const events: OrganizedEvent[] = [];
+            for (const [organization, eventList] of Object.entries(res)) {
+                for (const event of eventList) {
+                    event['organization'] = organization;
+                    events.push(event as OrganizedEvent);
+                }
+            }
+            return events;
+        });
     }
 
     /**
