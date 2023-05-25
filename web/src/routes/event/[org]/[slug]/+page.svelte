@@ -31,7 +31,7 @@
 
 <svelte:head>
     <!-- TODO: add head -->
-    <!-- also TODO: enable some preloading to init this server-side -->
+    <!-- also TODO: enable some ~~preloading~~ server-side rendering to init this server-side for SEO and embeds and whatnot -->
 </svelte:head>
 
 <section>
