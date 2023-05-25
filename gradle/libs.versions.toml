@@ -41,7 +41,7 @@ jda-ktx = { module = "com.github.minndevelopment:jda-ktx", version = "fc7d7de58a
 configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate" }
 configurate-extra-kotlin = { module = "org.spongepowered:configurate-extra-kotlin", version.ref = "configurate" }
 jraw = { module = "com.github.dukestreet.JRAW:lib", version = "8e2305db29" }
-okhttp = { module = "com.squareup.okhttp3:okhttp", version = "4.10.0" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version = "4.11.0" }
 
 [bundles]
 ktor-server = ["ktor-server-core-jvm", "ktor-server-auth-jvm", "ktor-server-locations-jvm", "ktor-server-sessions-jvm", "ktor-server-host-common-jvm", "ktor-server-status-pages-jvm", "ktor-server-compression-jvm", "ktor-server-content-negotiation-jvm", "ktor-server-cors-jvm", "ktor-server-default-headers-jvm", "ktor-server-call-logging-jvm", "ktor-server-conditional-headers-jvm", "ktor-server-netty-jvm", "ktor-serialization-kotlinx-json-jvm"]
