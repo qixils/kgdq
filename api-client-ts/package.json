@@ -1,0 +1,33 @@
+{
+  "name": "vods.speedrun.club-client",
+  "version": "1.0.0",
+  "description": "Client for the vods.speedrun.club API",
+  "main": "lib/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "speedrun",
+    "vod",
+    "gdq",
+    "esa"
+  ],
+  "author": "qixils",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qixils/kgdq.git",
+    "directory": "api-client-ts"
+  },
+  "bugs": {
+    "url": "https://github.com/qixils/kgdq/issues"
+  },
+  "homepage": "https://vods.speedrun.club",
+  "files": [
+    "build/**/*"
+  ],
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
+}
