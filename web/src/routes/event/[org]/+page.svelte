@@ -38,7 +38,10 @@
                 <p>Benefiting {event.charityName}</p>
             {/if}
 
-            <a href="{event.scheduleUrl}" target="_blank">Official schedule on the {data.org.shortName} website</a>
+            <p><a href="/event/{$page.params.org}/{event.short}">View event schedule and VODs</a></p>
+            {#if event.startTime && event.endTime} <!-- if event has an end time then it has runs and thus probably has a schedule -->
+                <p><a href={event.scheduleUrl} target="_blank">View official schedule on the {data.org.shortName} website</a></p>
+            {/if}
         </div>
     {/each}
 {:else}
