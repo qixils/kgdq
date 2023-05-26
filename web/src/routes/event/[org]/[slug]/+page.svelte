@@ -12,8 +12,8 @@
     let SVC = new SvcClient(BASE_URL, fetch);
     let event: Event = data.event; // slight backwards compat
     let formatter = new Formatters(event.paypalCurrency);
-    let runs: Run[] = [];
-    let run_error: Error | null = null;
+    let runs: Run[];
+    let run_error: Error;
 
     function niceShortName(event: Event) {
         let ESA_RE = /^esa([sw])(\d+)(?:s(\d+))?$/i;
@@ -36,7 +36,6 @@
             run_error = e;
         }
     });
-
 </script>
 
 <svelte:head>
@@ -61,9 +60,9 @@
         <p>Below you can find the schedule for the event and click on the play icon to the left of each run to watch back the run's VOD</p>
     </div>
 
-    {#if runs.length === 0 && run_error === null}
+    {#if runs === undefined && run_error === undefined}
         <div class="loading">loading!!!</div>
-    {:else if runs.length > 0}
+    {:else if runs !== undefined}
         <ul class="event-runs">
 
             {#each runs as run, run_index}
