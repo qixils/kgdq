@@ -12,8 +12,8 @@
     let SVC = new SvcClient(BASE_URL, fetch);
     let event: Event = data.event; // slight backwards compat
     let formatter = new Formatters(event.paypalCurrency);
-    let runs: Run[] = [];
-    let run_error: Error | null = null;
+    let runs: Run[];
+    let run_error: Error;
 
     function niceShortName(event: Event) {
         let ESA_RE = /^esa([sw])(\d+)(?:s(\d+))?$/i;
@@ -36,18 +36,21 @@
             run_error = e;
         }
     });
-
 </script>
 
 <svelte:head>
-    <!-- TODO: add head -->
+    <title>Speedrun VOD Club · {event.name}</title>
+    <meta name="description" content="View the schedule of {event.name} and watch back the runs.">
+    <meta property="og:title" content={event.name} />
+    <meta property="og:description" content="View the schedule of {niceShortName(event)} and watch back the runs." />
+    <meta property="og:url" content="https://vods.speedrun.club/{$page.params.org}/{$page.params.slug}" />
 </svelte:head>
 
 <section>
     <div class="event-description">
-        <h1>{ event.name }</h1>
+        <h1>{event.name}</h1>
         <p>
-            { niceShortName(event) }
+            {niceShortName(event)}
 
             {#if event.timeStatus === "UPCOMING"}
                 will run from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raise money
@@ -56,14 +59,20 @@
             {:else}
                 ran from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raised {formatter.money(event.amount)}
             {/if}
-            for {event.charityName}.
+            for
+            {#if event.charityName !== ""}
+                {event.charityName}.
+            {:else}
+                charity.
+            {/if}
         </p>
-        <p>Below you can find the schedule for the event and click on the play icon to the left of each run to watch back the run's VOD</p>
+        <p>Below you can find the schedule for the event and click on the play icon to the left of each run to watch back the run's VOD.</p>
+        <!-- TODO: jump to current run button -->
     </div>
 
-    {#if runs.length === 0 && run_error === null}
+    {#if runs === undefined && run_error === undefined}
         <div class="loading">loading!!!</div>
-    {:else if runs.length > 0}
+    {:else if runs !== undefined}
         <ul class="event-runs">
 
             {#each runs as run, run_index}

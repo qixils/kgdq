@@ -6,7 +6,7 @@
 </script>
 
 <svelte:head>
-    <title>Speedrun VOD Club - Upcoming Events</title>
+    <title>Speedrun VOD Club · Upcoming Events</title>
     <meta name="description" content="TODO KGDQ meta tags" />
 </svelte:head>
 
