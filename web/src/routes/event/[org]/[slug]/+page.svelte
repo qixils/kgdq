@@ -67,6 +67,7 @@
             {/if}
         </p>
         <p>Below you can find the schedule for the event and click on the play icon to the left of each run to watch back the run's VOD.</p>
+        <!-- TODO: jump to current run button -->
     </div>
 
     {#if runs === undefined && run_error === undefined}
