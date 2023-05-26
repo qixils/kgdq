@@ -12,6 +12,11 @@ html {
     --bid-open: #dda;
     --bid-closed: #d36;
 
+    --youtube-rgb: 255, 0, 0;
+    --twitch-rgb: 100, 65, 165;
+    --youtube: rgba(var(--youtube-rgb), 1);
+    --twitch: rgba(var(--twitch-rgb), 1);
+
     color: #EEF;
     background-color: var(--bg-bg);
 }
@@ -32,9 +37,36 @@ html, body, .page-container {
             auto  /* footer */ ;
 }
 
-header {
-    padding: 1em;
+.hero-text {
+    font-size: 150%;
+    text-align: center;
+    margin: 1em;
 }
+
+header {
+    --logo-size: 80px;
+    padding: 1em;
+    display: grid;
+    grid-template-columns: calc(var(--logo-size) + 20px) auto;
+}
+
+/*  Border underneath header */
+header::after {
+    grid-column: 1 / span 2;
+    content: " ";
+    height: 2px;
+    background: linear-gradient(90deg, var(--run-finished) 0%, var(--bg-bg) 30%, var(--bg-bg) 70%, var(--run-in-progress) 100%);
+}
+
+header img {
+    width: var(--logo-size);
+    margin: 10px;
+}
+
+header nav {
+    grid-column: 1 / span 2;
+}
+
 
 header h1 {
     color: #EEF;
@@ -56,9 +88,9 @@ a:hover {
     color: white;
 }
 
-a[target='_blank']::after {
-    content: ' ↗';
-}
+/*a[target='_blank']::after {*/
+/*    content: ' ↗';*/
+/*}*/
 
 header nav ul {
     display: flex;
@@ -117,7 +149,7 @@ footer {
 .event-runs > li {
     display: grid;
     --bar-width: 80px;
-    grid-template-columns: var(--bar-width) calc(1.5 * 5ch) 1fr;
+    grid-template-columns: var(--bar-width) calc(1.2 * 5ch) 1fr;
     margin: 5px;
 }
 
@@ -132,7 +164,7 @@ footer {
 }
 
 .run-schedule-time {
-    font-size: 150%;
+    font-size: 120%;
     text-align: center;
     word-break: break-all;
     margin: auto 0;
@@ -145,6 +177,7 @@ footer {
 
 .run-category {
     color: var(--text-quiet);
+    white-space: nowrap;
 }
 
 
@@ -292,4 +325,124 @@ sup {
 
 .bid-body {
     margin: 0 0.5em;
+}
+
+.bid-contributions {
+    color: var(--text-quiet);
+}
+
+.run-details {
+    display: flex;
+    flex-direction: row;
+    margin: 0.5em;
+    gap: 1em;
+}
+
+.run-details > div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.run-details > div > * {
+    vertical-align: middle;
+}
+
+.run-details > .run-runners a {
+
+}
+
+.run-details > div:before {
+    font-family: 'Material Symbols Rounded';
+    font-size: 150%;
+    margin: 5px;
+    color: var(--text-quiet);
+}
+
+.run-runners.single::before {
+    content: 'person';
+}
+
+.run-runners.multiple::before {
+    content: 'group';
+}
+
+.run-console::before {
+    content: 'stadia_controller';
+}
+
+.run-time::before {
+    content: 'timer';
+}
+
+.run-src::before {
+    /*content: 'social_leaderboard';*/
+    content: ' ';
+    background-image: url("/trohpy.svg");
+    width: 24px;
+    height: 24px;
+}
+
+.vod {
+    display: flex;
+    align-items: center;
+    min-width: 170px;
+}
+
+.vods-list {
+    /*float: right;*/
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-gap: 1em;
+    list-style: none;
+    padding: 0;
+    margin: 1em;
+}
+
+.vod::before {
+    font-family: 'Material Symbols Rounded';
+    content: 'play_circle';
+    font-size: 150%;
+    margin: 5px;
+}
+
+.vod.youtube::before {
+    text-shadow:
+            var(--youtube)   -2px 0 0,
+            rgba(var(--youtube-rgb), 0.8) -4px 0 0,
+            rgba(var(--youtube-rgb), 0.6) -6px 0 0,
+            rgba(var(--youtube-rgb), 0.4) -8px 0 0,
+            rgba(var(--youtube-rgb), 0.2) -10px 0 0;
+}
+
+.vod.twitch::before {
+    text-shadow:
+            var(--twitch)   -2px 0 0,
+            rgba(var(--twitch-rgb), 0.8) -4px 0 0,
+            rgba(var(--twitch-rgb), 0.6) -6px 0 0,
+            rgba(var(--twitch-rgb), 0.4) -8px 0 0,
+            rgba(var(--twitch-rgb), 0.2) -10px 0 0;
+}
+
+.bid-war-bars {
+    content: '';
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.5em;
+    margin: 0.5em;
+    width: 70px;
+    border-right: 2px solid var(--text-quiet);
+}
+
+.bid-war-bar {
+    height: 1em;
+    border-radius: 2px;
+}
+
+.bid-war-bar:first-child {
+    background-color: var(--run-in-progress);
+}
+
+.bid-war-bar:not(:first-child) {
+    background-color: var(--run-finished);
 }

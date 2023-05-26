@@ -4,7 +4,8 @@
 </script>
 
 <header>
-  <a href="/"><h1>Speedrun VOD Club</h1></a>
+  <a href="/"><img src="/icon.svg" alt="Speedrun VOD Club" /></a>
+  <a href="/"> <h1>Speedrun VOD Club</h1> </a>
   <nav>
     <ul>
 <!--      <li><a href="/">Home</a></li>-->

@@ -4,9 +4,15 @@
 
     export let bid: Bid;
     export let formatter: Formatters;
+
+    let max_bid_total = Math.max(...bid.children.map(c => c.donationTotal));
 </script>
 
-<span class="radial-progress" style="--value:100; --size:70px;">BID WAR</span>
+<div class="bid-war-bars">
+    {#each bid.children.slice(0,3) as child}
+        <div class="bid-war-bar" style="width: {child.donationTotal / max_bid_total * 90}%"></div>
+    {/each}
+</div>
 <div class="bid-body">
     <p>
         <b>{bid.name}&nbsp;</b>

@@ -4,11 +4,14 @@
     import {Formatters} from "$lib/Formatters";
     import {BASE_URL} from "$lib/kgdq";
     import {onMount} from "svelte";
+    import EventSummary from "$lib/EventSummary.svelte";
 
     export let data: { org: Organization };
     let events: Event[];
     let error: Error;
     let SVC = new SvcClient(BASE_URL, fetch);
+
+    let org = { ...data.org, id: $page.params.org };
 
     onMount(async () => {
         try {
@@ -19,31 +22,21 @@
     });
 </script>
 
+<svelte:head>
+    <title>Speedrun VOD Club · { data.org.shortName } Events</title>
+    <meta name="description" content="TODO KGDQ meta tags" />
+</svelte:head>
+
 <h1>Events by { data.org.displayName }</h1>
 
 {#if events === undefined && error === undefined}
     <p>loading...</p>
 {:else if events !== undefined}
-    {#each events as event}
-        <div>
-            <h2>{event.name}</h2>
-            <p>
-            {#if event.startTime && event.endTime}
-                { Formatters.date_hero(event.startTime) } - { Formatters.date_hero(event.endTime) }
-            {:else if event.startTime}
-                { Formatters.date_hero(event.startTime) }
-            {/if}
-            </p>
-            {#if event.charityName}
-                <p>Benefiting {event.charityName}</p>
-            {/if}
-
-            <p><a href="/event/{$page.params.org}/{event.short}">View event schedule and VODs</a></p>
-            {#if event.startTime && event.endTime} <!-- if event has times then it has runs and thus probably has a schedule -->
-                <p><a href={event.scheduleUrl} target="_blank">View official schedule on the {data.org.shortName} website</a></p>
-            {/if}
-        </div>
-    {/each}
+    <ul class="org-events">
+        {#each events as event}
+            <EventSummary {event} {org} />
+        {/each}
+    </ul>
 {:else}
     <p class="error">Error loading events: {error.message}</p>
 {/if}

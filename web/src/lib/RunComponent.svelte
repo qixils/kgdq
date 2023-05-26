@@ -31,42 +31,41 @@
     <div class="run-schedule-time">{ Formatters.time(run.startTime) }</div>
     <div class="run-content">
         <p>
-            {#if run.vods.length > 0}
-                <VODs {run} />
-            {/if}
             <b class="run-name">{run.name}</b>
-            {#if run.src !== null && run.src !== undefined}
-                <sup>
-                    <a href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer">[src]</a>
-                </sup>
-            {/if}
+
             {#if run.category !== ""}
                 <span class="run-category">{run.category}</span>
             {/if}
         </p>
-        <p>
-            <span class="material-symbols-rounded">timer</span>
-            <span>{run.runTime}</span>
-        {#if run.console !== "" }
-            <span class="material-symbols-rounded">stadia_controller</span>
-            <span class="post-icon">{run.console}</span>
-        {/if}
-        </p>
-        <p class="runners">
-            <span class="material-symbols-rounded">{run.runners.length === 1 ? 'person' : 'group'}</span>
-            <span class="post-icon">
-                {#each run.runners as runner, index}
-                    {#if index > 0}
-                        ,
-                    {/if}
-                    {#if runner.url !== null && runner.url !== undefined}
-                        <a href={runner.url} target="_blank" rel="noopener noreferrer">{runner.name}</a>
-                    {:else}
-                        {runner.name}
-                    {/if}
-                {/each}
-            </span>
-        </p>
+
+
+
+        <div class="run-details">
+            <div class="run-time">{ run.runTime }</div>
+            {#if run.console !== "" }
+                <div class="run-console">{ run.console }</div>
+            {/if}
+            <div class="run-runners {run.runners.length === 1 ? 'single' : 'multiple'}">
+                <span>
+                    {#each run.runners as runner, index}
+                        {#if index > 0}
+                            ,
+                        {/if}
+                        {#if runner.url !== null && runner.url !== undefined}
+                            <a href={runner.url} target="_blank" rel="noopener noreferrer">{runner.name}</a>
+                        {:else}
+                            {runner.name}
+                        {/if}
+                    {/each}
+                </span>
+            </div>
+            {#if run.src !== null && run.src !== undefined}
+                <div class="run-src">
+                    <a href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer">speedrun.com</a>
+                </div>
+            {/if}
+        </div>
+
         {#each run.bids as bid}
             <div class="bid">
                 {#if bid.isTarget}
@@ -76,6 +75,10 @@
                 {/if}
             </div>
         {/each}
+
+        {#if run.vods.length > 0}
+            <VODs {run} />
+        {/if}
     </div>
 </li>
 

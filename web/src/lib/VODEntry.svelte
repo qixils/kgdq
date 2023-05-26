@@ -3,14 +3,14 @@
 
     export let vod: VOD;
     export let index: number;
+
+    let platform_nice = vod.type === "YOUTUBE" ? "YouTube" : "Twitch";
+    let platform_css = platform_nice.toLowerCase();
+
 </script>
 
-<li><a href={vod.url} target="_blank" rel="noopener noreferrer">
-    Watch
-    {#if vod.type === "YOUTUBE"}
-        on YouTube
-    {:else if vod.type === "TWITCH"}
-        on Twitch
-    {/if}
-    {#if index > 0}(Part {index + 1}){/if}
-</a></li>
+<li class="vod { platform_css }">
+    <a href={vod.url} target="_blank" rel="noopener noreferrer">
+    { platform_nice } {#if index > 0}(Part {index + 1}){/if}
+    </a>
+</li>
