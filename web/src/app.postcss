@@ -1,23 +1,5 @@
 /* Write your global styles here, in PostCSS syntax */
 
-@import "@fontsource/fira-mono"; /* TODO: is this even used? */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-.steps-vertical .step::before {
-  height: 500% !important;
-  z-index: inherit;
-}
-
-a {
-  @apply text-accent;
-}
-
-a:hover {
-  @apply text-accent-focus;
-}
-
 .info {
   @apply block bg-info text-info-content p-2 rounded m-auto w-fit my-4;
 }

@@ -39,14 +39,18 @@
 </script>
 
 <svelte:head>
-    <!-- TODO: add head -->
+    <title>Speedrun VOD Club · {event.name}</title>
+    <meta name="description" content="View the schedule of {event.name} and watch back the runs.">
+    <meta property="og:title" content={event.name} />
+    <meta property="og:description" content="View the schedule of {niceShortName(event)} and watch back the runs." />
+    <meta property="og:url" content="https://vods.speedrun.club/{$page.params.org}/{$page.params.slug}" />
 </svelte:head>
 
 <section>
     <div class="event-description">
-        <h1>{ event.name }</h1>
+        <h1>{event.name}</h1>
         <p>
-            { niceShortName(event) }
+            {niceShortName(event)}
 
             {#if event.timeStatus === "UPCOMING"}
                 will run from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raise money

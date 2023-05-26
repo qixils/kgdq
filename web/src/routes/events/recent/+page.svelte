@@ -1,5 +1,5 @@
 <svelte:head>
-    <title>Speedrun VOD Club - Recent Events</title>
+    <title>Speedrun VOD Club · Recent Events</title>
     <meta name="description" content="TODO KGDQ meta tags" />
 </svelte:head>
 
