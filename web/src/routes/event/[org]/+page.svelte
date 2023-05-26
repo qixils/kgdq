@@ -1,7 +1,6 @@
 <script lang="ts">
     import {Event, Organization, SvcClient} from "vods.speedrun.club-client";
     import {page} from "$app/stores";
-    import {Formatters} from "$lib/Formatters";
     import {BASE_URL} from "$lib/kgdq";
     import {onMount} from "svelte";
     import EventSummary from "$lib/EventSummary.svelte";
