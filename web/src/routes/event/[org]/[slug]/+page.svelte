@@ -55,9 +55,14 @@
             {:else}
                 ran from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raised {formatter.money(event.amount)}
             {/if}
-            for {event.charityName}.
+            for
+            {#if event.charityName !== ""}
+                {event.charityName}.
+            {:else}
+                charity.
+            {/if}
         </p>
-        <p>Below you can find the schedule for the event and click on the play icon to the left of each run to watch back the run's VOD</p>
+        <p>Below you can find the schedule for the event and click on the play icon to the left of each run to watch back the run's VOD.</p>
     </div>
 
     {#if runs === undefined && run_error === undefined}
