@@ -5,6 +5,7 @@ import club.speedrun.vods.marathon.VODType
 import com.github.twitch4j.helix.TwitchHelix
 import com.github.twitch4j.helix.TwitchHelixBuilder
 import com.github.twitch4j.helix.domain.StreamList
+import com.github.twitch4j.helix.domain.Video
 import com.github.twitch4j.helix.domain.VideoList
 import com.netflix.hystrix.HystrixCommand
 import com.rabbitmq.client.CancelCallback
@@ -131,7 +132,7 @@ class DeliverHandler(
             overrides.startTime = runStart
             // Fetching stream's video (should always be the latest video)
             val stream = streams.await().streams.firstOrNull() ?: return@coroutineScope
-            val videos = async { twitch.videos(userId = stream.userId, type = "archive", limit = 1).execute() }
+            val videos = async { twitch.videos(userId = stream.userId, type = Video.Type.ARCHIVE, limit = 1).execute() }
             val video = videos.await().videos.firstOrNull() ?: return@coroutineScope
             // Create VOD object
             val vod = VODType.TWITCH.fromParts(video.id, Duration.between(stream.startedAtInstant, runStart))
@@ -196,28 +197,28 @@ fun TwitchHelix.streams(
 
 fun TwitchHelix.videos(
     authToken: String? = null,
-    id: String? = null,
+    ids: List<String>? = null,
     userId: String? = null,
     gameId: String? = null,
     language: String? = null,
-    period: String? = null,
-    sort: String? = null,
-    type: String? = null,
+    period: Video.SearchPeriod? = null,
+    sort: Video.SearchOrder? = null,
+    type: Video.Type? = null,
     after: String? = null,
     before: String? = null,
     limit: Int? = null
 ): HystrixCommand<VideoList> {
     return getVideos(
         authToken,
-        id,
+        ids,
         userId,
         gameId,
         language,
         period,
         sort,
         type,
+        limit,
         after,
-        before,
-        limit
+        before
     )
 }
