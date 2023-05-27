@@ -89,6 +89,7 @@ object ThreadMaster {
         logger.info("Loading threads...")
         val managers = config.threads.map { ThreadManager(reddit, it) }
         scheduler.scheduleAtFixedRate({
+            // TODO: withTimeout probably isn't sufficient to prevent threads from hanging
             runBlocking { managers.forEach { launch { withTimeout(Duration.ofMinutes(3)) { it.run() } } } }
         }, 0, config.waitMinutes, TimeUnit.MINUTES)
     }
