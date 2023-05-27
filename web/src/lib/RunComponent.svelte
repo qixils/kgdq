@@ -81,10 +81,3 @@
         {/if}
     </div>
 </li>
-
-<style>
-    .post-icon {
-        position: relative;
-        top: -0.15rem;
-    }
-</style>

@@ -16,15 +16,8 @@
     }
 </script>
 
-<div>
-    {#if event.timeStatus !== "FINISHED"}
-        <span class="time-status {event.timeStatus.toLowerCase().replace('_', '-')}">
-            { toTitleCase(event.timeStatus).replace('_', ' ') }
-        </span>
-    {/if}
-    <a href="/event/{org}/{event.short}">
-        {event.name}
-    </a>
+<div class="small-event-summary">
+    <p><a href="/event/{org}/{event.short}">{event.name}</a></p>
     <span class="event-time-info">
         {#if event.timeStatus === "UPCOMING"}
             Begins {Formatters.date_hero(event.startTime)} at {Formatters.time(event.startTime)}
