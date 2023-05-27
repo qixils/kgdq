@@ -61,7 +61,7 @@
             </div>
             {#if run.src !== null && run.src !== undefined}
                 <div class="run-src">
-                    <a href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer">speedrun.com</a>
+                    <a href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer">Leaderboards</a>
                 </div>
             {/if}
         </div>
