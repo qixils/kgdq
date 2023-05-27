@@ -5,7 +5,6 @@ package club.speedrun.vods.plugins
 import club.speedrun.vods.*
 import club.speedrun.vods.marathon.Organization
 import club.speedrun.vods.marathon.VOD
-import club.speedrun.vods.marathon.VodSuggestion
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -112,7 +111,7 @@ fun Application.configureRouting() {
                         val user = getUser(call) ?: return@put
                         val body: VodSuggestionBody = call.body()
                         // parse VOD from URL
-                        val vod = VOD.fromUrl(body.url)
+                        val vod = VOD.fromUrl(body.url, contributor = user.id)
                         // get marathon
                         val marathon = marathons.firstOrNull { it.id.equals(body.organization, true) }
                             ?: throw UserError("Invalid organization; must be one of: ${marathons.joinToString { it.id }}")
@@ -120,7 +119,7 @@ fun Application.configureRouting() {
                         val run = marathon.db.getRunOverrides(gdqId = body.gdqId, horaroId = body.horaroId)
                             ?: throw UserError("Invalid run ID")
                         // add suggestion
-                        run.vodSuggestions.add(VodSuggestion(vod, user.id))
+                        run.suggestions.add(vod)
                         // update override
                         marathon.db.runs.update(run)
                         // respond
