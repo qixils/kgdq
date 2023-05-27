@@ -9,10 +9,12 @@ import club.speedrun.vods.naturalJoinTo
 import dev.qixils.gdq.models.Runner
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import net.dean.jraw.RateLimitException
 import net.dean.jraw.RedditClient
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.Locale
+import kotlin.time.Duration.Companion.seconds
 
 class ThreadManager(
     private val reddit: RedditClient,
@@ -154,13 +156,17 @@ class ThreadManager(
         try {
             // Generate body
             val body = generateBody().toString()
-            // Wait until 3 seconds have elapsed since the last update to avoid rate limiting
-            while (lastUpdate.isAfter(Instant.now().minusSeconds(3)))
+            // Wait until 5 seconds have elapsed since the last update to avoid rate limiting
+            while (lastUpdate.isAfter(Instant.now().minusSeconds(5)))
                 delay(1000)
             // Perform update
-            lastUpdate = Instant.now()
             reddit.submission(config.threadId).edit(body)
+            lastUpdate = Instant.now()
             logger.info("Updated thread ${config.threadId} for ${config.org}")
+        } catch (e: RateLimitException) {
+            logger.info("Timed out, trying again in ${e.cooldown.toInt()} seconds")
+            delay(e.cooldown.seconds)
+            run()
         } catch (e: Exception) {
             logger.error("Failed to update thread ${config.threadId} for ${config.org}", e)
         }
