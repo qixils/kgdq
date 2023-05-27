@@ -74,7 +74,7 @@ class ThreadManager(
         if (config.events.size > 1)
             body.append("# ${eventConfig.displayName}\n\n")
         body.append("## Links\n\n")
-            .append("* **New:** [Watch and submit VODs on the VOD site](https://vods.speedrun.club/event/${config.org}/${event.short}")
+            .append("* **New:** [Watch and submit VODs on the VOD site](https://vods.speedrun.club/event/${config.org}/${event.short})\n")
             .append("* [Watch ${eventConfig.displayName}](https://twitch.tv/${eventConfig.twitch})\n")
             .append("* [Donate to ${event.charityName}](${event.donationUrl})\n")
             .append("* [Official Schedule](${event.scheduleUrl})\n")
