@@ -160,13 +160,17 @@ class ThreadManager(
             while (lastUpdate.isAfter(Instant.now().minusSeconds(5)))
                 delay(1000)
             // Perform update
-            reddit.submission(config.threadId).edit(body)
+            while (true) {
+                try {
+                    reddit.submission(config.threadId).edit(body)
+                    break
+                } catch (e: RateLimitException) {
+                    logger.info("Got ratelimited, trying again in ${e.cooldown.toInt()} seconds")
+                    delay(e.cooldown.seconds)
+                }
+            }
             lastUpdate = Instant.now()
             logger.info("Updated thread ${config.threadId} for ${config.org}")
-        } catch (e: RateLimitException) {
-            logger.info("Timed out, trying again in ${e.cooldown.toInt()} seconds")
-            delay(e.cooldown.seconds)
-            run()
         } catch (e: Exception) {
             logger.error("Failed to update thread ${config.threadId} for ${config.org}", e)
         }
