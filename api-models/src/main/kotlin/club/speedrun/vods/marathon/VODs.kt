@@ -2,7 +2,6 @@ package club.speedrun.vods.marathon
 
 import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import java.time.Duration
 import java.util.regex.Pattern
 
@@ -12,7 +11,6 @@ data class VOD(
     val videoId: String? = null,
     val timestamp: String? = null,
     val url: String,
-    @Transient
     val contributorId: String? = null, // TODO: expose user's name in API
 ) {
     companion object {
