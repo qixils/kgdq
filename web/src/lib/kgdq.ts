@@ -41,17 +41,6 @@ export declare class DiscordUser {
     public_flags: number | null;
 }
 
-export function fake_status(run: Run, index: number) {
-    let current_status_index  = 61;
-    if (index == current_status_index) {
-        return "IN_PROGRESS";
-    } else if (index < current_status_index) {
-        return "FINISHED";
-    } else {
-        return "UPCOMING";
-    }
-}
-
 // get<T>(url: string | URL): Promise<T> {
 //     // prepend the base URL if the URL is relative (i.e. a string)
 //     const calculatedUrl = typeof url === 'string' ? `${this.baseUrl}/${url}` : url;

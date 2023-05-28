@@ -4,7 +4,7 @@
     import type {Run} from "vods.speedrun.club-client";
     import BidTarget from "$lib/BidTarget.svelte";
     import BidWar from "$lib/BidWar.svelte";
-    import {BASE_URL, fake_status} from "$lib/kgdq";
+    import {BASE_URL} from "$lib/kgdq";
     import {user} from "../stores";
     import {page} from "$app/stores";
     import {svc} from "vods.speedrun.club-client";
@@ -17,9 +17,9 @@
     // TODO: step_color style var
     let step_color = run.timeStatus === "UPCOMING" ? "" : (run.timeStatus === "IN_PROGRESS" ? "#fff" : "#d2a");
 
-    let previous_status = fake_status(run, run_index - 1);
-    let current_status = fake_status(run, run_index);
-    let next_status = fake_status(run, run_index + 1);
+    let previous_status = run_index === 0 ? null : runs[run_index - 1].timeStatus;
+    let current_status = run.timeStatus
+    let next_status = run_index === runs.length - 1 ? null : runs[run_index + 1].timeStatus;
 
     async function suggest_navigate(org, event_slug, index) {
         let event_id = (await svc.getEvent(org, event_slug)).id;

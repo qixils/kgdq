@@ -5,7 +5,7 @@
     import RunComponent from "$lib/RunComponent.svelte";
     import {page} from "$app/stores";
     import {Formatters} from "$lib/Formatters";
-    import {BASE_URL, fake_status, niceShortName} from "$lib/kgdq";
+    import {BASE_URL, niceShortName} from "$lib/kgdq";
     import {onMount} from "svelte";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
 
@@ -62,30 +62,9 @@
 
             {#each runs as run, run_index}
 
-                <script>
-                /*
-                    Possible states for schedule bar bit:
-                    - First day marker, not yet that day
-                    - First day marker, that day but not yet started first run
-                    - First day marker, that day and started
-                    - Run, not yet started and the previous run is not finished
-                    - Run, not yet started and the previous run is finished (intermission)
-                    - Run, started and not yet finished
-                    - Run, finished
-                    - Day marker, not yet that day but previous run is in progress and will finish after midnight
-                    - Day marker, not yet that day but previous run is finished (before midnight)
-                    - Day marker, not yet that day
-                    - Day marker, that day but not yet started
-                    - Day marker, that day and started first run of the day
-
-                    Key predicates:
-                */
-                </script>
-
                 { @const last_run = runs[run_index - 1] }
-                { @const last_run_status = fake_status(last_run, run_index - 1) }
-                { @const this_run_status = fake_status(run, run_index ) }
-                <!--{ @const is_today = true }-->
+                { @const last_run_status = last_run?.timeStatus }
+                { @const this_run_status = run.timeStatus }
 
                 {#if run_index === 0 || new Date(run.startTime).getDay() !== new Date(last_run.startTime).getDay()}
 

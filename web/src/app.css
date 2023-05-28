@@ -213,24 +213,24 @@ footer {
 .schedule-bar-bit::before, .schedule-bar-bit::after {
     content: " ";
     display: block;
-    background-color: #001;
+    background-color: var(--run-nothing);
 }
 
 .next-up .schedule-bar-bit::before {
-    background: linear-gradient(180deg, #d2a 0%, #001 30%);
+    background: linear-gradient(180deg, var(--run-finished) 0%, var(--run-nothing) 30%);
 }
 
 .in-progress .schedule-bar-bit::before {
-    background: linear-gradient(180deg, #d2a 0%, #5e7 30%, #5e7 70%, #001 100%);
+    background: linear-gradient(180deg, var(--run-finished) 0%, var(--run-in-progress) 30%, var(--run-in-progress) 70%, var(--run-nothing) 100%);
 }
 
 .in-progress .schedule-bar-bit::after {
-    background-color: #5e7;
+    background-color: var(--run-in-progress);
 }
 
 .finished .schedule-bar-bit::before,
 .finished .schedule-bar-bit::after {
-    background-color: #d2a;
+    background-color: var(--run-finished);
 }
 
 /* lines that appear next to runs */
@@ -241,13 +241,8 @@ footer {
 
 }
 
-/* first day area */
-li:first-child > .schedule-bar-bit::before {
-    display: none;
-}
-
 /* where the line starts */
-li:nth-child(2) > .schedule-bar-bit::before {
+li:first-child > .schedule-bar-bit::before {
     width: calc(var(--bar-size)/4);
     height: calc(50% + var(--bar-size)/4);
     bottom: 0;
