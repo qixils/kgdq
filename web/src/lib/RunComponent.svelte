@@ -96,7 +96,7 @@
             <VODs {run} />
         {/if}
 
-        {#if $user && run.horaroId }
+        {#if $user && run.id }
             <button class="suggest-btn" on:click={ () => suggest_navigate($page.params.org, $page.params.slug, run.horaroId) }>Suggest VOD</button>
         {/if}
     </div>
