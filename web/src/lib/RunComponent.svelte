@@ -56,7 +56,7 @@
             },
             body: JSON.stringify({
                     url: url,
-                    organization: $page.params.org,
+                    organization: $page.params.org.toLowerCase(),
                     gdqId: run.gdqId,
                     horaroId: run.horaroId
                 })
@@ -103,7 +103,7 @@
                     <input type="text" id="suggest-{run_index}-url" name="url">
 
                     <label for="suggest-{run_index}-organization">Organization</label>
-                    <input type="text" id="suggest-{run_index}-organization" name="organization" value="{ $page.params.org }" disabled>
+                    <input type="text" id="suggest-{run_index}-organization" name="organization" value="{ $page.params.org.toLowerCase() }" disabled>
 
                     <label for="suggest-{run_index}-gdqId" >GDQ ID</label>
                     <input type="text" id="suggest-{run_index}-gdqId" name="gdqId" value="{ run.gdqId }" disabled>

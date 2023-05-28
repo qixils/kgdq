@@ -20,7 +20,7 @@
 
     onMount(async () => {
         try {
-            runs = await SVC.getRuns($page.params.org, $page.params.slug);
+            runs = await SVC.getRuns($page.params.org.toLowerCase(), $page.params.slug);
         } catch (e) {
             run_error = e;
         }

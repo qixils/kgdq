@@ -15,7 +15,7 @@
 
     onMount(async () => {
         try {
-            events = (await SVC.getEvents($page.params.org)).reverse();
+            events = (await SVC.getEvents($page.params.org.toLowerCase())).reverse();
         } catch (e) {
             error = e;
         }
@@ -35,7 +35,7 @@
 {:else if events !== undefined}
     <ul class="events-list">
         {#each events as event}
-            <EventSummary event={event} org={$page.params.org} />
+            <EventSummary event={event} org={$page.params.org.toLowerCase()} />
         {/each}
     </ul>
 {:else}
