@@ -35,7 +35,10 @@
                     runs_cache[event.short] = await svc.getRuns(suggest.organization, event.short);
                 }
                 let event_runs = runs_cache[event.short];
-                let run = event_runs.find(r => r.horaroId === suggest.horaroId);
+                let run = event_runs.find(r => {
+                    if (r.gdqId !== null && r.gdqId === suggest.gdqId) return true;
+                    return r.horaroId !== null && r.horaroId === suggest.horaroId;
+                });
                 if (run) {
                     suggests_with_run_event = [...suggests_with_run_event ?? [], {run, suggest, event}];
                     break;
@@ -92,7 +95,7 @@
         <li>
             <p>for <b>{run.name}</b> / {run.category} during {event.public}</p>
             <p>{suggest.vod.type} {suggest.vod.url}</p>
-            <p>ID: <code>{suggest.id}</code>, GDQ: <code>{suggest.gdqId}</code>, Horaro: <code>{suggest.horaroId}</code></p>
+            <p>User: <code>{suggest.vod.contributorId}</code>, ID: <code>{suggest.id}</code>, GDQ: <code>{suggest.gdqId}</code>, Horaro: <code>{suggest.horaroId}</code></p>
             <p>{suggest.organization}</p>
             <button on:click={() => decide(suggest, true)}>Accept</button>
             <button on:click={() => decide(suggest, false)}>Reject</button>
