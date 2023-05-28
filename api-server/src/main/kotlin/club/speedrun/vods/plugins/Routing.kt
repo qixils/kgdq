@@ -21,7 +21,7 @@ import kotlinx.coroutines.async
 import kotlinx.serialization.SerializationException
 import java.time.Duration
 
-private val ADMINS: List<String> = listOf("01GSPA63RW82QK1KAA4TPX1D20")
+private val ADMINS: List<String> = listOf("01GSPA63RW82QK1KAA4TPX1D20", "01H1FNG7BG6VQX1ETDC3ZY13D6")
 
 private suspend fun getUser(call: ApplicationCall): User? {
     return try {
