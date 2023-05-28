@@ -10,7 +10,8 @@
 
     let suggests: VODSuggestion[];
 
-    let suggests_with_run_event: { run: Run, suggest: VODSuggestion, event: Event }[];
+    let suggests_with_run_event: { run: Run, suggest: VODSuggestion, event: Event }[] = [];
+    let suggests_populated = false;
     let events_cache: {[org: string]: Event[]} = {};
     let runs_cache: {[slug: string]: Run[]} = {};
 
@@ -41,6 +42,8 @@
                 }
             }
         }
+
+        suggests_populated = true;
     });
 
     async function decide(suggest: VODSuggestion, accept: boolean) {
@@ -79,7 +82,7 @@
 
 <p>SECRET ADMIN VOD APPROVAL PAGE</p>
 
-{#if suggests_with_run_event === undefined}
+{#if !suggests_populated}
     <LoadingSkeleton />
 {:else if suggests_with_run_event.length === 0}
     <p>No suggestions</p>
