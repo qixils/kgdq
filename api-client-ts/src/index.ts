@@ -104,9 +104,9 @@ export interface OrganizedEvent extends Event {
 
 export interface Run {
 
-    // The ID of the run on the donation tracker.
+    // The ID of the run on the GDQ donation tracker.
     // May be null if the run comes from a Horaro schedule and has no corresponding run on the donation tracker.
-    id: number | null;
+    gdqId: number | null;
 
     // The ID of the run on the Horaro schedule.
     // May be null if the event does not have a Horaro schedule.
@@ -298,7 +298,7 @@ export class SvcClient {
     private readonly fetchFunction: typeof fetch;
 
     /** Creates an instance of SvcClient.
-     * param baseUrl The base URL of the service. Defaults to the public instance 'https://vods.speedrun.club/api/v2'.
+     * @param baseUrl The base URL of the service. Defaults to the public instance 'https://vods.speedrun.club/api/v2'.
      * @param fetchFunction The function to use to fetch URLs. Defaults to the global fetch function.
      */
     constructor(baseUrl: string = 'https://vods.speedrun.club/api/v2', fetchFunction: typeof fetch = fetch) {

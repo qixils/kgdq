@@ -30,7 +30,7 @@ import java.util.regex.Pattern
 class RunData{
     @Transient var trackerSource: Run? = null
     @Transient var horaroSource: dev.qixils.horaro.models.Run? = null
-    var id: Int? = null
+    var gdqId: Int? = null
     var horaroId: String? = null
     // TODO: export RunOverrides ID for maps/sets/etc
     val event: Int
@@ -67,7 +67,7 @@ class RunData{
     ) {
         trackerSource = run.value
         horaroSource = null
-        id = run.id
+        gdqId = run.id
         horaroId = run.value.horaroId
         event = run.value.eventId
         name = run.value.name
@@ -118,7 +118,7 @@ class RunData{
     ) {
         trackerSource = trackerRun?.trackerSource
         horaroSource = horaroRun
-        id = trackerRun?.id
+        gdqId = trackerRun?.gdqId
         horaroId = horaroRun.getValue("ID")
         this.event = event.id
         name = calculateHoraroName(horaroRun)

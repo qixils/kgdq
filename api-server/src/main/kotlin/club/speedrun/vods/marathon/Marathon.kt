@@ -263,7 +263,7 @@ abstract class Marathon(
             horaroRuns.add(data)
         }
         return horaroRuns.filter {
-            query.id == null || (it.id ?: -1) == query.id.toIntOrNull() || it.horaroId == query.id
+            query.id == null || (it.gdqId ?: -1) == query.id.toIntOrNull() || it.horaroId == query.id
                     //|| query.runner == null || it.runners.any { it.id == query.runner } TODO create RunnerData with added id field
                     || query.event == null || it.event == getEventId(query.event)
         }
