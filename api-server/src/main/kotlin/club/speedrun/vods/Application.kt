@@ -19,7 +19,10 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
+val logger: Logger = LoggerFactory.getLogger("SVC")
 const val root = "https://vods.speedrun.club"
 val json = Json {
     isLenient = true

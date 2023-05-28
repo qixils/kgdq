@@ -18,6 +18,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.util.pipeline.*
 import kotlinx.coroutines.async
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import java.time.Duration
 
@@ -47,7 +48,7 @@ fun Application.configureRouting() {
     }
     install(StatusPages) {
         exception<SerializationException> { call, cause ->
-            logError(call, cause)
+            logger.error("Serialization error on ${call.request.httpMethod} ${call.request.uri}", cause)
             call.respond(
                 HttpStatusCode.InternalServerError,
                 mapOf("error" to ("An internal error occurred: " + (cause.message ?: cause.toString())))
@@ -69,6 +70,13 @@ fun Application.configureRouting() {
         }
         exception<UserError> { call, cause ->
             call.respond(HttpStatusCode.BadRequest, mapOf("error" to cause.message))
+        }
+        exception<Throwable> { call, cause ->
+            logger.error("Internal server error on ${call.request.httpMethod} ${call.request.uri}", cause)
+            call.respond(
+                HttpStatusCode.InternalServerError,
+                mapOf("error" to "An internal error occurred")
+            )
         }
     }
 
@@ -242,6 +250,7 @@ interface RunBasedBody {
     val horaroId: String?
 }
 
+@Serializable
 class VodSuggestionBody(
     val url: String,
     override val organization: String,
@@ -249,6 +258,7 @@ class VodSuggestionBody(
     override val horaroId: String? = null,
 ) : RunBasedBody
 
+@Serializable
 class SetTimeBody(
     val time: Long,
     override val organization: String,
@@ -256,6 +266,7 @@ class SetTimeBody(
     override val horaroId: String? = null,
 ) : RunBasedBody
 
+@Serializable
 class SuggestionWrapper(
     val vod: VOD,
     val id: String,
@@ -267,6 +278,7 @@ class SuggestionWrapper(
             : this(suggestion.vod, suggestion.id, organization, gdqId, horaroId)
 }
 
+@Serializable
 class ModifySuggestionBody(
     val id: String,
     val action: VodSuggestionState,
