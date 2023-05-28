@@ -1,12 +1,10 @@
 <script lang="ts">
 
     import {onMount} from "svelte";
-    import type {User} from "$lib/kgdq.ts";
-    import {BASE_URL, getUser} from "$lib/kgdq.ts";
+    import {getUser} from "$lib/kgdq.ts";
     import {user} from "../../stores";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
 
-    // let user: User | null = null;
     let user_error: string | null = null;
 
     onMount(async () => {

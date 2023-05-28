@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type {Event, IdentifiedOrganization} from 'vods.speedrun.club-client';
+    import type {Event} from 'vods.speedrun.club-client';
     import {Formatters} from "$lib/Formatters";
 
     export let org: string;
@@ -8,18 +8,16 @@
 
     let formatter = new Formatters(event.paypalCurrency);
 
-    let org_id = typeof org === "string" ? org : org.id;
-
 </script>
 
 <li class="event-summary">
     <h2>{event.name}</h2>
     <p>
-        {#if event.startTime && event.endTime && event.timeStatus == "FINISHED"}
+        {#if event.startTime && event.endTime && event.timeStatus === "FINISHED"}
             { Formatters.date_hero(event.startTime) } - { Formatters.date_hero(event.endTime) }
-        {:else if event.startTime && event.timeStatus == "UPCOMING"}
+        {:else if event.startTime && event.timeStatus === "UPCOMING"}
             Begins { Formatters.date_hero(event.startTime) }
-        {:else if event.endTime && event.timeStatus == "IN_PROGRESS"}
+        {:else if event.endTime && event.timeStatus === "IN_PROGRESS"}
             Ends { Formatters.date_hero(event.endTime) }
         {:else if event.startTime}
             { Formatters.date_hero(event.startTime) }
@@ -27,7 +25,7 @@
     </p>
 
     {#if event.charityName}
-        {#if event.timeStatus == "FINISHED" && event.amount > 0 }
+        {#if event.timeStatus === "FINISHED" && event.amount > 0 }
             <p>Raised { formatter.money(event.amount) } to benefit {event.charityName}.</p>
         {:else}
             <p>Benefiting {event.charityName}.</p>
