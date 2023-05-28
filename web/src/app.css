@@ -2,6 +2,7 @@ html {
     font-family: Verdana, sans-serif;
 
     --bg-bg: #001;
+    --raise-bg: #20252e;
     --text-quiet: #88A;
     --text: #EEF;
 
@@ -461,11 +462,28 @@ form button[type="submit"] {
 /* bottom right of div, and also dont make any taller*/
 .suggest-btn {
     display: inline-block;
-    padding: 0.5em 1em;
+    /*padding: 0.5em 1em;*/
+    padding: 5px;
     color: var(--text);
-    background-color: var(--text-quiet);
-    border: none;
+    background-color: var(--raise-bg);
     border-radius: 2px;
     margin: 0.5em;
     float: right;
+    border: 2px solid var(--run-finished);
+    box-shadow: #713 0 3px 0 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.suggest-btn::before {
+    font-family: 'Material Symbols Rounded';
+    content: 'add_circle';
+    font-size: 150%;
+    margin-right: 5px;
+}
+
+.run.in-progress .suggest-btn {
+    border-color: var(--run-in-progress);
+    box-shadow: #173 0 3px 0 0;
 }

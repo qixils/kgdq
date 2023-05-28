@@ -11,12 +11,6 @@
 
         let url = (document.getElementById("url") as HTMLInputElement).value;
 
-        let form_data = new FormData();
-        form_data.append("url", url);
-        form_data.append("organization", organization);
-        form_data.append("gdqId", gdqId);
-        form_data.append("horaroId", horaroId);
-
         let json_data = {
             url: url,
             organization: organization,
@@ -29,12 +23,9 @@
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
-                // "Content-Type": "multipart/form-data"
-                // "Content-Type": "application/x-www-form-urlencoded"
             },
             body:
                 JSON.stringify(json_data)
-                //"gdq_id=4&horaro_id=3d5087ae07184e8c867d383fdafd7e9f&organization=hek&url=3"
 
         });
 

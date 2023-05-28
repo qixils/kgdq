@@ -46,8 +46,10 @@
     <div class="schedule-bar-bit" ></div>
     <div class="run-schedule-time">{ Formatters.time(run.startTime) }</div>
     <div class="run-content">
-        {#if $user }
-            <button class="suggest-btn" on:click={ () => suggest_navigate($page.params.org, $page.params.slug, run.horaroId) }>Suggest VOD</button>
+        {#if $user && current_status === "FINISHED" || current_status === "IN_PROGRESS" }
+            <button class="suggest-btn" on:click={ () => suggest_navigate($page.params.org, $page.params.slug, run.horaroId) }>
+                Suggest VOD
+            </button>
         {/if}
         <p>
             <b class="run-name">{run.name}</b>
