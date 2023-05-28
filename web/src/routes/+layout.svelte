@@ -1,6 +1,14 @@
 <script lang="ts">
   import "../app.css";
   import {user} from "../stores";
+  import {onMount} from "svelte";
+
+  onMount(() => {
+    let user_local = localStorage.getItem("user");
+    if (user_local) {
+      $user = JSON.parse(user_local);
+    }
+  })
 </script>
 
 <header>

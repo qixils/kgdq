@@ -9,11 +9,10 @@
     // let user: User | null = null;
     let user_error: string | null = null;
 
-
-
     onMount(async () => {
         try {
             $user = await getUser();
+            localStorage.setItem("user", JSON.stringify($user));
         } catch (e) {
             user_error = e;
             console.error(e);
