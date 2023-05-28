@@ -29,7 +29,7 @@
 <svelte:head>
     <PageHeadTags
         title={ event.name }
-        description="View the schedule of {niceShortName(event)} and watch back the runs." />
+        description="View the schedule of {niceShortName(event)} and watch back the VODs." />
 </svelte:head>
 
 <section>
