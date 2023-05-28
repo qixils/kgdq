@@ -18,6 +18,7 @@ fun Application.configureHTTP() {
     }
     install(CORS) {
         anyHost()
+        allowHost("vods.speedrun.club", listOf("http", "https"))
     }
     install(DefaultHeaders) {
         header("X-Engine", "Ktor") // will send this header with each response
