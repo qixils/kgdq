@@ -11,14 +11,11 @@
 
     onMount(async () => {
         try {
-            let data = await getUser();
-            console.log(data);
+            user = await getUser();
         } catch (e) {
             user_error = e;
             console.error(e);
         }
-
-        user = {"id":"01H1FNG7BG6VQX1ETDC3ZY13D6","name":"Dunkyl 🔣🔣"};
 
         localStorage.setItem("user", JSON.stringify(user));
     });
@@ -26,6 +23,8 @@
 
 {#if user}
     <p>Logged in as {user.name}</p>
+{:else if user_error}
+    <p>Error loading user: {user_error}</p>
 {:else}
     <p>Loading user...</p>
 {/if}

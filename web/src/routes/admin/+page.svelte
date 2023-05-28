@@ -13,6 +13,11 @@
 
     });
 
+    function decide(suggest: VODSuggestion2, accept: boolean) {
+        let accept_enum = accept ? "APPROVED" : "REJECTED";
+        console.log(`${suggest.vod.url}: ${accept_enum}`);
+    }
+
 
 </script>
 
@@ -21,6 +26,8 @@
         <li>
             <p>{suggest.vod.type}</p>
             <p>{suggest.vod.url}</p>
+            <button on:click={() => decide(suggest, true)}>Accept</button>
+            <button on:click={() => decide(suggest, false)}>Reject</button>
         </li>
     {/each}
 </ul>
