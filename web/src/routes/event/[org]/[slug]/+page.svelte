@@ -9,6 +9,7 @@
     import {onMount} from "svelte";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
     import LoadingButton from "$lib/LoadingButton.svelte";
+    import ErrorReport from "$lib/ErrorReport.svelte";
 
     export let data: { event: Event };
     let SVC = new SvcClient(BASE_URL, fetch);
@@ -88,6 +89,7 @@
             {/each}
         </ul>
     {:else}
-        <p class="error-box">Failed to load runs: {run_error.message}</p>
+        <ErrorReport
+            message="Failed to load runs: {run_error.message}" />
     {/if}
 </section>

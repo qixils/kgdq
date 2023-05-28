@@ -6,6 +6,7 @@
     import EventSummary from "$lib/EventSummary.svelte";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
     import LoadingButton from "$lib/LoadingButton.svelte";
+    import ErrorReport from "$lib/ErrorReport.svelte";
 
     export let data: { org: Organization };
     let events: Event[];
@@ -38,5 +39,6 @@
         {/each}
     </ul>
 {:else}
-    <p class="error-box">Failed to load events: {error.message}</p>
+    <ErrorReport
+            message="Failed to load events: {error.message}" />
 {/if}

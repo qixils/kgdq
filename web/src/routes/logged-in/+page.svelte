@@ -4,6 +4,7 @@
     import {getUser} from "$lib/kgdq.ts";
     import {user} from "../../stores";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
+    import ErrorReport from "$lib/ErrorReport.svelte";
 
     let user_error: string | null = null;
 
@@ -28,7 +29,8 @@
 {#if $user}
     <p>Logged in as {$user.name}</p>
 {:else if user_error}
-    <p>Error loading user: {user_error}</p>
+    <ErrorReport
+            message="Error loading user: {user_error}" />
 {:else}
     <p>Loading user...</p>
 {/if}

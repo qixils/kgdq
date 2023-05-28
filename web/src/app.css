@@ -579,11 +579,28 @@ form button[type="submit"] {
 }
 
 .error-box {
-    background-color: hsl(0, 95%, 56%);
-    color: var(--text);
-    padding: 1em;
+    background-color: #201;
+    border: 2px solid hsl(0, 95%, 56%);
     margin: 1em auto;
-    border-radius: 0.2em;
-    display: block;
+    border-radius: 2px;
+    display: grid;
+    grid-template-columns: auto 1fr;
     width: fit-content;
+    align-items: center;
+}
+
+.error-icon {
+    float: left;
+    font-size: 200%;
+    grid-row: 1 / span 2;
+    margin: 15px;
+}
+
+.error-box h2 {
+    margin: 0.5em 0;
+}
+
+.error-box p {
+    /* TODO: consolidate various margin and padding values on text elements */
+    margin-right: 1em;
 }

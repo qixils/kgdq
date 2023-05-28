@@ -6,14 +6,20 @@
 	import {onMount} from "svelte";
 	import {BASE_URL, compareEventStartTime} from "$lib/kgdq";
 	import LoadingSkeleton from "$lib/LoadingSkeleton.svelte";
+	import ErrorReport from "$lib/ErrorReport.svelte";
 
 	let events: OrganizedEvent[];
+	let events_error: Error | null = null;
 
 	onMount(async () => {
-		events = (await new SvcClient(BASE_URL, fetch).getAllEventsFlat())
-				.filter(event => event.timeStatus === "IN_PROGRESS")
-				// From order by ascending start time, top of list might end soonest
-				.sort(compareEventStartTime)
+		try {
+			events = (await new SvcClient(BASE_URL, fetch).getAllEventsFlat())
+					.filter(event => event.timeStatus === "IN_PROGRESS")
+					// From order by ascending start time, top of list might end soonest
+					.sort(compareEventStartTime);
+		} catch (e) {
+			events_error = e;
+		}
 	});
 </script>
 
@@ -29,7 +35,9 @@
 </div>
 
 <h1>Current Events</h1>
-{#if events === undefined}
+{#if events_error !== null}
+	<ErrorReport message="Failed to load events: {events_error.message}" />
+{:else if events === undefined}
 	<LoadingSkeleton size="40em" />
 {:else if events.length > 0}
 	<ul class="events-list">

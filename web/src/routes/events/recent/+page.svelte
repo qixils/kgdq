@@ -2,8 +2,9 @@
     import type {OrganizedEvent} from "vods.speedrun.club-client";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
     import EventSummary from "$lib/EventSummary.svelte";
+    import ErrorReport from "$lib/ErrorReport.svelte";
 
-    export let data: { events: OrganizedEvent[] };
+    export let data: { events: OrganizedEvent[] | Error };
 </script>
 
 <svelte:head>
@@ -14,8 +15,14 @@
 
 <h1>Recent Events</h1>
 
-<ul class="events-list">
-    {#each data.events as event}
-        <EventSummary org={event.organization} event={event} />
-    {/each}
-</ul>
+{#if data.events instanceof Error}
+    <ErrorReport
+        message="Failed to load events: {data.events.message}" />
+{:else}
+    <ul class="events-list">
+        {#each data.events as event}
+            <EventSummary org={event.organization} event={event} />
+        {/each}
+    </ul>
+{/if}
+
