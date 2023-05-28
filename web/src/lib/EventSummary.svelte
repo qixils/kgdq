@@ -14,13 +14,13 @@
     <h2>{event.name}</h2>
     <p>
         {#if event.startTime && event.endTime && event.timeStatus === "FINISHED"}
-            { Formatters.date_hero(event.startTime) } - { Formatters.date_hero(event.endTime) }
+            { Formatters.date_hero(event.startTime) } - { Formatters.date_hero(event.endTime) }.
         {:else if event.startTime && event.timeStatus === "UPCOMING"}
-            Begins { Formatters.date_hero(event.startTime) }
+            Begins { Formatters.date_hero(event.startTime) }.
         {:else if event.endTime && event.timeStatus === "IN_PROGRESS"}
-            Ends { Formatters.date_hero(event.endTime) }
+            Ends { Formatters.date_hero(event.endTime) }.
         {:else if event.startTime}
-            { Formatters.date_hero(event.startTime) }
+            { Formatters.date_hero(event.startTime) }.
         {/if}
     </p>
 

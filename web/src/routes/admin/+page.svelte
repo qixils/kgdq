@@ -3,9 +3,10 @@
     import {onMount} from "svelte";
     import type {VODSuggestion} from "$lib/kgdq";
     import {BASE_URL, getSuggestions} from "$lib/kgdq";
-    import type {Run, Event} from "vods.speedrun.club-client";
+    import type {Event, Run} from "vods.speedrun.club-client";
     import {svc} from "vods.speedrun.club-client";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
+    import LoadingSkeleton from "$lib/LoadingSkeleton.svelte";
 
     let suggests: VODSuggestion[];
 
@@ -77,7 +78,7 @@
 <p>SECRET ADMIN VOD APPROVAL PAGE</p>
 
 {#if suggests_with_run_event === undefined}
-    <p>Loading...</p>
+    <LoadingSkeleton />
 {:else if suggests_with_run_event.length === 0}
     <p>No suggestions</p>
 {:else}
