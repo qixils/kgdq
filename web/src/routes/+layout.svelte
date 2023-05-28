@@ -4,12 +4,11 @@
   import type {User} from "$lib/kgdq";
   import {page} from "$app/stores";
   import {onMount} from "svelte";
-
-  let user: User | null = null;
+  import {user} from "../stores";
 
   onMount(() => {
       let user_str = localStorage.getItem("user");
-      user = user_str ? JSON.parse(user_str) : null;
+      $user = user_str ? JSON.parse(user_str) : null;
   })
 </script>
 
@@ -22,8 +21,8 @@
       <li><a href="/events/upcoming">Upcoming Events</a></li>
       <li><a href="/events/recent">Recent Events</a></li>
       <li><a href="/organizations">Organizations</a></li>
-        {#if user}
-          <li>Logged in as <b>{ user.name }</b></li>
+        {#if $user}
+          <li>Logged in as <b>{ $user.name }</b></li>
         {:else}
           <li><a href="/login">Log In to submit VODs</a></li>
         {/if}

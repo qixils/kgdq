@@ -1,0 +1,1 @@
+<a href="/admin/suggests">View submitted vods</a>

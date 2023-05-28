@@ -5,6 +5,9 @@
     import BidTarget from "$lib/BidTarget.svelte";
     import BidWar from "$lib/BidWar.svelte";
     import {fake_status} from "$lib/kgdq";
+    import {user} from "../stores";
+    import {page} from "$app/stores";
+    import {svc} from "vods.speedrun.club-client";
 
     export let runs: Run[];
     export let run_index: number;
@@ -17,6 +20,19 @@
     let previous_status = fake_status(run, run_index - 1);
     let current_status = fake_status(run, run_index);
     let next_status = fake_status(run, run_index + 1);
+
+    async function suggest_navigate(org, event_slug, index) {
+        let event_id = (await svc.getEvent(org, event_slug)).id;
+
+        let navigate_query = new URLSearchParams();
+        navigate_query.set("gdq_id", event_id.toString());
+        navigate_query.set("horaro_id", index.toString());
+        navigate_query.set("organization", org);
+
+        let navigate_url = `/suggest?${navigate_query.toString()}`;
+
+        window.location.href = navigate_url;
+    }
 
 </script>
 
@@ -78,6 +94,10 @@
 
         {#if run.vods.length > 0}
             <VODs {run} />
+        {/if}
+
+        {#if $user && run.horaroId }
+            <button class="suggest-btn" on:click={ () => suggest_navigate($page.params.org, $page.params.slug, run.horaroId) }>Suggest VOD</button>
         {/if}
     </div>
 </li>

@@ -437,6 +437,7 @@ form {
     grid-template-columns: 1fr auto;
     gap: 1em;
     width: fit-content;
+    margin: 0 auto;
 }
 
 form label {
@@ -445,4 +446,12 @@ form label {
 
 form input {
     grid-column: 2;
+}
+
+form input[type="text"] {
+    width: 80ch;
+}
+
+form button[type="submit"] {
+    grid-column: 1 / span 2;
 }
