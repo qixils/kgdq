@@ -16,6 +16,7 @@
 
     onMount(async () => {
         suggests = await getSuggestions();
+        suggests_with_run_event = [];
 
         for (let suggest of suggests) {
             console.log("Suggest", suggest);
