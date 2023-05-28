@@ -11,8 +11,6 @@
     let error: Error;
     let SVC = new SvcClient(BASE_URL, fetch);
 
-    let org = { ...data.org, id: $page.params.org };
-
     onMount(async () => {
         try {
             events = await SVC.getEvents($page.params.org);
@@ -33,9 +31,9 @@
 {#if events === undefined && error === undefined}
     <p>loading...</p>
 {:else if events !== undefined}
-    <ul class="org-events">
+    <ul class="events-list">
         {#each events as event}
-            <EventSummary {event} {org} />
+            <EventSummary event={event} org={$page.params.org} />
         {/each}
     </ul>
 {:else}

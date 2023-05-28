@@ -1,7 +1,7 @@
 <script lang="ts">
     import type {OrganizedEvent} from "vods.speedrun.club-client";
-    import SmallEventSummary from "$lib/SmallEventSummary.svelte";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
+    import EventSummary from "$lib/EventSummary.svelte";
 
     export let data: { events: OrganizedEvent[] };
 
@@ -24,22 +24,18 @@
 
 {#if current_events.length > 0}
     <h1>Current Events</h1>
-    <ul>
+    <ul class="events-list">
         {#each current_events as event}
-            <li>
-                <SmallEventSummary  org={event.organization} event={event} />
-            </li>
+            <EventSummary  org={event.organization} event={event} />
         {/each}
     </ul>
 {/if}
 
 {#if upcoming_events.length > 0}
     <h1>Upcoming Events</h1>
-    <ul>
+    <ul class="events-list">
         {#each upcoming_events as event}
-            <li>
-                <SmallEventSummary  org={event.organization} event={event} />
-            </li>
+            <EventSummary  org={event.organization} event={event} />
         {/each}
     </ul>
 {/if}

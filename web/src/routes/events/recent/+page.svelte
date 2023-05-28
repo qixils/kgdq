@@ -1,7 +1,7 @@
 <script lang="ts">
     import type {OrganizedEvent} from "vods.speedrun.club-client";
-    import SmallEventSummary from "$lib/SmallEventSummary.svelte";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
+    import EventSummary from "$lib/EventSummary.svelte";
 
     export let data: { events: OrganizedEvent[] };
 </script>
@@ -14,12 +14,8 @@
 
 <h1>Recent Events</h1>
 
-
-
-<ul>
+<ul class="events-list">
     {#each data.events as event}
-        <li>
-            <SmallEventSummary org={event.organization} event={event} />
-        </li>
+        <EventSummary org={event.organization} event={event} />
     {/each}
 </ul>

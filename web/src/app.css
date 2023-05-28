@@ -545,3 +545,24 @@ form button[type="submit"] {
     font-size: 200%;
     padding: 0;
 }
+
+.event-summary {
+    background-color: #20252e;
+    box-shadow: inset #fff8 0 0 2px;
+    border-radius: 2px;
+    padding: 1em;
+    margin: 1em;
+    list-style-type: none;
+}
+
+.event-summary > :first-child {
+    margin-top: 0;
+}
+
+.event-summary > :last-child {
+    margin-bottom: 0;
+}
+
+.events-list {
+    padding: 0;
+}

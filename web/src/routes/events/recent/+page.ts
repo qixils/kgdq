@@ -10,5 +10,7 @@ export const load = (async ({ fetch }) => {
                 .filter(event => event.timeStatus === "FINISHED")
                 // From most recent to least recent
                 .sort((a, b) => -(a.endTime || a.startTime || epoch).localeCompare(b.endTime || b.startTime || epoch))
+                // Only 20 most recent
+                .slice(0, 20)
     };
 }) satisfies PageLoad;
