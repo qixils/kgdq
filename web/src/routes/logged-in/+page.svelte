@@ -20,7 +20,7 @@
 
 <svelte:head>
     <PageHeadTags
-            no_index={true}
+            noindex={true}
             title="Log In Success"
             description="Check your account status." />
 </svelte:head>

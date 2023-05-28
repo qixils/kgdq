@@ -71,7 +71,7 @@
 
 <svelte:head>
     <PageHeadTags
-            no_index={true}
+            noindex={true}
             title="Admin >:3"
             description="Modify event data and approve VOD suggestions." />
 </svelte:head>

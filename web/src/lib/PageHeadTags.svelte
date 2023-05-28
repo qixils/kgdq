@@ -7,7 +7,7 @@
 
     export let url: string | null = null;
 
-    export let no_index: boolean = false;
+    export let noindex: boolean = false;
 
 </script>
 
@@ -17,6 +17,7 @@
 {:else}
     <title>Speedrun VOD Club · { title }</title>
     <meta property="og:title" content={ title } />
+    <meta property="og:site_name" content="Speedrun VOD Club" />
 {/if}
 
 <meta name="description" content="{ description }">
@@ -25,6 +26,6 @@
 <meta property="og:url" content="{ url ?? $page.url }" />
 <link rel="canonical" href="{ url ?? $page.url }">
 
-{#if no_index}
+{#if noindex}
     <meta name="robots" content="noindex">
 {/if}
