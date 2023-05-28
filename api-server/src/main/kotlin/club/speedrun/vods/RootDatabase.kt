@@ -33,4 +33,6 @@ class RootDatabase : Database("api") {
     }
 
     fun getFromToken(token: String): User? = users.find { it.token == token }
+
+    fun getFromId(id: String): User? = users.find { it.id == id }
 }

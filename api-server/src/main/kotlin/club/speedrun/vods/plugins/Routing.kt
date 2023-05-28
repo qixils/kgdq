@@ -112,9 +112,21 @@ fun Application.configureRouting() {
                     }
                 }
 
-                get("/profile") {
-                    val user = getUser(call) ?: return@get
-                    call.respond(mapOf("id" to user.id, "name" to user.discord?.user?.username))
+                get<ProfileQuery> { query ->
+                    val caller: User = getUser(call) ?: return@get
+                    val user: User
+                    = if (query.id != null) {
+                        if (caller.id !in ADMINS)
+                            throw AuthorizationException()
+                        rootDb.getFromId(query.id) ?: throw UserError("User not found")
+                    } else {
+                        caller
+                    }
+                    call.respond(mapOf(
+                        "id" to user.id,
+                        "name" to user.discord?.fetchUserOrCache()?.username
+                        // TODO: accepts/rejects
+                    ))
                 }
 
                 route("/suggest") {
@@ -283,6 +295,11 @@ class SuggestionWrapper(
 class ModifySuggestionBody(
     val id: String,
     val action: VodSuggestionState,
+)
+
+@Location("/profile")
+data class ProfileQuery(
+    val id: String? = null,
 )
 
 suspend inline fun <reified T> ApplicationCall.body(): T {
