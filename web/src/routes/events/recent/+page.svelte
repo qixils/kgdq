@@ -9,7 +9,7 @@
 <svelte:head>
     <PageHeadTags
             title="Recent Events"
-            description="List of past marathons." />
+            description="List of past marathon events." />
 </svelte:head>
 
 <h1>Recent Events</h1>

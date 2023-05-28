@@ -24,7 +24,7 @@
 <svelte:head>
     <PageHeadTags
         title="{data.org.displayName} Events"
-        description="List of events hosted by {data.org.displayName}" />
+        description="List of events hosted by {data.org.displayName}." />
 </svelte:head>
 
 <h1>Events by { data.org.displayName }</h1>

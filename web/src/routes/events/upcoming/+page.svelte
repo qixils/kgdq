@@ -9,7 +9,7 @@
 <svelte:head>
     <PageHeadTags
             title="Upcoming Events"
-            description="List of marathons that will happen in the future." />
+            description="List of marathon events that will happen in the future." />
 </svelte:head>
 
 {#if data.events.length === 0}

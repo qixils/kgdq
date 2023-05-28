@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { BASE_URL } from "$lib/kgdq.ts";
+    import {BASE_URL} from "$lib/kgdq.ts";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
 
     let current_url = window.location.href;
@@ -9,7 +9,7 @@
 <svelte:head>
     <PageHeadTags
             title="Log In"
-            description="" />
+            description="Log in to submit VODs to appear on the website." />
 </svelte:head>
 
 <h1>Log in for VOD Submission</h1>
@@ -20,4 +20,4 @@
 
 <h2>Do you collect any data?</h2>
 
-<p>Other than verifying that you are logged in with a real Discord account when submitting, no data is collected.</p>
+<p>Other than storing your VODs and verifying that you are logged in with a real Discord account when submitting, no data is collected.</p>
