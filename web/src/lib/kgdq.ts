@@ -10,6 +10,21 @@ export declare class VODSuggestion {
     horaroId: string | null;
 }
 
+
+export declare class VodLink {
+    type: "YOUTUBE" | "TWITCH" | "OTHER";
+    videoId: string;
+    timestamp: number | null;
+    url: string;
+    contributorId: string;
+}
+export declare class VODSuggestion2 {
+    vod: VodLink;
+    organization: string;
+    gdqId: number | null;
+    horaroId: string | null;
+}
+
 export declare class User {
     id: string;
     name: string;
@@ -41,4 +56,45 @@ export function fake_status(run: Run, index: number) {
     } else {
         return "UPCOMING";
     }
+}
+
+// get<T>(url: string | URL): Promise<T> {
+//     // prepend the base URL if the URL is relative (i.e. a string)
+//     const calculatedUrl = typeof url === 'string' ? `${this.baseUrl}/${url}` : url;
+//     return this.fetchFunction(calculatedUrl).then(res => {
+//         if (res.status >= 400) {
+//             throw new Error(`Request failed with status code ${res.status}`);
+//         }
+//         return res.json();
+//     });
+// }
+
+// let res = await fetch(`${BASE_URL}/profile`,
+//     {
+//         credentials: "include",
+//         mode: 'cors',
+//         headers: headers,
+//     });
+// let data = await res.json();
+// console.log(data);
+// // discord_user = data as DiscordUser;
+// user = {"id":"01H1FNG7BG6VQX1ETDC3ZY13D6","name":"Dunkyl 🔣🔣"};
+//
+// localStorage.setItem("user", JSON.stringify(user));
+
+async function get<T>(url: string): Promise<T> {
+    let res = await fetch(url, { credentials: 'include'});
+    if (res.status >= 400) {
+        throw new Error(`Request failed with status code ${res.status}`);
+    }
+    return await res.json();
+}
+
+export async function getSuggestions(): Promise<VODSuggestion2[]> {
+    return await get<VODSuggestion2[]>(`${BASE_URL}/list/suggestions`);
+}
+
+
+export async function getUser(): Promise<User> {
+    return await get<User>(`${BASE_URL}/profile`);
 }

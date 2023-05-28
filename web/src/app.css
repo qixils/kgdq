@@ -3,6 +3,7 @@ html {
 
     --bg-bg: #001;
     --text-quiet: #88A;
+    --text: #EEF;
 
     --run-in-progress: #5e7;
     --run-finished: #d2a;
@@ -17,7 +18,7 @@ html {
     --youtube: rgba(var(--youtube-rgb), 1);
     --twitch: rgba(var(--twitch-rgb), 1);
 
-    color: #EEF;
+    color: var(--text);
     background-color: var(--bg-bg);
 }
 
@@ -454,4 +455,15 @@ form input[type="text"] {
 
 form button[type="submit"] {
     grid-column: 1 / span 2;
+}
+
+.suggest-btn {
+    display: inline-block;
+    padding: 0.5em 1em;
+    color: var(--text);
+    background-color: var(--text-quiet);
+    border: none;
+    border-radius: 2px;
+    margin: 0.5em;
+    float: right;
 }
