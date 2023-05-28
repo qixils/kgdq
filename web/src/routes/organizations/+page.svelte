@@ -8,7 +8,7 @@
 <svelte:head>
     <PageHeadTags
             title="Organizations"
-            description="Descriptions of organizations that host events covered by this site." />
+            description="Learn about the charity marathon organizations that host events covered by this site." />
 </svelte:head>
 
 <h1>Organizations</h1>

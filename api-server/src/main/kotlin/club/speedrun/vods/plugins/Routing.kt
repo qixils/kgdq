@@ -55,6 +55,7 @@ fun Application.configureRouting() {
             )
         }
         exception<AuthorizationException> { call, _ ->
+            logger.warn("Unauthorized access to ${call.request.httpMethod} ${call.request.uri}")
             call.respond(HttpStatusCode.Forbidden, mapOf("error" to "You are not authorized to access this resource"))
         }
         exception<AuthenticationException> { call, cause ->

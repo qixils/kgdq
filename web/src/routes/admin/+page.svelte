@@ -3,18 +3,21 @@
     import {onMount} from "svelte";
     import type {VODSuggestion} from "$lib/kgdq";
     import {BASE_URL, getSuggestions} from "$lib/kgdq";
-    import type {Run, Event} from "vods.speedrun.club-client";
+    import type {Event, Run} from "vods.speedrun.club-client";
     import {svc} from "vods.speedrun.club-client";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
+    import LoadingSkeleton from "$lib/LoadingSkeleton.svelte";
 
     let suggests: VODSuggestion[];
 
-    let suggests_with_run_event: { run: Run, suggest: VODSuggestion, event: Event }[];
+    let suggests_with_run_event: { run: Run, suggest: VODSuggestion, event: Event }[] = [];
+    let suggests_populated = false;
     let events_cache: {[org: string]: Event[]} = {};
     let runs_cache: {[slug: string]: Run[]} = {};
 
     onMount(async () => {
         suggests = await getSuggestions();
+        suggests_with_run_event = [];
 
         for (let suggest of suggests) {
             console.log("Suggest", suggest);
@@ -32,13 +35,18 @@
                     runs_cache[event.short] = await svc.getRuns(suggest.organization, event.short);
                 }
                 let event_runs = runs_cache[event.short];
-                let run = event_runs.find(r => r.horaroId === suggest.horaroId);
+                let run = event_runs.find(r => {
+                    if (r.gdqId !== null && r.gdqId === suggest.gdqId) return true;
+                    return r.horaroId !== null && r.horaroId === suggest.horaroId;
+                });
                 if (run) {
                     suggests_with_run_event = [...suggests_with_run_event ?? [], {run, suggest, event}];
                     break;
                 }
             }
         }
+
+        suggests_populated = true;
     });
 
     async function decide(suggest: VODSuggestion, accept: boolean) {
@@ -70,14 +78,15 @@
 
 <svelte:head>
     <PageHeadTags
+            noindex={true}
             title="Admin >:3"
-            description="adming admin" />
+            description="Modify event data and approve VOD suggestions." />
 </svelte:head>
 
 <p>SECRET ADMIN VOD APPROVAL PAGE</p>
 
-{#if suggests_with_run_event === undefined}
-    <p>Loading...</p>
+{#if !suggests_populated}
+    <LoadingSkeleton />
 {:else if suggests_with_run_event.length === 0}
     <p>No suggestions</p>
 {:else}
@@ -86,7 +95,7 @@
         <li>
             <p>for <b>{run.name}</b> / {run.category} during {event.public}</p>
             <p>{suggest.vod.type} {suggest.vod.url}</p>
-            <p>ID: <code>{suggest.id}</code>, GDQ: <code>{suggest.gdqId}</code>, Horaro: <code>{suggest.horaroId}</code></p>
+            <p>User: <code>{suggest.vod.contributorId}</code>, ID: <code>{suggest.id}</code>, GDQ: <code>{suggest.gdqId}</code>, Horaro: <code>{suggest.horaroId}</code></p>
             <p>{suggest.organization}</p>
             <button on:click={() => decide(suggest, true)}>Accept</button>
             <button on:click={() => decide(suggest, false)}>Reject</button>

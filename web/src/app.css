@@ -577,3 +577,13 @@ form button[type="submit"] {
 .events-list {
     padding: 0;
 }
+
+.error-box {
+    background-color: hsl(0, 95%, 56%);
+    color: var(--text);
+    padding: 1em;
+    margin: 1em auto;
+    border-radius: 0.2em;
+    display: block;
+    width: fit-content;
+}

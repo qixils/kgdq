@@ -20,8 +20,9 @@
 
 <svelte:head>
     <PageHeadTags
+            noindex={true}
             title="Log In Success"
-            description="" />
+            description="Check your account status." />
 </svelte:head>
 
 {#if $user}

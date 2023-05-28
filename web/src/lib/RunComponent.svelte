@@ -2,12 +2,12 @@
     import {Formatters} from "$lib/Formatters";
     import VODs from "$lib/VODs.svelte";
     import type {Run} from "vods.speedrun.club-client";
+    import {svc} from "vods.speedrun.club-client";
     import BidTarget from "$lib/BidTarget.svelte";
     import BidWar from "$lib/BidWar.svelte";
     import {BASE_URL} from "$lib/kgdq";
     import {user} from "../stores";
     import {page} from "$app/stores";
-    import {svc} from "vods.speedrun.club-client";
 
     export let runs: Run[];
     export let run_index: number;
@@ -64,14 +64,14 @@
         });
 
         console.log(res);
-
-        console.log(await res.text())
+        let res_text = res.statusText + " " + await res.text();
+        console.log(res_text)
 
         if (res.ok) {
             submit_status = "OK";
         } else {
             submit_status = "ERROR";
-            alert("Error submitting VOD: " + await res.text());
+            alert("Error submitting VOD: " + res_text);
         }
 
         await new Promise(resolve => setTimeout(resolve, 2000));

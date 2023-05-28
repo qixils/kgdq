@@ -8,6 +8,7 @@
     import {BASE_URL, niceShortName} from "$lib/kgdq";
     import {onMount} from "svelte";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
+    import LoadingButton from "$lib/LoadingButton.svelte";
 
     export let data: { event: Event };
     let SVC = new SvcClient(BASE_URL, fetch);
@@ -56,7 +57,7 @@
     </div>
 
     {#if runs === undefined && run_error === undefined}
-        <div class="loading">loading!!!</div>
+        <LoadingButton />
     {:else if runs !== undefined}
         <ul class="event-runs">
 
@@ -87,6 +88,6 @@
             {/each}
         </ul>
     {:else}
-        <p class="error">Error loading runs: {run_error.message}</p>
+        <p class="error-box">Failed to load runs: {run_error.message}</p>
     {/if}
 </section>
