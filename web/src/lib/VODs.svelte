@@ -6,7 +6,7 @@
     let vodCount = new Map();
 </script>
 
-<ul class="vods-list" tabindex="0">
+<ul class="vods-list">
     {#each run.vods as vod}
         <VODEntry vod={vod} index={vodCount.set(vod.type, (vodCount.get(vod.type) ?? -1) + 1).get(vod.type)} />
     {/each}

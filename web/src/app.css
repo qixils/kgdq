@@ -185,8 +185,29 @@ footer {
     display: flex;
     justify-content: center;
     align-items: center;
+}
 
+@media (max-width: 600px) {
+    .run-schedule-time {
+        font-size: 100%;
+    }
 
+    .event-runs li {
+        grid-template-columns: var(--bar-width) 5ch 1fr;
+    }
+
+    .schedule-bar-bit {
+        --bar-size: 20px;
+    }
+
+    .event-runs > li {
+        --bar-width: 40px;
+
+    }
+
+    .run-content {
+        margin-left: 0.5em;
+    }
 }
 
 .schedule-bar-bit::before, .schedule-bar-bit::after {
@@ -321,6 +342,7 @@ sup {
 .run-details {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     margin: 0.5em;
     gap: 1em;
 }
@@ -440,6 +462,7 @@ form {
     gap: 1em;
     width: fit-content;
     margin: 0 auto;
+    justify-items: end;
 }
 
 form label {
@@ -448,10 +471,18 @@ form label {
 
 form input {
     grid-column: 2;
+    background-color: var(--bg-bg);
+    color: var(--text);
+    border: none;
+    padding: 0.25em;
+}
+
+form input[disabled] {
+    opacity: 50%;
 }
 
 form input[type="text"] {
-    width: 80ch;
+    width: 50ch;
 }
 
 form button[type="submit"] {
@@ -460,7 +491,8 @@ form button[type="submit"] {
 
 
 /* bottom right of div, and also dont make any taller*/
-.suggest-btn {
+.suggest-btn,
+.suggest-dialog button[type="submit"] {
     display: inline-block;
     /*padding: 0.5em 1em;*/
     padding: 5px;
@@ -474,6 +506,7 @@ form button[type="submit"] {
     cursor: pointer;
     display: flex;
     align-items: center;
+    text-align: center;
 }
 
 .suggest-btn::before {
@@ -486,4 +519,29 @@ form button[type="submit"] {
 .run.in-progress .suggest-btn {
     border-color: var(--run-in-progress);
     box-shadow: #173 0 3px 0 0;
+}
+
+.suggest-dialog {
+    background-color: var(--raise-bg);
+    color: var(--text);
+    border: 1px solid var(--run-finished);
+    border-radius: 2px;
+    padding: 1.5em;
+    box-shadow: var(--bg-bg) 0 0 30px 10px;
+}
+
+.suggest-dialog > h1 {
+    margin-top: 0;
+}
+
+.close-btn {
+    position: absolute;
+    margin: 0.5em;
+    top: 0;
+    right: 0;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 200%;
+    padding: 0;
 }

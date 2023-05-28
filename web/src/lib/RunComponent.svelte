@@ -4,7 +4,7 @@
     import type {Run} from "vods.speedrun.club-client";
     import BidTarget from "$lib/BidTarget.svelte";
     import BidWar from "$lib/BidWar.svelte";
-    import {fake_status} from "$lib/kgdq";
+    import {BASE_URL, fake_status} from "$lib/kgdq";
     import {user} from "../stores";
     import {page} from "$app/stores";
     import {svc} from "vods.speedrun.club-client";
@@ -34,6 +34,41 @@
         window.location.href = navigate_url;
     }
 
+    let suggest_dialog = () => (document.getElementById(`suggest-${run_index}`) as HTMLDialogElement );
+
+    async function submit_suggestion(e: Event) {
+        e.preventDefault();
+
+        let url = (document.getElementById(`suggest-${run_index}-url`) as HTMLInputElement).value;
+
+        let res = await fetch(`${BASE_URL}/suggest/vod`, {
+            credentials: "include",
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                    url: url,
+                    organization: $page.params.org,
+                    gdqId: run.gdqId,
+                    horaroId: run.horaroId
+                })
+
+        });
+
+        console.log(res);
+
+        console.log(await res.text())
+
+        if (res.ok) {
+            alert("VOD submitted!");
+        } else {
+            alert("Something went wrong!");
+        }
+
+        suggest_dialog().close();
+    }
+
 </script>
 
 <li class='run {
@@ -46,8 +81,28 @@
     <div class="schedule-bar-bit" ></div>
     <div class="run-schedule-time">{ Formatters.time(run.startTime) }</div>
     <div class="run-content">
-        {#if $user && current_status === "FINISHED" || current_status === "IN_PROGRESS" }
-            <button class="suggest-btn" on:click={ () => suggest_navigate($page.params.org, $page.params.slug, run.horaroId) }>
+        {#if $user && (current_status === "FINISHED" || current_status === "IN_PROGRESS") }
+            <dialog id="suggest-{run_index}"  class="suggest-dialog">
+                <button class="close-btn material-symbols-rounded" on:click={ () => suggest_dialog().close() }>close</button>
+                <h1>Suggest a VOD</h1>
+
+                <form>
+                    <label for="suggest-{run_index}-url">URL</label>
+                    <input type="text" id="suggest-{run_index}-url" name="url">
+
+                    <label for="suggest-{run_index}-organization">Organization</label>
+                    <input type="text" id="suggest-{run_index}-organization" name="organization" value="{ $page.params.org }" disabled>
+
+                    <label for="suggest-{run_index}-gdqId" >GDQ ID</label>
+                    <input type="text" id="suggest-{run_index}-gdqId" name="gdqId" value="{ run.gdqId }" disabled>
+
+                    <label for="suggest-{run_index}-horaroId" >Horaro ID</label>
+                    <input type="text" id="suggest-{run_index}-horaroId" name="horaroId" value="{ run.horaroId }" disabled>
+
+                    <button type="submit" on:click={ submit_suggestion }>Submit</button>
+                </form>
+            </dialog>
+            <button class="suggest-btn" on:click={ () => suggest_dialog().showModal() }>
                 Suggest VOD
             </button>
         {/if}
