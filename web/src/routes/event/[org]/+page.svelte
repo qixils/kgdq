@@ -13,7 +13,7 @@
 
     onMount(async () => {
         try {
-            events = await SVC.getEvents($page.params.org);
+            events = (await SVC.getEvents($page.params.org)).reverse();
         } catch (e) {
             error = e;
         }
