@@ -3,6 +3,18 @@ import type {Run} from "vods.speedrun.club-client";
 let API_DOMAIN = 'vods.speedrun.club';
 export let BASE_URL= 'https://' + API_DOMAIN + '/api/v2';
 
+export declare class VODSuggestion {
+    url: string;
+    organization: string;
+    gdqId: number | null;
+    horaroId: string | null;
+}
+
+export declare class User {
+    id: string;
+    name: string;
+}
+
 export declare class DiscordUser {
     id: number;
     username: string;

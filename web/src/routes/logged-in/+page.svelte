@@ -1,21 +1,25 @@
 <script lang="ts">
 
     import {onMount} from "svelte";
-    import type {DiscordUser} from "$lib/kgdq.ts";
+    import type {User} from "$lib/kgdq.ts";
     import {BASE_URL} from "$lib/kgdq.ts";
 
-    let discord_user: DiscordUser | null = null;
-    let discord_error: string | null = null;
+    let user: User | null = null;
+    let user_error: string | null = null;
 
     onMount(async () => {
-        let res = await fetch(`${BASE_URL}/auth/user`, { credentials: "include" });
+        let res = await fetch(`${BASE_URL}/profile`, { credentials: "include" });
         let data = await res.json();
-        discord_user = data as DiscordUser;
+        console.log(data);
+        // discord_user = data as DiscordUser;
+        user = {"id":"01H1FNG7BG6VQX1ETDC3ZY13D6","name":"Dunkyl 🔣🔣"};
+
+        localStorage.setItem("user", JSON.stringify(user));
     });
 </script>
 
-{#if discord_user}
-    <p>Logged in as {discord_user.username}#{discord_user.discriminator}</p>
+{#if user}
+    <p>Logged in as {user.name}</p>
 {:else}
     <p>Loading user...</p>
 {/if}

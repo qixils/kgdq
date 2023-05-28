@@ -431,3 +431,18 @@ sup {
 .bid-war-bar:not(:first-child) {
     background-color: var(--run-finished);
 }
+
+form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1em;
+    width: fit-content;
+}
+
+form label {
+    grid-column: 1;
+}
+
+form input {
+    grid-column: 2;
+}

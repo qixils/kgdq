@@ -1,6 +1,16 @@
 <script lang="ts">
   // import "../app.postcss";
   import "../app.css";
+  import type {User} from "$lib/kgdq";
+  import {page} from "$app/stores";
+  import {onMount} from "svelte";
+
+  let user: User | null = null;
+
+  onMount(() => {
+      let user_str = localStorage.getItem("user");
+      user = user_str ? JSON.parse(user_str) : null;
+  })
 </script>
 
 <header>
@@ -12,7 +22,11 @@
       <li><a href="/events/upcoming">Upcoming Events</a></li>
       <li><a href="/events/recent">Recent Events</a></li>
       <li><a href="/organizations">Organizations</a></li>
-      <li><a id="log-in" href="/login">Log In to submit VODs</a></li>
+        {#if user}
+          <li>Logged in as <b>{ user.name }</b></li>
+        {:else}
+          <li><a href="/login">Log In to submit VODs</a></li>
+        {/if}
     </ul>
   </nav>
 </header>
