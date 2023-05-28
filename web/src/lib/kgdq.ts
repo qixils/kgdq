@@ -23,6 +23,7 @@ export declare class VODSuggestion2 {
     organization: string;
     gdqId: number | null;
     horaroId: string | null;
+    id: string;
 }
 
 export declare class User {
