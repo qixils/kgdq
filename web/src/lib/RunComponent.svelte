@@ -36,10 +36,17 @@
 
     let suggest_dialog = () => (document.getElementById(`suggest-${run_index}`) as HTMLDialogElement );
 
+    let submit_status: string | null = null;
+
     async function submit_suggestion(e: Event) {
         e.preventDefault();
+        let btn = document.getElementById(`suggest-${run_index}-btn`);
+        btn.setAttribute("disabled", "");
+        btn.blur();
 
         let url = (document.getElementById(`suggest-${run_index}-url`) as HTMLInputElement).value;
+
+        submit_status = "SUBMITTING";
 
         let res = await fetch(`${BASE_URL}/suggest/vod`, {
             credentials: "include",
@@ -61,12 +68,17 @@
         console.log(await res.text())
 
         if (res.ok) {
-            alert("VOD submitted!");
+            submit_status = "OK";
         } else {
-            alert("Something went wrong!");
+            submit_status = "ERROR";
+            alert("Error submitting VOD: " + await res.text());
         }
 
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
         suggest_dialog().close();
+        btn.removeAttribute("disabled");
+
     }
 
 </script>
@@ -82,7 +94,7 @@
     <div class="run-schedule-time">{ Formatters.time(run.startTime) }</div>
     <div class="run-content">
         {#if $user && (current_status === "FINISHED" || current_status === "IN_PROGRESS") }
-            <dialog id="suggest-{run_index}"  class="suggest-dialog">
+            <dialog id="suggest-{run_index}"  class="suggest-dialog { submit_status?.toLowerCase() ?? '' }">
                 <button class="close-btn material-symbols-rounded" on:click={ () => suggest_dialog().close() }>close</button>
                 <h1>Suggest a VOD</h1>
 
@@ -99,9 +111,21 @@
                     <label for="suggest-{run_index}-horaroId" >Horaro ID</label>
                     <input type="text" id="suggest-{run_index}-horaroId" name="horaroId" value="{ run.horaroId }" disabled>
 
-                    <button type="submit" on:click={ submit_suggestion }>Submit</button>
+                    <button id="suggest-{run_index}-btn" type="submit" on:click={ submit_suggestion }>
+                        {#if submit_status === null}
+                            Submit
+                        {:else if submit_status === "SUBMITTING"}
+                            Submitting...
+                        {:else if submit_status === "OK"}
+                            Submitted!
+                        {:else if submit_status === "ERROR"}
+                            Error!
+                        {/if}
+                    </button>
                 </form>
+
             </dialog>
+
             <button class="suggest-btn" on:click={ () => suggest_dialog().showModal() }>
                 Suggest VOD
             </button>

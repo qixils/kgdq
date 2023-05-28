@@ -504,6 +504,22 @@ form button[type="submit"] {
     text-align: center;
 }
 
+.suggest-dialog.submitting button[type="submit"] {
+    cursor: wait;
+    border: 2px solid var(--bid-open);
+    box-shadow: #663 0 3px 0 0;
+}
+
+.suggest-dialog.ok button[type="submit"] {
+    border: 2px solid var(--run-in-progress);
+    box-shadow: #173 0 3px 0 0;
+}
+
+.suggest-dialog.error button[type="submit"] {
+    border: 2px solid var(--bid-closed);
+    box-shadow: #713 0 3px 0 0;
+}
+
 .suggest-btn::before {
     font-family: 'Material Symbols Rounded';
     content: 'add_circle';
