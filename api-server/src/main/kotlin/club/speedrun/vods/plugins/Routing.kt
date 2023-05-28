@@ -5,6 +5,8 @@ package club.speedrun.vods.plugins
 import club.speedrun.vods.*
 import club.speedrun.vods.marathon.Organization
 import club.speedrun.vods.marathon.VOD
+import club.speedrun.vods.marathon.VodSuggestion
+import club.speedrun.vods.marathon.VodSuggestionState
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -19,7 +21,7 @@ import kotlinx.coroutines.async
 import kotlinx.serialization.SerializationException
 import java.time.Duration
 
-private val ADMINS: List<String> = listOf("01GSPA63RW82QK1KAA4TPX1D20")
+private val ADMINS: List<String> = listOf("01GSPA63RW82QK1KAA4TPX1D20", "01H1FNG7BG6VQX1ETDC3ZY13D6")
 
 private suspend fun getUser(call: ApplicationCall): User? {
     return try {
@@ -119,7 +121,7 @@ fun Application.configureRouting() {
                         val run = marathon.db.getRunOverrides(gdqId = body.gdqId, horaroId = body.horaroId)
                             ?: throw UserError("Invalid run ID")
                         // add suggestion
-                        run.suggestions.add(vod)
+                        run.vodSuggestions.add(VodSuggestion(vod))
                         // update override
                         marathon.db.runs.update(run)
                         // respond
@@ -149,6 +151,19 @@ fun Application.configureRouting() {
                         call.respond(HttpStatusCode.OK)
                     }
                 }
+                
+                route("/list") {
+                    get("/suggestions") {
+                        val user = getUser(call) ?: return@get
+                        if (user.id !in ADMINS)
+                            throw AuthorizationException()
+                        val suggestions: List<SuggestionWrapper> = marathons.flatMap { marathon ->
+                            marathon.db.runs.getAll().flatMap { run ->
+                                run.vodSuggestions.filter { it.state == VodSuggestionState.PENDING }.map { suggestion ->
+                                    SuggestionWrapper(suggestion, marathon.id, run.runId, run.horaroId) } } }
+                        call.respond(suggestions)
+                    }
+                }
 
                 route("/set") {
                     put("/time") {
@@ -173,6 +188,31 @@ fun Application.configureRouting() {
                         marathon.db.runs.update(run)
                         // respond
                         call.respond(HttpStatusCode.OK)
+                    }
+
+                    put("/suggestion") {
+                        val user = getUser(call) ?: return@put
+                        if (user.id !in ADMINS)
+                            throw AuthorizationException()
+                        val body: ModifySuggestionBody = call.body()
+                        for (marathon in marathons) {
+                            for (run in marathon.db.runs.getAll()) {
+                                for (suggestion in run.vodSuggestions) {
+                                    if (suggestion.id == body.id) {
+                                        suggestion.state = body.action
+                                        if (body.action == VodSuggestionState.APPROVED) {
+                                            run.vods.add(suggestion.vod)
+                                        }
+                                        // update override
+                                        marathon.db.runs.update(run)
+                                        // respond
+                                        call.respond(HttpStatusCode.OK)
+                                        return@put
+                                    }
+                                }
+                            }
+                        }
+                        throw UserError("Invalid suggestion ID")
                     }
                 }
             }
@@ -215,6 +255,22 @@ class SetTimeBody(
     override val gdqId: Int? = null,
     override val horaroId: String? = null,
 ) : RunBasedBody
+
+class SuggestionWrapper(
+    val vod: VOD,
+    val id: String,
+    override val organization: String,
+    override val gdqId: Int?,
+    override val horaroId: String?,
+) : RunBasedBody {
+    constructor(suggestion: VodSuggestion, organization: String, gdqId: Int?, horaroId: String?)
+            : this(suggestion.vod, suggestion.id, organization, gdqId, horaroId)
+}
+
+class ModifySuggestionBody(
+    val id: String,
+    val action: VodSuggestionState,
+)
 
 suspend inline fun <reified T> ApplicationCall.body(): T {
     try {

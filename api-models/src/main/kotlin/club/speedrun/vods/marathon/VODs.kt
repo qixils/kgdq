@@ -1,5 +1,6 @@
 package club.speedrun.vods.marathon
 
+import club.speedrun.vods.db.ULID
 import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import kotlinx.serialization.Serializable
 import java.time.Duration
@@ -95,4 +96,18 @@ enum class VODType {
     abstract fun fromUrl(url: String, contributor: String? = null): VOD?
     abstract fun fromParts(videoId: String, timestamp: String?, contributor: String? = null): VOD
     abstract fun fromParts(videoId: String, timestamp: Duration?, contributor: String? = null): VOD
+}
+
+@Serializable
+data class VodSuggestion(
+    val vod: VOD,
+    val id: String = ULID.random(),
+    var state: VodSuggestionState = VodSuggestionState.PENDING,
+)
+
+@Serializable
+enum class VodSuggestionState {
+    PENDING,
+    APPROVED,
+    REJECTED,
 }
