@@ -4,6 +4,16 @@ import type {Event} from "vods.speedrun.club-client";
 let API_DOMAIN = 'vods.speedrun.club';
 export let BASE_URL= 'https://' + API_DOMAIN + '/api/v2';
 
+export const EPOCH = "1970-01-01T00:00:00Z";
+
+export function compareEventStartTime(a: Event, b: Event) {
+    return (a.startTime || EPOCH).localeCompare(b.startTime || EPOCH);
+}
+
+export function compareEventEndTime(a: Event, b: Event) {
+    return (a.endTime || a.startTime || EPOCH).localeCompare(b.endTime || b.startTime || EPOCH);
+}
+
 export declare class VodLink {
     type: "YOUTUBE" | "TWITCH" | "OTHER";
     videoId: string;
