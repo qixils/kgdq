@@ -1,16 +1,20 @@
+<script lang="ts">
+    import type {OrganizedEvent} from "vods.speedrun.club-client";
+    import SmallEventSummary from "$lib/SmallEventSummary.svelte";
+    import PageHeadTags from "$lib/PageHeadTags.svelte";
+
+    export let data: { events: OrganizedEvent[] };
+</script>
+
 <svelte:head>
-    <title>Speedrun VOD Club · Recent Events</title>
-    <meta name="description" content="TODO KGDQ meta tags" />
+    <PageHeadTags
+            title="Recent Events"
+            description="List of past marathons." />
 </svelte:head>
 
 <h1>Recent Events</h1>
 
-<script lang="ts">
-    import type {OrganizedEvent} from "vods.speedrun.club-client";
-    import SmallEventSummary from "$lib/SmallEventSummary.svelte";
 
-    export let data: { events: OrganizedEvent[] };
-</script>
 
 <ul>
     {#each data.events as event}

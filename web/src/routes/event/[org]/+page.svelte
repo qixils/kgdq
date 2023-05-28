@@ -4,6 +4,7 @@
     import {BASE_URL} from "$lib/kgdq";
     import {onMount} from "svelte";
     import EventSummary from "$lib/EventSummary.svelte";
+    import PageHeadTags from "$lib/PageHeadTags.svelte";
 
     export let data: { org: Organization };
     let events: Event[];
@@ -22,8 +23,9 @@
 </script>
 
 <svelte:head>
-    <title>Speedrun VOD Club · { data.org.shortName } Events</title>
-    <meta name="description" content="TODO KGDQ meta tags" />
+    <PageHeadTags
+        title="{data.org.displayName} Events"
+        description="List of events hosted by {data.org.displayName}" />
 </svelte:head>
 
 <h1>Events by { data.org.displayName }</h1>

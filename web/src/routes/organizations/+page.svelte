@@ -1,12 +1,14 @@
 <script lang="ts">
     import {IdentifiedOrganization} from "vods.speedrun.club-client";
+    import PageHeadTags from "$lib/PageHeadTags.svelte";
 
     export let data: { orgs: IdentifiedOrganization[] };
 </script>
 
 <svelte:head>
-    <title>Speedrun VOD Club · Organizations</title>
-    <meta name="description" content="TODO KGDQ meta tags" />
+    <PageHeadTags
+            title="Organizations"
+            description="Descriptions of organizations that host events covered by this site." />
 </svelte:head>
 
 <h1>Organizations</h1>

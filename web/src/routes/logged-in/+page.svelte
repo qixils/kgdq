@@ -4,6 +4,7 @@
     import type {User} from "$lib/kgdq.ts";
     import {BASE_URL, getUser} from "$lib/kgdq.ts";
     import {user} from "../../stores";
+    import PageHeadTags from "$lib/PageHeadTags.svelte";
 
     // let user: User | null = null;
     let user_error: string | null = null;
@@ -19,6 +20,12 @@
         }
     });
 </script>
+
+<svelte:head>
+    <PageHeadTags
+            title="Log In Success"
+            description="" />
+</svelte:head>
 
 {#if $user}
     <p>Logged in as {$user.name}</p>

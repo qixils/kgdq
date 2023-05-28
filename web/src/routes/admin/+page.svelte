@@ -5,6 +5,7 @@
     import {BASE_URL, getSuggestions} from "$lib/kgdq";
     import type {Run, Event} from "vods.speedrun.club-client";
     import {svc} from "vods.speedrun.club-client";
+    import PageHeadTags from "$lib/PageHeadTags.svelte";
 
     let suggests: VODSuggestion[];
 
@@ -66,6 +67,12 @@
 
 
 </script>
+
+<svelte:head>
+    <PageHeadTags
+            title="Admin >:3"
+            description="adming admin" />
+</svelte:head>
 
 <p>SECRET ADMIN VOD APPROVAL PAGE</p>
 

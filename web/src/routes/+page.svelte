@@ -1,6 +1,10 @@
+<script lang="ts">
+	import PageHeadTags from '$lib/PageHeadTags.svelte';
+</script>
+
 <svelte:head>
-	<title>Speedrun VOD Club</title>
-	<meta name="description" content="TODO KGDQ meta tags" />
+		<PageHeadTags
+			description="Find VODs of speedruns from charity marathon streams." />
 </svelte:head>
 
 <div style="text-align: center; max-width: 600px; margin: 0 auto">

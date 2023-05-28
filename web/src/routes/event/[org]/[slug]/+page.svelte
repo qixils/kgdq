@@ -5,8 +5,9 @@
     import RunComponent from "$lib/RunComponent.svelte";
     import {page} from "$app/stores";
     import {Formatters} from "$lib/Formatters";
-    import {BASE_URL, fake_status} from "$lib/kgdq";
+    import {BASE_URL, fake_status, niceShortName} from "$lib/kgdq";
     import {onMount} from "svelte";
+    import PageHeadTags from "$lib/PageHeadTags.svelte";
 
     export let data: { event: Event };
     let SVC = new SvcClient(BASE_URL, fetch);
@@ -14,20 +15,6 @@
     let formatter = new Formatters(event.paypalCurrency);
     let runs: Run[];
     let run_error: Error;
-
-    function niceShortName(event: Event) {
-        let ESA_RE = /^esa([sw])(\d+)(?:s(\d+))?$/i;
-        let match = event.short.match(ESA_RE);
-        if (match) {
-            let [_, season, year, stream_number] = match;
-            let season_nice = season === "s" ? "Summer" : "Winter";
-            if (stream_number) {
-                return `ESA ${season_nice} ${year} S${stream_number}`;
-            }
-            return `ESA ${season_nice} ${year}`;
-        }
-        return event.short.toUpperCase();
-    }
 
     onMount(async () => {
         try {
@@ -39,11 +26,9 @@
 </script>
 
 <svelte:head>
-    <title>Speedrun VOD Club · {event.name}</title>
-    <meta name="description" content="View the schedule of {event.name} and watch back the runs.">
-    <meta property="og:title" content={event.name} />
-    <meta property="og:description" content="View the schedule of {niceShortName(event)} and watch back the runs." />
-    <meta property="og:url" content="https://vods.speedrun.club/{$page.params.org}/{$page.params.slug}" />
+    <PageHeadTags
+        title={ event.name }
+        description="View the schedule of {niceShortName(event)} and watch back the runs." />
 </svelte:head>
 
 <section>

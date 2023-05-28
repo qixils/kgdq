@@ -1,9 +1,16 @@
 <script lang="ts">
     import { BASE_URL } from "$lib/kgdq.ts";
+    import PageHeadTags from "$lib/PageHeadTags.svelte";
 
     let current_url = window.location.href;
     let redirect_url = current_url.replace("/login", "/logged-in");
 </script>
+
+<svelte:head>
+    <PageHeadTags
+            title="Log In"
+            description="" />
+</svelte:head>
 
 <h1>Log in for VOD Submission</h1>
 

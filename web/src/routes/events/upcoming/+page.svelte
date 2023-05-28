@@ -1,6 +1,7 @@
 <script lang="ts">
     import type {OrganizedEvent} from "vods.speedrun.club-client";
     import SmallEventSummary from "$lib/SmallEventSummary.svelte";
+    import PageHeadTags from "$lib/PageHeadTags.svelte";
 
     export let data: { events: OrganizedEvent[] };
 
@@ -11,8 +12,9 @@
 </script>
 
 <svelte:head>
-    <title>Speedrun VOD Club · Upcoming Events</title>
-    <meta name="description" content="TODO KGDQ meta tags" />
+    <PageHeadTags
+            title="Upcoming Events"
+            description="List of marathons that will happen in the future." />
 </svelte:head>
 
 {#if current_events.length === 0 && upcoming_events.length === 0}

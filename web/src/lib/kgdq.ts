@@ -1,4 +1,5 @@
 import type {Run} from "vods.speedrun.club-client";
+import type {Event} from "vods.speedrun.club-client";
 
 let API_DOMAIN = 'vods.speedrun.club';
 export let BASE_URL= 'https://' + API_DOMAIN + '/api/v2';
@@ -90,4 +91,17 @@ export async function getSuggestions(): Promise<VODSuggestion[]> {
 
 export async function getUser(): Promise<User> {
     return await get<User>(`${BASE_URL}/profile`);
+}
+export function niceShortName(event: Event) {
+    let ESA_RE = /^esa([sw])(\d+)(?:s(\d+))?$/i;
+    let match = event.short.match(ESA_RE);
+    if (match) {
+        let [_, season, year, stream_number] = match;
+        let season_nice = season === "s" ? "Summer" : "Winter";
+        if (stream_number) {
+            return `ESA ${season_nice} ${year} S${stream_number}`;
+        }
+        return `ESA ${season_nice} ${year}`;
+    }
+    return event.short.toUpperCase();
 }
