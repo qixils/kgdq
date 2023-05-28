@@ -3,14 +3,6 @@ import type {Run} from "vods.speedrun.club-client";
 let API_DOMAIN = 'vods.speedrun.club';
 export let BASE_URL= 'https://' + API_DOMAIN + '/api/v2';
 
-export declare class VODSuggestion {
-    url: string;
-    organization: string;
-    gdqId: number | null;
-    horaroId: string | null;
-}
-
-
 export declare class VodLink {
     type: "YOUTUBE" | "TWITCH" | "OTHER";
     videoId: string;
@@ -18,7 +10,7 @@ export declare class VodLink {
     url: string;
     contributorId: string;
 }
-export declare class VODSuggestion2 {
+export declare class VODSuggestion {
     vod: VodLink;
     organization: string;
     gdqId: number | null;
@@ -91,8 +83,8 @@ async function get<T>(url: string): Promise<T> {
     return await res.json();
 }
 
-export async function getSuggestions(): Promise<VODSuggestion2[]> {
-    return await get<VODSuggestion2[]>(`${BASE_URL}/list/suggestions`);
+export async function getSuggestions(): Promise<VODSuggestion[]> {
+    return await get<VODSuggestion[]>(`${BASE_URL}/list/suggestions`);
 }
 
 

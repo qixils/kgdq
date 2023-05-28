@@ -1,16 +1,16 @@
 <script lang="ts">
 
     import {onMount} from "svelte";
-    import type {VODSuggestion2} from "$lib/kgdq";
+    import type {VODSuggestion} from "$lib/kgdq";
     import {BASE_URL, getSuggestions} from "$lib/kgdq";
 
-    let suggests: VODSuggestion2[] = [];
+    let suggests: VODSuggestion[] = [];
 
     onMount(async () => {
         suggests = await getSuggestions();
     });
 
-    async function decide(suggest: VODSuggestion2, accept: boolean) {
+    async function decide(suggest: VODSuggestion, accept: boolean) {
         suggests = suggests.filter(s => s.id !== suggest.id);
         let accept_enum = accept ? "APPROVED" : "REJECTED";
         await fetch(`${BASE_URL}/set/suggestion`, { // TODO: do in background? is that a thing? idk
