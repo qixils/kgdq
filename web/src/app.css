@@ -292,7 +292,7 @@ sup {
     background-color: transparent;
     vertical-align: middle;
     box-sizing: content-box;
-
+    background-color: var(--bg-bg);
     margin: 0.5em;
 }
 
