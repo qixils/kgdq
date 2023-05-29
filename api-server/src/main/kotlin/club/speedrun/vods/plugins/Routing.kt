@@ -5,6 +5,7 @@ package club.speedrun.vods.plugins
 import club.speedrun.vods.*
 import club.speedrun.vods.marathon.Organization
 import club.speedrun.vods.marathon.VOD
+import club.speedrun.vods.marathon.VODType
 import club.speedrun.vods.marathon.VodSuggestion
 import club.speedrun.vods.marathon.VodSuggestionState
 import io.ktor.http.*
@@ -133,8 +134,8 @@ fun Application.configureRouting() {
                         // get override
                         val run = marathon.db.getRunOverrides(gdqId = body.gdqId, horaroId = body.horaroId)
                             ?: throw UserError("Invalid run ID")
-                        if (user.role < Role.APPROVED || run.vods.any { it.type == vod.type }) {
-                            // add suggestion if user isn't approved or if VOD might be a duplicate
+                        if (user.role < Role.APPROVED || vod.type == VODType.OTHER || run.vods.any { it.type == vod.type }) {
+                            // add suggestion if user isn't approved, if the VOD is non-standard, or if VOD might be a duplicate
                             run.vodSuggestions.add(VodSuggestion(vod))
                         } else {
                             // add VOD
