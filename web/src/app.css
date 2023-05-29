@@ -387,6 +387,11 @@ sup {
     height: 24px;
 }
 
+.run-src-img {
+    width: 24px;
+    height: 24px;
+}
+
 .vod {
     display: flex;
     align-items: center;
