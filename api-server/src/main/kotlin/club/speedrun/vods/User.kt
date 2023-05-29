@@ -16,6 +16,7 @@ import java.time.Instant
 data class User(
     override val id: String = ULID.random(),
     var token: String? = randomToken(),
+    var role: Role = Role.USER,
     var discord: DiscordOAuth? = null,
     //var reddit: OAuthData? = null,
 ) : Identified {
@@ -26,9 +27,11 @@ data class User(
     }
     fun regenerateToken() {
         token = randomToken()
+        rootDb.users.update(this)
     }
     fun clearToken() {
         token = null
+        rootDb.users.update(this)
     }
     fun session() = UserSession(id, token!!)
 }
@@ -106,4 +109,31 @@ data class DiscordOAuth(
             return oauth
         }
     }
+}
+
+@Serializable
+data class Profile(
+    val id: String,
+    val name: String?,
+    val role: Role,
+    // TODO: accepts/rejects
+) {
+    companion object {
+        suspend fun fromFetch(data: User): Profile {
+            return Profile(data.id, data.discord?.fetchUserOrCache()?.username, data.role)
+        }
+
+        fun fromCache(data: User): Profile {
+            return Profile(data.id, data.discord?.user?.username, data.role)
+        }
+    }
+}
+
+@Serializable
+enum class Role {
+    BANNED,
+    USER,
+    APPROVED,
+    MODERATOR,
+    ADMIN,
 }

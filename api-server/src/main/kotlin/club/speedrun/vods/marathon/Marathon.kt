@@ -165,12 +165,11 @@ abstract class Marathon(
         eventOverrides: EventOverrides,
     ): List<RunData> = coroutineScope {
         val vodsFinalized = event.value.endTime == null || event.value.endTime!!.isBefore(Instant.now().minus(7, ChronoUnit.DAYS))
-        val vods: Deferred<List<List<VOD>>> = async {
+        val vods: Deferred<List<List<VOD>>>? =
             if (!eventOverrides.redditMergedIn || !vodsFinalized)
-                getRedditVODs(event.value.short)
+                async { getRedditVODs(event.value.short) }
             else
-                emptyList()
-        }
+                null
 
         // do queries
         val runs: List<Wrapper<Run>> = ArrayList(
@@ -221,10 +220,12 @@ abstract class Marathon(
             val data = RunData(run, runBids, previousRun, overrides)
             data.loadData()
             data.loadSrcGame(overrides)
-            vods.await().getOrNull(index)?.let {
-                data.vods.addAll(it)
+            vods?.await()?.getOrNull(index)?.let {
+                val existingVODTypes: Set<VODType> = data.vods.mapTo(mutableSetOf()) { vod -> vod.type }
+                val newVODs = it.filter { vod -> vod.type !in existingVODTypes }
+                data.vods.addAll(newVODs)
                 if (vodsFinalized) {
-                    overrides.vods.addAll(it)
+                    overrides.vods.addAll(newVODs)
                     db.runs.update(overrides)
                 }
             }

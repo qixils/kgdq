@@ -94,7 +94,7 @@
     <div class="schedule-bar-bit" ></div>
     <div class="run-schedule-time">{ Formatters.time(run.startTime) }</div>
     <div class="run-content">
-        {#if $user && (current_status === "FINISHED" || current_status === "IN_PROGRESS") }
+        {#if $user && (current_status === "FINISHED" || current_status === "IN_PROGRESS") && (run.gdqId !== null || run.horaroId !== null) }
             <dialog id="suggest-{run_index}"  class="suggest-dialog { submit_status?.toLowerCase() ?? '' }">
                 <button class="close-btn material-symbols-rounded" on:click={ () => suggest_dialog().close() }>close</button>
                 <h1>Suggest a VOD</h1>
