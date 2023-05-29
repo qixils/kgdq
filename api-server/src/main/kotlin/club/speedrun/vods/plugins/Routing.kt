@@ -133,8 +133,8 @@ fun Application.configureRouting() {
                         // get override
                         val run = marathon.db.getRunOverrides(gdqId = body.gdqId, horaroId = body.horaroId)
                             ?: throw UserError("Invalid run ID")
-                        if (user.role < Role.APPROVED) {
-                            // add suggestion
+                        if (user.role < Role.APPROVED || run.vods.any { it.type == vod.type }) {
+                            // add suggestion if user isn't approved or if VOD might be a duplicate
                             run.vodSuggestions.add(VodSuggestion(vod))
                         } else {
                             // add VOD
