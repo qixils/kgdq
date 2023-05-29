@@ -22,8 +22,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import java.time.Duration
 
-private val ADMINS: List<String> = listOf("01GSPA63RW82QK1KAA4TPX1D20", "01H1FNG7BG6VQX1ETDC3ZY13D6")
-
 private suspend fun getUser(call: ApplicationCall): User? {
     return try {
         rootDb.getFromSession(call.sessions.get()!!)!!
@@ -113,25 +111,19 @@ fun Application.configureRouting() {
                 }
 
                 get<ProfileQuery> { query ->
-                    val caller: User = getUser(call) ?: return@get
-                    val user: User
-                    = if (query.id != null) {
-                        if (caller.id !in ADMINS)
-                            throw AuthorizationException()
-                        rootDb.getFromId(query.id) ?: throw UserError("User not found")
+                    val user: User = if (query.id != null) {
+                        rootDb.users.get(query.id) ?: throw UserError("User not found")
                     } else {
-                        caller
+                        getUser(call) ?: return@get
                     }
-                    call.respond(mapOf(
-                        "id" to user.id,
-                        "name" to user.discord?.fetchUserOrCache()?.username
-                        // TODO: accepts/rejects
-                    ))
+                    call.respond(Profile.fromFetch(user))
                 }
 
                 route("/suggest") {
                     put("/vod") {
                         val user = getUser(call) ?: return@put
+                        if (user.role <= Role.BANNED)
+                            throw AuthorizationException()
                         val body: VodSuggestionBody = call.body()
                         // parse VOD from URL
                         val vod = VOD.fromUrl(body.url, contributor = user.id)
@@ -141,31 +133,13 @@ fun Application.configureRouting() {
                         // get override
                         val run = marathon.db.getRunOverrides(gdqId = body.gdqId, horaroId = body.horaroId)
                             ?: throw UserError("Invalid run ID")
-                        // add suggestion
-                        run.vodSuggestions.add(VodSuggestion(vod))
-                        // update override
-                        marathon.db.runs.update(run)
-                        // respond
-                        call.respond(HttpStatusCode.OK)
-                    }
-                }
-
-                route("/add") {
-                    put("/vod") {
-                        val user = getUser(call) ?: return@put
-                        if (user.id !in ADMINS)
-                            throw AuthorizationException()
-                        val body: VodSuggestionBody = call.body()
-                        // parse VOD from URL
-                        val vod = VOD.fromUrl(body.url)
-                        // get marathon
-                        val marathon = marathons.firstOrNull { it.id.equals(body.organization, true) }
-                            ?: throw UserError("Invalid organization; must be one of: ${marathons.joinToString { it.id }}")
-                        // get override
-                        val run = marathon.db.getRunOverrides(gdqId = body.gdqId, horaroId = body.horaroId)
-                            ?: throw UserError("Invalid run ID")
-                        // add VOD
-                        run.vods.add(vod)
+                        if (user.role < Role.APPROVED) {
+                            // add suggestion
+                            run.vodSuggestions.add(VodSuggestion(vod))
+                        } else {
+                            // add VOD
+                            run.vods.add(vod)
+                        }
                         // update override
                         marathon.db.runs.update(run)
                         // respond
@@ -176,7 +150,7 @@ fun Application.configureRouting() {
                 route("/list") {
                     get("/suggestions") {
                         val user = getUser(call) ?: return@get
-                        if (user.id !in ADMINS)
+                        if (user.role < Role.MODERATOR)
                             throw AuthorizationException()
                         val suggestions: List<SuggestionWrapper> = marathons.flatMap { marathon ->
                             marathon.db.runs.getAll().flatMap { run ->
@@ -189,7 +163,7 @@ fun Application.configureRouting() {
                 route("/set") {
                     put("/time") {
                         val user = getUser(call) ?: return@put
-                        if (user.id !in ADMINS)
+                        if (user.role < Role.MODERATOR)
                             throw AuthorizationException()
                         val body: SetTimeBody = call.body()
                         // validate body
@@ -213,7 +187,7 @@ fun Application.configureRouting() {
 
                     put("/suggestion") {
                         val user = getUser(call) ?: return@put
-                        if (user.id !in ADMINS)
+                        if (user.role < Role.MODERATOR)
                             throw AuthorizationException()
                         val body: ModifySuggestionBody = call.body()
                         for (marathon in marathons) {
@@ -234,6 +208,17 @@ fun Application.configureRouting() {
                             }
                         }
                         throw UserError("Invalid suggestion ID")
+                    }
+
+                    put("/role") {
+                        val user = getUser(call) ?: return@put
+                        if (user.role < Role.ADMIN)
+                            throw AuthorizationException()
+                        val body: ModifyRoleBody = call.body()
+                        val target = rootDb.users.get(body.id) ?: throw UserError("User not found")
+                        target.role = body.role
+                        rootDb.users.update(target)
+                        call.respond(HttpStatusCode.OK)
                     }
                 }
             }
@@ -295,6 +280,12 @@ class SuggestionWrapper(
 class ModifySuggestionBody(
     val id: String,
     val action: VodSuggestionState,
+)
+
+@Serializable
+class ModifyRoleBody(
+    val id: String,
+    val role: Role,
 )
 
 @Location("/profile")

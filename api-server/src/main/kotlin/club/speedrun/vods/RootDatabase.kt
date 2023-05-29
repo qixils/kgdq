@@ -3,7 +3,7 @@ package club.speedrun.vods
 import club.speedrun.vods.db.Database
 
 class RootDatabase : Database("api") {
-    private val users = getCollection(User.serializer(), User.COLLECTION_NAME)
+    val users = getCollection(User.serializer(), User.COLLECTION_NAME)
 
     fun getFromDiscord(id: Long): User? = users.find { it.discord?.user?.id == id }
     fun getFromDiscord(id: String): User? {
@@ -33,6 +33,4 @@ class RootDatabase : Database("api") {
     }
 
     fun getFromToken(token: String): User? = users.find { it.token == token }
-
-    fun getFromId(id: String): User? = users.find { it.id == id }
 }
