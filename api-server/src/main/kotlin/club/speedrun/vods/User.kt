@@ -114,7 +114,7 @@ data class DiscordOAuth(
 @Serializable
 data class Profile(
     val id: String,
-    val username: String?,
+    val name: String?,
     val role: Role,
     // TODO: accepts/rejects
 ) {
