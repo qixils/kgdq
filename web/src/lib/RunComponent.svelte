@@ -88,6 +88,7 @@
     current_status === "FINISHED" ? "finished" :
     current_status === "UPCOMING" && previous_status === "FINISHED" ? "next-up" :
     "" }'
+    id="run-{ run_index }"
     style="--schedule-color: { step_color }">
      <!-- later upcoming runs have no extra class -->
     <div class="schedule-bar-bit" ></div>

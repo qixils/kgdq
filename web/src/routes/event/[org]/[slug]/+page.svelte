@@ -18,9 +18,18 @@
     let runs: Run[];
     let run_error: Error;
 
+    let current_run_index: number | null = null;
+
     onMount(async () => {
         try {
             runs = await SVC.getRuns($page.params.org.toLowerCase(), $page.params.slug);
+            if (runs.length > 0) {
+                let now = new Date();
+                let current_run = runs.find(run => run.timeStatus === "IN_PROGRESS" || run.timeStatus === "UPCOMING");
+                if (current_run !== undefined) {
+                    current_run_index = runs.indexOf(current_run);
+                }
+            }
         } catch (e) {
             run_error = e;
         }
@@ -53,8 +62,9 @@
                 charity.
             {/if}
         </p>
-        <p>Below you can find the schedule for the event and click on the play icon to the left of each run to watch back the run's VOD.</p>
-        <!-- TODO: jump to current run button -->
+        {#if current_run_index !== null}
+            <p><a href="#run-{current_run_index}">Jump to current run</a></p>
+        {/if}
     </div>
 
     {#if runs === undefined && run_error === undefined}
