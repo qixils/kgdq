@@ -160,10 +160,7 @@
                 </span>
             </div>
             {#if run.src !== null && run.src !== undefined}
-                <a href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer">
-                    <!-- i also tried making this a background image like it already is but it had the same result -->
-                    <img src="/trohpy.svg" alt="Leaderboards" class="run-src-img">
-                </a>
+                <a class="run-src" href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer"></a>
             {/if}
         </div>
 

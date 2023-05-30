@@ -379,17 +379,13 @@ sup {
     content: 'timer';
 }
 
-.run-src::before {
-    /*content: 'social_leaderboard';*/
+.run-src {
+    display: block;
     content: ' ';
     background-image: url("/trohpy.svg");
     width: 24px;
-    height: 24px;
-}
-
-.run-src-img {
-    width: 24px;
-    height: 24px;
+    height: 27px;
+    margin: 5px;
 }
 
 .vod {
