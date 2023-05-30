@@ -341,7 +341,12 @@ sup {
     flex-direction: row;
     flex-wrap: wrap;
     margin: 0.5em;
+    margin-left: 0;
     gap: 1em;
+}
+
+.run-details> div:first-child::before {
+    margin-left: 0;
 }
 
 .run-details > div {
