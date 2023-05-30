@@ -426,7 +426,7 @@ sup {
     grid-gap: 1em;
     list-style: none;
     padding: 0;
-    margin: 1em;
+    margin: 0.5em;
 }
 
 .vod::before {
