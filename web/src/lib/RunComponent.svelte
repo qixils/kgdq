@@ -9,9 +9,9 @@
     import {user} from "../stores";
     import {page} from "$app/stores";
 
-    export let runs: Run[];
-    export let run_index: number;
-    export let formatter: Formatters;
+    export let runs: Run[] = undefined as Run[];
+    export let run_index: number = undefined as number;
+    export let formatter: Formatters = undefined as Formatters;
 
     let run = runs[run_index];
     // TODO: step_color style var

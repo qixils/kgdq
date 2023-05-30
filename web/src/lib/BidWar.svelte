@@ -2,7 +2,7 @@
     import {Formatters} from "$lib/Formatters";
     import type {Bid} from "vods.speedrun.club-client";
 
-    export let bid: Bid;
+    export let bid: Bid = undefined as Bid;
     export let formatter: Formatters;
 
     let max_bid_total = Math.max(...bid.children.map(c => c.donationTotal));

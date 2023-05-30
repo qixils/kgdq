@@ -1,5 +1,5 @@
 <script lang="ts">
-    export let size: string = '30em';
+    export let size = '30em';
 </script>
 
 <div style="max-width: {size}"></div>

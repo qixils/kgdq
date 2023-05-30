@@ -4,7 +4,7 @@
 
     export let org: string;
 
-    export let event: Event;
+    export let event: Event = undefined as Event;
 
     let formatter = new Formatters(event.paypalCurrency);
 

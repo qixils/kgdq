@@ -1,7 +1,7 @@
 <script lang="ts">
     import type {VOD} from "vods.speedrun.club-client";
 
-    export let vod: VOD;
+    export let vod: VOD = undefined as VOD;
     export let index: number;
 
     let platform_nice = vod.type === "YOUTUBE" ? "YouTube" : "Twitch";

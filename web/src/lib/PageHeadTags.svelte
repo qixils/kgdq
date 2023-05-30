@@ -7,7 +7,7 @@
 
     export let url: string | null = null;
 
-    export let noindex: boolean = false;
+    export let noindex = false;
 
 </script>
 

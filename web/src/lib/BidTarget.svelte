@@ -2,7 +2,7 @@
     import {Formatters} from "$lib/Formatters";
     import type {Bid} from "vods.speedrun.club-client";
 
-    export let bid: Bid;
+    export let bid: Bid = undefined as Bid;
     export let formatter: Formatters;
 
     let percent = Math.round((bid.donationTotal / bid.goal) * 100);
