@@ -117,8 +117,11 @@ footer {
 }
 
 .material-symbols-rounded {
+    /* Symbol fonts have no generic font equivalent  */
+    /*noinspection CssNoGenericFontName*/
     font-family: "Material Symbols Rounded";
     font-size: 14pt;
+    max-width: 1ch;
 }
 
 .loading {
@@ -357,10 +360,12 @@ sup {
 }
 
 .run-details > div:before {
+    /*noinspection CssNoGenericFontName*/
     font-family: 'Material Symbols Rounded';
     font-size: 150%;
     margin: 5px;
     color: var(--text-quiet);
+    width: 1ch;
 }
 
 .run-runners.single::before {
@@ -382,6 +387,7 @@ sup {
 .run-src {
     display: inline-block;
     content: ' ';
+    /*noinspection CssUnknownTarget*/
     background-image: url("/trohpy.svg");
     background-size: 20px;
     background-repeat: no-repeat;
@@ -395,6 +401,7 @@ sup {
 }
 
 .run-src:hover {
+    /*noinspection CssUnknownTarget*/
     background-image: url("/trohpy.svg"), url("/trohpy.svg"); /* hack to make bg svg brighten */
     background-size: 20px, 20px;
     background-repeat: no-repeat, no-repeat;
@@ -423,10 +430,12 @@ sup {
 }
 
 .vod::before {
+    /*noinspection CssNoGenericFontName*/
     font-family: 'Material Symbols Rounded';
     content: 'play_circle';
     font-size: 150%;
     margin: 5px;
+    width: 1ch;
 }
 
 .vod.youtube::before {
@@ -540,10 +549,12 @@ form button[type="submit"] {
 }
 
 .suggest-btn::before {
+    /*noinspection CssNoGenericFontName*/
     font-family: 'Material Symbols Rounded';
     content: 'add_circle';
     font-size: 150%;
     margin-right: 5px;
+    width: 1ch;
 }
 
 .run.in-progress .suggest-btn {
