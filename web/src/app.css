@@ -458,7 +458,7 @@ sup {
     content: '';
     display: inline-flex;
     flex-direction: column;
-    gap: 0.2em;
+    gap: 3px;
     margin: 0.5em;
     width: 70px;
     border-right: 2px solid var(--text-quiet);
