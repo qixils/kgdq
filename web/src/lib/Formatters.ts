@@ -1,7 +1,8 @@
-const date_header_format = new Intl.DateTimeFormat(undefined, { dateStyle: 'full' });
-// When translated: use translation locale
+// TODO When translated: use translation locale
+const date_header_format = new Intl.DateTimeFormat("en-US", { dateStyle: 'full' });
 const date_hero_format = new Intl.DateTimeFormat("en-US", { dateStyle: 'long' });
 const time_format = new Intl.DateTimeFormat(undefined, { timeStyle: 'short' });
+const date_weekday_date_format = new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" });
 
 export class Formatters {
     private money_format: Intl.NumberFormat;
@@ -19,9 +20,7 @@ export class Formatters {
     }
 
     static date_weekday_date(dt: string) {
-        return new Intl.DateTimeFormat(undefined,
-            { weekday: "long", month: "long", day: "numeric", }
-        ).format(new Date(dt));
+        return date_weekday_date_format.format(new Date(dt));
     }
 
     static time(dt: string) {
