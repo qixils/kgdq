@@ -1,5 +1,6 @@
 const date_header_format = new Intl.DateTimeFormat(undefined, { dateStyle: 'full' });
-const date_hero_format = new Intl.DateTimeFormat(undefined, { dateStyle: 'long' });
+// When translated: use translation locale
+const date_hero_format = new Intl.DateTimeFormat("en-US", { dateStyle: 'long' });
 const time_format = new Intl.DateTimeFormat(undefined, { timeStyle: 'short' });
 
 export class Formatters {
