@@ -136,6 +136,10 @@
             {#if run.category !== ""}
                 <span class="run-category">{run.category}</span>
             {/if}
+
+            {#if run.src !== null && run.src !== undefined}
+                <a class="run-src" href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer"></a>
+            {/if}
         </p>
 
 
@@ -159,9 +163,7 @@
                     {/each}
                 </span>
             </div>
-            {#if run.src !== null && run.src !== undefined}
-                <a class="run-src" href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer"></a>
-            {/if}
+
         </div>
 
         {#each run.bids as bid}
