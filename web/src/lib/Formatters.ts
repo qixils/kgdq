@@ -6,7 +6,9 @@ export class Formatters {
     private money_format: Intl.NumberFormat;
 
     constructor(money_currency: string) {
-        this.money_format = new Intl.NumberFormat(undefined, { style: 'currency', currency: money_currency });
+        this.money_format = new Intl.NumberFormat(undefined, { style: 'currency', currency: money_currency,
+            maximumFractionDigits: 0,
+            minimumFractionDigits: 0,  });
     }
 
     static date_header(dt: string) {
