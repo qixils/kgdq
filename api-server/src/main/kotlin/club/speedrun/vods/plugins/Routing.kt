@@ -127,6 +127,8 @@ fun Application.configureRouting() {
                             throw AuthorizationException()
                         val body: VodSuggestionBody = call.body()
                         // parse VOD from URL
+                        if (body.url.isBlank())
+                            throw UserError("VOD URL cannot be blank")
                         val vod = VOD.fromUrl(body.url, contributor = user.id)
                         // get marathon
                         val marathon = marathons.firstOrNull { it.id.equals(body.organization, true) }
