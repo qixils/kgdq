@@ -32,6 +32,6 @@
   },
   "type": "module",
   "dependencies": {
-    "@fontsource/fira-mono": "^5.0.1"
+    "@fontsource/fira-mono": "^5.0.2"
   }
 }
