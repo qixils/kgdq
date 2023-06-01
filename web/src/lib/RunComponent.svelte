@@ -22,7 +22,7 @@
 
     let suggest_dialog = () => (document.getElementById(`suggest-${run_index}`) as HTMLDialogElement );
 
-    let submit_status: string | null = null;
+    let submit_status: "SUBMITTING" | "OK" | "ERROR" | null = null;
 
     async function submit_suggestion(e: Event) {
         e.preventDefault();
@@ -32,39 +32,57 @@
 
         let url = (document.getElementById(`suggest-${run_index}-url`) as HTMLInputElement).value;
 
+        // null: not an admin (no replacement)
+        // "": no replacement
+        // "<id>": replace
+        let replace_id = (document.getElementById(`suggest-${run_index}-replace`) as HTMLSelectElement | null)?.value ?? null;
+
         submit_status = "SUBMITTING";
 
-        let res = await fetch(`${BASE_URL}/suggest/vod`, {
-            credentials: "include",
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
+        if (replace_id !== null && replace_id !== "") {
+            let delete_response = await fetch(`${BASE_URL}/suggest/vod?id=${encodeURIComponent(replace_id)}`, {
+                credentials: "include",
+                method: "DELETE"
+            });
+            if (!delete_response.ok) {
+                submit_status = "ERROR";
+                alert("Error deleting existing suggestion: " + delete_response);
+            }
+        }
+
+        if (submit_status !== "ERROR") {
+
+            let post_response = await fetch(`${BASE_URL}/suggest/vod`, {
+                credentials: "include",
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
                     url: url,
                     organization: $page.params.org.toLowerCase(),
                     gdqId: run.gdqId,
                     horaroId: run.horaroId
                 })
+            });
 
-        });
+            console.log(post_response);
+            let res_text = post_response.statusText + " " + await post_response.text();
+            console.log(res_text)
 
-        console.log(res);
-        let res_text = res.statusText + " " + await res.text();
-        console.log(res_text)
+            if (post_response.ok) {
+                submit_status = "OK";
+            } else {
+                submit_status = "ERROR";
+                alert("Error submitting VOD: " + res_text);
+            }
 
-        if (res.ok) {
-            submit_status = "OK";
-        } else {
-            submit_status = "ERROR";
-            alert("Error submitting VOD: " + res_text);
         }
 
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         suggest_dialog().close();
         btn.removeAttribute("disabled");
-
     }
 
 </script>
@@ -97,6 +115,18 @@
 
                     <label for="suggest-{run_index}-horaroId" >Horaro ID</label>
                     <input type="text" id="suggest-{run_index}-horaroId" name="horaroId" value="{ run.horaroId }" disabled>
+
+                    <!-- UI only shown to admins for now (technically api allows users also to replace their own suggestions)-->
+                    <!-- in pseudo-code for adding non-admins: run.vods.filter(is_admin || is_same_contributor)  -->
+                    {#if ["ADMIN", "MODERATOR"].includes($user.role)}
+                        <label for="suggest-{run_index}-replace">Replace existing suggestion</label>
+                        <select id="suggest-{run_index}-replace" name="replace">
+                            <option value="">None</option>
+                            {#each run.vods as vod}
+                                <option value="{ vod.id }">{ vod.url }</option>
+                            {/each}
+                        </select>
+                    {/if}
 
                     <button id="suggest-{run_index}-btn" type="submit" on:click={ submit_suggestion }>
                         {#if submit_status === null}
