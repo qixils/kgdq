@@ -148,6 +148,27 @@ fun Application.configureRouting() {
                         // respond
                         call.respond(HttpStatusCode.OK)
                     }
+
+                    delete("/vod") { // ?id=<suggestion_id>
+                        val user = getUser(call) ?: return@delete
+
+                        val id = call.parameters["id"] ?: throw UserError("Missing suggestion ID parameter")
+
+                        val (marathon, suggestion, run) = (marathons.firstNotNullOfOrNull {
+                            it.getVodSuggestionAndRun(id)?.let { (s, r) -> Triple(it, s, r) }
+                        }) ?: throw UserError("Invalid suggestion ID")
+
+                        // Admins OR the contributor are allowed
+                        if (!(user.role >= Role.MODERATOR || suggestion.vod.contributorId == user.id))
+                            throw AuthorizationException()
+
+                        run.vodSuggestions.remove(suggestion)
+
+                        // update override
+                        marathon.db.runs.update(run)
+                        // respond
+                        call.respond(HttpStatusCode.OK)
+                    }
                 }
                 
                 route("/list") {
@@ -208,26 +229,7 @@ fun Application.configureRouting() {
                         call.respond(HttpStatusCode.OK)
                     }
 
-                    delete("/suggestion") { // ?id=<suggestion_id>
-                        val user = getUser(call) ?: return@delete
 
-                        val id = call.parameters["id"] ?: throw UserError("Missing suggestion ID parameter")
-
-                        val (marathon, suggestion, run) = (marathons.firstNotNullOfOrNull {
-                            it.getVodSuggestionAndRun(id)?.let { (s, r) -> Triple(it, s, r) }
-                        }) ?: throw UserError("Invalid suggestion ID")
-
-                        // Admins OR the contributor are allowed
-                        if (!(user.role >= Role.MODERATOR || suggestion.vod.contributorId == user.id))
-                            throw AuthorizationException()
-
-                        run.vodSuggestions.remove(suggestion)
-
-                        // update override
-                        marathon.db.runs.update(run)
-                        // respond
-                        call.respond(HttpStatusCode.OK)
-                    }
 
                     put("/role") {
                         val user = getUser(call) ?: return@put
