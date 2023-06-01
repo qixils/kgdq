@@ -28,9 +28,12 @@ export declare class VODSuggestion {
     id: string;
 }
 
+export type Role = 'ADMIN' | 'MODERATOR' | 'APPROVED' | 'USER' | 'BANNED';
+
 export declare class User {
     id: string;
     name: string;
+    role: Role;
 }
 
 async function get<T>(url: string): Promise<T> {
