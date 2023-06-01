@@ -193,24 +193,40 @@ fun Application.configureRouting() {
                         if (user.role < Role.MODERATOR)
                             throw AuthorizationException()
                         val body: ModifySuggestionBody = call.body()
-                        for (marathon in marathons) {
-                            for (run in marathon.db.runs.getAll()) {
-                                for (suggestion in run.vodSuggestions) {
-                                    if (suggestion.id == body.id) {
-                                        suggestion.state = body.action
-                                        if (body.action == VodSuggestionState.APPROVED) {
-                                            run.vods.add(suggestion.vod)
-                                        }
-                                        // update override
-                                        marathon.db.runs.update(run)
-                                        // respond
-                                        call.respond(HttpStatusCode.OK)
-                                        return@put
-                                    }
-                                }
-                            }
+
+                        val (marathon, suggestion, run) = (marathons.firstNotNullOfOrNull {
+                            it.getVodSuggestionAndRun(body.id)?.let { (s, r) -> Triple(it, s, r) }
+                        }) ?: throw UserError("Invalid suggestion ID")
+
+                        suggestion.state = body.action
+                        if (body.action == VodSuggestionState.APPROVED) {
+                            run.vods.add(suggestion.vod)
                         }
-                        throw UserError("Invalid suggestion ID")
+                        // update override
+                        marathon.db.runs.update(run)
+                        // respond
+                        call.respond(HttpStatusCode.OK)
+                    }
+
+                    delete("/suggestion") { // ?id=<suggestion_id>
+                        val user = getUser(call) ?: return@delete
+
+                        val id = call.parameters["id"] ?: throw UserError("Missing suggestion ID parameter")
+
+                        val (marathon, suggestion, run) = (marathons.firstNotNullOfOrNull {
+                            it.getVodSuggestionAndRun(id)?.let { (s, r) -> Triple(it, s, r) }
+                        }) ?: throw UserError("Invalid suggestion ID")
+
+                        // Admins OR the contributor are allowed
+                        if (!(user.role >= Role.MODERATOR || suggestion.vod.contributorId == user.id))
+                            throw AuthorizationException()
+
+                        run.vodSuggestions.remove(suggestion)
+
+                        // update override
+                        marathon.db.runs.update(run)
+                        // respond
+                        call.respond(HttpStatusCode.OK)
                     }
 
                     put("/role") {

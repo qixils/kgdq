@@ -35,8 +35,9 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.Locale
+import java.util.*
 import java.util.regex.Pattern
+import kotlin.collections.ArrayList
 import kotlin.collections.set
 
 abstract class Marathon(
@@ -301,6 +302,17 @@ abstract class Marathon(
 
     suspend fun getOrganizationData(query: Organization): OrganizationData {
         return getOrganizationData(query.stats)
+    }
+
+    fun getVodSuggestionAndRun(id: String): Pair<VodSuggestion, RunOverrides>? {
+        for (run in db.runs.getAll()) {
+            for (suggestion in run.vodSuggestions) {
+                if (suggestion.id == id) {
+                    return Pair(suggestion, run)
+                }
+            }
+        }
+        return null
     }
 
     fun route(): Route.() -> Unit = {
