@@ -1,6 +1,6 @@
 <script lang="ts">
 	import PageHeadTags from '$lib/PageHeadTags.svelte';
-	import type {OrganizedEvent} from "vods.speedrun.club-client";
+	import type {MarathonEvent} from "vods.speedrun.club-client";
 	import {SvcClient} from "vods.speedrun.club-client";
 	import EventSummary from "$lib/EventSummary.svelte";
 	import {onMount} from "svelte";
@@ -8,12 +8,12 @@
 	import LoadingSkeleton from "$lib/LoadingSkeleton.svelte";
 	import ErrorReport from "$lib/ErrorReport.svelte";
 
-	let events: OrganizedEvent[];
+	let events: MarathonEvent[];
 	let events_error: Error | null = null;
 
 	onMount(async () => {
 		try {
-			events = (await new SvcClient(BASE_URL, fetch).getAllEventsFlat())
+			events = (await new SvcClient(BASE_URL, fetch).getAllEvents())
 					.filter(event => event.timeStatus === "IN_PROGRESS")
 					// From order by ascending start time, top of list might end soonest
 					.sort(compareEventStartTime);

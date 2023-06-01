@@ -1,5 +1,7 @@
 // An organization that hosts speedrunning events.
 export interface Organization {
+    // The text ID of the organization, e.g. `gdq`
+    id: string
 
     displayName: string;
     shortName: string;
@@ -7,27 +9,18 @@ export interface Organization {
 
     // Indicates whether this organization supports automatic VOD (Video on Demand) link generation.
     autoVODs: boolean;
-
-    // The amount of money this organization has raised in total.
-    // This property may be missing if the endpoint was fetched with `stats=false`.
-    amountRaised?: number;
-
-    // The number of donations this organization has received in total.
-    // This property may be missing if the endpoint was fetched with `stats=false`.
-    donationCount?: number;
 }
 
-// An organization containing its ID.
-export interface IdentifiedOrganization extends Organization {
-    // The text ID of the organization, e.g. `gdq`
-    id: string;
+export interface OrganizationWithStats  extends  Organization {
+    amountRaised: number;
+    donationCount: number;
 }
 
 // The status of an event or run.
 export type TimeStatus = 'UPCOMING' | 'IN_PROGRESS' | 'FINISHED';
 
 // An event being hosted by a speedrunning organization.
-export interface Event {
+export interface MarathonEvent {
 
     // The positive integer ID of the event.
     id: number;
@@ -93,10 +86,6 @@ export interface Event {
 
     // The URL for the event's official schedule.
     scheduleUrl: string;
-}
-
-// An event containing the owning organization's ID.
-export interface OrganizedEvent extends Event {
 
     // The text ID of the organization that owns this event, e.g. `gdq`
     organization: string;
@@ -321,37 +310,15 @@ export class SvcClient {
         });
     }
 
-    /** Performs a GET request to the specified URL and returns the first element of the response as a Promise.
-     * @param url The URL to fetch data from.
-     * @returns A Promise that resolves to the first element of the response data.
-     */
-    private getFirst<T>(url: string | URL): Promise<T> {
-        return this.get<T[]>(url).then(res => res[0]);
-    }
-
-    /** Performs a GET request to the specified URL and returns the response as a Promise for a Map.
-     * @param url The URL to fetch data from.
-     * @returns A Promise that resolves to the response data as a Map.
-     */
-    private getAsMap<V>(url: string | URL): Promise<Map<string, V>> {
-        return this.get<object>(url).then(res => new Map(Object.entries(res)));
-    }
-
     /** Retrieves all known marathon organizations, optionally with statistics.
      * @param stats Whether to include statistics. Defaults to true.
      * @returns A Promise that resolves to a Map object where the keys are organization IDs and the values are Organization objects.
      */
-    getMarathons(stats: boolean = true): Promise<Map<String, Organization>> {
-        return this.getAsMap(`marathons?stats=${stats}`);
-    }
-
-    /** Retrieves all known marathon organizations, optionally with statistics.
-     * @param stats Whether to include statistics. Defaults to true.
-     * @returns A Promise that resolves to an array of Organization objects.
-     */
-    getMarathonsFlat(stats: boolean = true): Promise<IdentifiedOrganization[]> {
-        const promise: Promise<Object> = this.get(`marathons?stats=${stats}`);
-        return promise.then(res => Object.entries(res).map(([id, org]) => ({ id, ...org })));
+    async getMarathons(stats: false): Promise<Organization[]>
+    async getMarathons(stats: true): Promise<OrganizationWithStats[]>
+    async getMarathons(stats: boolean = true): Promise<Organization[] | OrganizationWithStats[]> {
+        let json = await this.get<object>(`marathons?stats=${stats}`);
+        return Object.entries(json).map(([id, org]) => ({ id, ...org }));
     }
 
     /** Retrieves a specific marathon by ID, optionally with statistics.
@@ -359,40 +326,27 @@ export class SvcClient {
      * @param stats Whether to include statistics. Defaults to true.
      * @returns A Promise that resolves to the Organization object representing the marathon.
      */
-    getMarathon(id: string, stats: boolean = true): Promise<Organization> {
-        return this.get(`marathons/${id}?stats=${stats}`);
+    async getMarathon(id: string, stats: false): Promise<Organization>
+    async getMarathon(id: string, stats: true): Promise<|OrganizationWithStats>
+    async getMarathon(id: string, stats: boolean = true): Promise<Organization|OrganizationWithStats> {
+        return { id,  ...await this.get<any>(`marathons/${id}?stats=${stats}`) };
     }
 
     /** Retrieves every event for every organization.
      * @returns A Promise that resolves to a Map object where the keys are organization IDs and the values are arrays of Event objects.
      */
-    getAllEvents(): Promise<Map<string, Event[]>> {
-        return this.getAsMap(`marathons/events`);
-    }
-
-    /** Retrieves every event for every organization.
-     * @returns A Promise that resolves to an array of Event objects.
-     */
-    getAllEventsFlat(): Promise<OrganizedEvent[]> {
-        const promise: Promise<Object> = this.get(`marathons/events`);
-        return promise.then(res => {
-            const events: OrganizedEvent[] = [];
-            for (const [organization, eventList] of Object.entries(res)) {
-                for (const event of eventList) {
-                    event['organization'] = organization;
-                    events.push(event as OrganizedEvent);
-                }
-            }
-            return events;
-        });
+    async getAllEvents(): Promise<MarathonEvent[]> {
+        let json = await this.get<object>('marathons/events');
+        return Object.entries(json).map(([organization, events]) => (events as any[]).map(event => ({ organization, ...event }))).flat();
     }
 
     /** Retrieves the events done by a specific organization.
      * @param organization The name of the organization.
      * @returns A Promise that resolves to an array of Event objects representing the events.
      */
-    getEvents(organization: string): Promise<Event[]> {
-        return this.get(`marathons/${organization}/events`);
+    async getEvents(organization: string): Promise<MarathonEvent[]> {
+        let json = await this.get<any[]>(`marathons/${organization}/events`);
+        return json.map(event => ({ organization, ...event}));
     }
 
     /** Retrieves a specific event by organization and event ID.
@@ -400,8 +354,9 @@ export class SvcClient {
      * @param event The ID of the event to retrieve.
      * @returns A Promise that resolves to the Event object representing the event.
      */
-    getEvent(organization: string, event: string): Promise<Event> {
-        return this.getFirst(`marathons/${organization}/events?id=${event}`);
+    async getEvent(organization: string, event: string): Promise<MarathonEvent> {
+        let json = await this.get<any[]>(`marathons/${organization}/events?id=${event}`);
+        return { organization, ...json[0] };
     }
 
     /** Retrieves the runs for a specific organization, event, and runner.
@@ -422,8 +377,8 @@ export class SvcClient {
      * @param id The ID of the run to retrieve.
      * @returns A Promise that resolves to the Run object representing the run.
      */
-    getRun(organization: string, id: string): Promise<Run> {
-        return this.getFirst(`marathons/${organization}/runs?id=${id}`);
+    async getRun(organization: string, id: string): Promise<Run> {
+        return (await this.get<any[]>(`marathons/${organization}/runs?id=${id}`))[0];
     }
 
     /** Creates an instance of MarathonClient associated with a specific organization.
@@ -459,7 +414,7 @@ export class MarathonClient {
     /** Retrieves the events associated with the marathon.
      * @returns A Promise that resolves to an array of Event objects representing the events.
      */
-    getEvents(): Promise<Event[]> {
+    getEvents(): Promise<MarathonEvent[]> {
         return this.svc.getEvents(this.organization);
     }
 
@@ -467,7 +422,7 @@ export class MarathonClient {
      * @param event The ID of the event to retrieve.
      * @returns A Promise that resolves to the Event object representing the event.
      */
-    getEvent(event: string): Promise<Event> {
+    getEvent(event: string): Promise<MarathonEvent> {
         return this.svc.getEvent(this.organization, event);
     }
 

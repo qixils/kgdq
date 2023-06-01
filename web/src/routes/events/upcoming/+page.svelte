@@ -1,10 +1,10 @@
 <script lang="ts">
-    import type {OrganizedEvent} from "vods.speedrun.club-client";
+    import type {MarathonEvent} from "vods.speedrun.club-client";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
     import EventSummary from "$lib/EventSummary.svelte";
     import ErrorReport from "$lib/ErrorReport.svelte";
 
-    export let data: { events: OrganizedEvent[] | Error };
+    export let data: { events: MarathonEvent[] | Error };
 </script>
 
 <svelte:head>

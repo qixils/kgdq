@@ -1,5 +1,6 @@
 <script lang="ts">
-    import {Event, Organization, SvcClient} from "vods.speedrun.club-client";
+    import type {MarathonEvent, Organization} from "vods.speedrun.club-client";
+    import {SvcClient} from "vods.speedrun.club-client";
     import {page} from "$app/stores";
     import {BASE_URL} from "$lib/kgdq";
     import {onMount} from "svelte";
@@ -9,7 +10,7 @@
     import ErrorReport from "$lib/ErrorReport.svelte";
 
     export let data: { org: Organization };
-    let events: Event[];
+    let events: MarathonEvent[];
     let error: Error;
     let SVC = new SvcClient(BASE_URL, fetch);
 

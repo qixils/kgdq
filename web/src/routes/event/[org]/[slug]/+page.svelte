@@ -1,7 +1,8 @@
 <!-- TODO: support displaying multiple "events" (e.g. ESA Stream 1 & 2) on the same page -->
 
 <script lang="ts">
-    import {Event, Run, SvcClient} from 'vods.speedrun.club-client';
+    import type {MarathonEvent, Run} from 'vods.speedrun.club-client';
+    import {SvcClient} from 'vods.speedrun.club-client';
     import RunComponent from "$lib/RunComponent.svelte";
     import {page} from "$app/stores";
     import {Formatters} from "$lib/Formatters";
@@ -11,10 +12,9 @@
     import LoadingButton from "$lib/LoadingButton.svelte";
     import ErrorReport from "$lib/ErrorReport.svelte";
 
-    export let data: { event: Event };
+    export let data: { event: MarathonEvent };
     let SVC = new SvcClient(BASE_URL, fetch);
-    let event: Event = data.event; // slight backwards compat
-    let formatter = new Formatters(event.paypalCurrency);
+    let formatter = new Formatters(data.event.paypalCurrency);
     let runs: Run[];
     let run_error: Error;
 
@@ -24,8 +24,7 @@
         try {
             runs = await SVC.getRuns($page.params.org.toLowerCase(), $page.params.slug);
             if (runs.length > 0) {
-                let now = new Date();
-                let current_run = runs.find(run => run.timeStatus === "IN_PROGRESS" || run.timeStatus === "UPCOMING");
+                let current_run: Run | undefined = runs.find(run => run.timeStatus === "IN_PROGRESS" || run.timeStatus === "UPCOMING");
                 if (current_run !== undefined) {
                     current_run_index = runs.indexOf(current_run);
                 }
@@ -38,26 +37,26 @@
 
 <svelte:head>
     <PageHeadTags
-        title={ event.name }
-        description="View the schedule of {niceShortName(event)} and watch back the VODs." />
+        title={ data.event.name }
+        description="View the schedule of {niceShortName(data.event)} and watch back the VODs." />
 </svelte:head>
 
 <section>
     <div class="event-description">
-        <h1>{event.name}</h1>
+        <h1>{data.event.name}</h1>
         <p>
-            {niceShortName(event)}
+            {niceShortName(data.event)}
 
-            {#if event.timeStatus === "UPCOMING"}
-                will run from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raise money
-            {:else if event.timeStatus === "IN_PROGRESS"}
-                is running from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and has raised {formatter.money(event.amount)}
+            {#if data.event.timeStatus === "UPCOMING"}
+                will run from {Formatters.date_hero(data.event.startTime)} to {Formatters.date_hero(data.event.endTime)} and raise money
+            {:else if data.event.timeStatus === "IN_PROGRESS"}
+                is running from {Formatters.date_hero(data.event.startTime)} to {Formatters.date_hero(data.event.endTime)} and has raised {formatter.money(data.event.amount)}
             {:else}
-                ran from {Formatters.date_hero(event.startTime)} to {Formatters.date_hero(event.endTime)} and raised {formatter.money(event.amount)}
+                ran from {Formatters.date_hero(data.event.startTime)} to {Formatters.date_hero(data.event.endTime)} and raised {formatter.money(data.event.amount)}
             {/if}
             for
-            {#if event.charityName !== ""}
-                {event.charityName}.
+            {#if data.event.charityName !== ""}
+                {data.event.charityName}.
             {:else}
                 charity.
             {/if}
@@ -90,7 +89,7 @@
                 <RunComponent {runs} {run_index} {formatter} />
             {:else}
                 <p>
-                    {#if event.timeStatus === "UPCOMING"}
+                    {#if data.event.timeStatus === "UPCOMING"}
                         No runs have been scheduled for this event yet.
                     {:else}
                         No runs were found for this event.
