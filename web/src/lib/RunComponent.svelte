@@ -18,21 +18,7 @@
     let step_color = run.timeStatus === "UPCOMING" ? "" : (run.timeStatus === "IN_PROGRESS" ? "#fff" : "#d2a");
 
     let previous_status = run_index === 0 ? null : runs[run_index - 1].timeStatus;
-    let current_status = run.timeStatus
-    let next_status = run_index === runs.length - 1 ? null : runs[run_index + 1].timeStatus;
-
-    async function suggest_navigate(org, event_slug, index) {
-        let event_id = (await svc.getEvent(org, event_slug)).id;
-
-        let navigate_query = new URLSearchParams();
-        navigate_query.set("gdq_id", event_id.toString());
-        navigate_query.set("horaro_id", index.toString());
-        navigate_query.set("organization", org);
-
-        let navigate_url = `/suggest?${navigate_query.toString()}`;
-
-        window.location.href = navigate_url;
-    }
+    let current_status = run.timeStatus;
 
     let suggest_dialog = () => (document.getElementById(`suggest-${run_index}`) as HTMLDialogElement );
 
@@ -169,7 +155,7 @@
             {/if}
 
             {#if run.src !== null && run.src !== undefined}
-                <a class="run-src" href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer"></a>
+                <a class="run-src" href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer">↗</a>
             {/if}
         </p>
 
