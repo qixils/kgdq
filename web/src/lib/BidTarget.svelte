@@ -9,11 +9,11 @@
     let color = percent >= 100 ? "var(--bid-full)" : (bid.state === "OPENED" ? "var(--bid-open)" : "var(--bid-closed)");
 </script>
 
-<span class="radial-progress" style="--value:{percent}; --size:70px; color:{color}">{percent}%</span>
+<span class="radial-progress" style="--value:{percent}; --size:30px; color:{color}"></span>
 <div class="bid-body">
-    <p>
-        <b>{bid.name}&nbsp;</b>
-        <span class="bid-contributions">{ formatter.money(bid.donationTotal) } / { formatter.money(bid.goal) }</span>
-    </p>
-    <p>{bid.description}</p>
+    <b>{bid.name}</b>
+    <span class="bid-contributions">{ formatter.money(bid.donationTotal) } / { formatter.money(bid.goal) }</span>
 </div>
+{#if bid.description}
+    <div class="bid-description">{bid.description}</div>
+{/if}

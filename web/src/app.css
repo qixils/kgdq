@@ -69,6 +69,11 @@ header nav {
     grid-column: 1 / span 2;
 }
 
+header nav ul {
+    text-align: center;
+    padding-left: 0;
+}
+
 
 header h1 {
     color: #EEF;
@@ -324,13 +329,14 @@ sup {
 }
 
 .bid {
-    grid-template-columns: auto 1fr;
-    display: grid;
+    display: flex;
     align-items: center;
+    position: relative;
 }
 
 .bid-body {
     margin: 0 0.5em;
+
 }
 
 .bid-contributions {
@@ -342,7 +348,12 @@ sup {
     flex-direction: row;
     flex-wrap: wrap;
     margin: 0.5em;
+    margin-left: 0;
     gap: 1em;
+}
+
+.run-details> div:first-child::before {
+    margin-left: 0;
 }
 
 .run-details > div {
@@ -426,7 +437,7 @@ sup {
     grid-gap: 1em;
     list-style: none;
     padding: 0;
-    margin: 1em;
+    margin: 0.5em;
 }
 
 .vod::before {
@@ -456,19 +467,33 @@ sup {
             rgba(var(--twitch-rgb), 0.2) -10px 0 0;
 }
 
+.bid-war-stats {
+    display: flex;
+    flex-direction: row;
+}
+
 .bid-war-bars {
     content: '';
     display: inline-flex;
     flex-direction: column;
-    gap: 0.5em;
+    gap: 3px;
     margin: 0.5em;
     width: 70px;
     border-right: 2px solid var(--text-quiet);
 }
 
 .bid-war-bar {
-    height: 1em;
+    height: 0.75em;
     border-radius: 2px;
+}
+
+.bid-war-legend {
+    margin: 0.25em;
+    display: block;
+    width: min-content;
+    font-size: 85%;
+    color: var(--text-quiet);
+    white-space: nowrap;
 }
 
 .bid-war-bar:first-child {
@@ -477,6 +502,32 @@ sup {
 
 .bid-war-bar:not(:first-child) {
     background-color: var(--run-finished);
+}
+
+.bid-description {
+    display: none;
+    position: absolute;
+    background-color: var(--bg-bg);
+    color: var(--text);
+    border: 1px solid var(--text-quiet);
+    padding: 1em;
+    bottom: 100%; /* above name of bid incentive */
+    box-shadow: black 0 0 1em;
+}
+
+.bid-description::after {
+    /* triangle pointing down in the middle */
+    content: '';
+    position: absolute;
+    bottom: -1em;
+    left: calc(50% - 0.5em);
+    border: 0.5em solid transparent;
+    border-top-color: var(--text-quiet);
+
+}
+
+.bid:hover .bid-description {
+    display: block;
 }
 
 form {
