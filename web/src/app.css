@@ -69,6 +69,11 @@ header nav {
     grid-column: 1 / span 2;
 }
 
+header nav ul {
+    text-align: center;
+    padding-left: 0;
+}
+
 
 header h1 {
     color: #EEF;
@@ -321,8 +326,7 @@ sup {
 }
 
 .bid {
-    grid-template-columns: auto 1fr;
-    display: grid;
+    display: flex;
     align-items: center;
     position: relative;
 }
