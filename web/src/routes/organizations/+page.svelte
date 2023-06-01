@@ -1,9 +1,9 @@
 <script lang="ts">
-    import {IdentifiedOrganization} from "vods.speedrun.club-client";
+    import type {Organization} from "vods.speedrun.club-client";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
     import ErrorReport from "$lib/ErrorReport.svelte";
 
-    export let data: { orgs: IdentifiedOrganization[] | Error };
+    export let data: { orgs: Organization[] | Error };
 </script>
 
 <svelte:head>

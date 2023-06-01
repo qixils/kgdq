@@ -1,15 +1,15 @@
-import type {Event} from "vods.speedrun.club-client";
+import type {MarathonEvent} from "vods.speedrun.club-client";
 
 let API_DOMAIN = 'vods.speedrun.club';
 export let BASE_URL= 'https://' + API_DOMAIN + '/api/v2';
 
 export const EPOCH = "1970-01-01T00:00:00Z";
 
-export function compareEventStartTime(a: Event, b: Event) {
+export function compareEventStartTime(a: MarathonEvent, b: MarathonEvent) {
     return (a.startTime || EPOCH).localeCompare(b.startTime || EPOCH);
 }
 
-export function compareEventEndTime(a: Event, b: Event) {
+export function compareEventEndTime(a: MarathonEvent, b: MarathonEvent) {
     return (a.endTime || a.startTime || EPOCH).localeCompare(b.endTime || b.startTime || EPOCH);
 }
 
@@ -49,7 +49,7 @@ export async function getSuggestions(): Promise<VODSuggestion[]> {
 export async function getUser(): Promise<User> {
     return await get<User>(`${BASE_URL}/profile`);
 }
-export function niceShortName(event: Event) {
+export function niceShortName(event: MarathonEvent) {
     let ESA_RE = /^esa([sw])(\d+)(?:s(\d+))?$/i;
     let match = event.short.match(ESA_RE);
     if (match) {

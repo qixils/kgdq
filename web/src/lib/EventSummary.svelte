@@ -1,10 +1,10 @@
 <script lang="ts">
-    import type {Event} from 'vods.speedrun.club-client';
+    import type {MarathonEvent} from 'vods.speedrun.club-client';
     import {Formatters} from "$lib/Formatters";
 
     export let org: string;
 
-    export let event: Event = undefined as Event;
+    export let event: MarathonEvent = undefined as MarathonEvent;
 
     let formatter = new Formatters(event.paypalCurrency);
 
