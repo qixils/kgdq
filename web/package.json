@@ -2,8 +2,8 @@
   "name": "vods.speedrun.club",
   "version": "1.0.0",
   "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
+    "dev": "npm --prefix ../api-client-ts run build && vite dev",
+    "build": "npm --prefix ../api-client-ts run build && vite build",
     "preview": "vite preview",
     "test": "playwright test",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

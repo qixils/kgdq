@@ -25,10 +25,6 @@ jobs:
         working-directory: web
         run: npm install
 
-      - name: Build api-client-ts
-        working-directory: api-client-ts
-        run: npm run build
-
       - name: Build frontend
         working-directory: web
         run: npm run build
