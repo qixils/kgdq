@@ -12,7 +12,7 @@
     import LoadingButton from "$lib/LoadingButton.svelte";
     import ErrorReport from "$lib/ErrorReport.svelte";
 
-    export let data: { event: MarathonEvent };
+    export let data: { event: MarathonEvent } = undefined as never;
     let SVC = new SvcClient(BASE_URL, fetch);
     let formatter = new Formatters(data.event.paypalCurrency);
     let runs: Run[];
