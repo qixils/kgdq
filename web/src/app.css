@@ -402,13 +402,13 @@ sup {
     background-image: url("/trohpy.svg");
     background-size: 20px;
     background-repeat: no-repeat;
-    width: 30px;
-    height: 24px;
 
     margin: 0 5px;
     vertical-align: bottom;
     text-decoration: none;
     border-bottom: 1px solid currentColor;
+
+    padding-left: 20px;
 }
 
 .run-src:hover {
@@ -417,11 +417,6 @@ sup {
     background-size: 20px, 20px;
     background-repeat: no-repeat, no-repeat;
     background-blend-mode: screen, screen;
-}
-
-.run-src::after {
-    content: '↗';
-    margin-left: 20px;
 }
 
 .vod {
