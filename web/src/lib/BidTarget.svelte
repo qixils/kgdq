@@ -11,7 +11,7 @@
 
 <span class="radial-progress" style="--value:{percent}; --size:30px; color:{color}"></span>
 <div class="bid-body">
-    <b>{bid.name}&nbsp;</b>
+    <b>{bid.name}</b>
     <span class="bid-contributions">{ formatter.money(bid.donationTotal) } / { formatter.money(bid.goal) }</span>
 </div>
 {#if bid.description}

@@ -27,7 +27,7 @@
 </div>
 
 <div class="bid-body">
-    <b>{bid.name}&nbsp;</b>
+    <b>{bid.name}</b>
     <span class="bid-contributions">{formatter.money(bid.donationTotal)}</span>
 </div>
 {#if bid.description}
