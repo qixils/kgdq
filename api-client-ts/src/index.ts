@@ -314,8 +314,8 @@ export class SvcClient {
      * @param stats Whether to include statistics. Defaults to true.
      * @returns A Promise that resolves to a Map object where the keys are organization IDs and the values are Organization objects.
      */
-    async getMarathons(stats: false): Promise<Organization[]>
-    async getMarathons(stats: true): Promise<OrganizationWithStats[]>
+    async getMarathons(stats?: false): Promise<Organization[]>
+    async getMarathons(stats?: true): Promise<OrganizationWithStats[]>
     async getMarathons(stats: boolean = true): Promise<Organization[] | OrganizationWithStats[]> {
         let json = await this.get<object>(`marathons?stats=${stats}`);
         return Object.entries(json).map(([id, org]) => ({ id, ...org }));
@@ -326,8 +326,8 @@ export class SvcClient {
      * @param stats Whether to include statistics. Defaults to true.
      * @returns A Promise that resolves to the Organization object representing the marathon.
      */
-    async getMarathon(id: string, stats: false): Promise<Organization>
-    async getMarathon(id: string, stats: true): Promise<|OrganizationWithStats>
+    async getMarathon(id: string, stats?: false): Promise<Organization>
+    async getMarathon(id: string, stats?: true): Promise<|OrganizationWithStats>
     async getMarathon(id: string, stats: boolean = true): Promise<Organization|OrganizationWithStats> {
         return { id,  ...await this.get<any>(`marathons/${id}?stats=${stats}`) };
     }
