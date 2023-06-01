@@ -8,6 +8,15 @@ Frontend for KGDQ with Svelte and Tailwind.
 - NPM 9+
 - Node 18+
 
+## Other dependencies
+
+`api-client-ts` is a typescript dependency that needs to be built.
+
+```bash
+# Run automatically by npm run dev or build
+npm --prefix ../api-client-ts run build
+```
+
 ## Run
 
 ```bash
