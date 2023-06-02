@@ -33,7 +33,7 @@ enum class VODType {
         private val format = "%dh%dm%ds"
         private val urlRegex = Pattern.compile("^https?://(?:www\\.)?twitch\\.tv/videos/(\\d+)(?:\\?t=(\\w+))?$")
         private val videoIdRegex = Pattern.compile("^\\d+$")
-        private val timestampRegex = Pattern.compile("^\\d{1,2}h\\d{1,2}m\\d{1,2}s$")
+        private val timestampRegex = Pattern.compile("^(?:\\d{1,2}h)?(?:\\d{1,2}m)?(?:\\d{1,2}s)?$")
         override fun fromUrl(url: String, contributor: String?): VOD? {
             val matcher = urlRegex.matcher(url)
             if (!matcher.find()) return null
@@ -45,7 +45,7 @@ enum class VODType {
             if (!videoIdRegex.matcher(videoId).matches())
                 throw IllegalArgumentException("Invalid Twitch video ID: $videoId")
             val sb = StringBuilder("https://www.twitch.tv/videos/").append(videoId)
-            if (timestamp != null) {
+            if (!timestamp.isNullOrEmpty()) {
                 if (!timestampRegex.matcher(timestamp).matches())
                     throw IllegalArgumentException("Invalid Twitch timestamp: $timestamp")
                 sb.append("?t=").append(timestamp)
