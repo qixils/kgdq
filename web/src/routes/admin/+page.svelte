@@ -3,16 +3,16 @@
     import {onMount} from "svelte";
     import type {VODSuggestion} from "$lib/kgdq";
     import {BASE_URL, getSuggestions} from "$lib/kgdq";
-    import type {Event, Run} from "vods.speedrun.club-client";
+    import type {MarathonEvent, Run} from "vods.speedrun.club-client";
     import {svc} from "vods.speedrun.club-client";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
     import LoadingSkeleton from "$lib/LoadingSkeleton.svelte";
 
     let suggests: VODSuggestion[];
 
-    let suggests_with_run_event: { run: Run, suggest: VODSuggestion, event: Event }[] = [];
+    let suggests_with_run_event: { run: Run, suggest: VODSuggestion, event: MarathonEvent }[] = [];
     let suggests_populated = false;
-    let events_cache: {[org: string]: Event[]} = {};
+    let events_cache: {[org: string]: MarathonEvent[]} = {};
     let runs_cache: {[slug: string]: Run[]} = {};
 
     onMount(async () => {
