@@ -85,19 +85,19 @@ class RunData{
         runnersAsString = run.value.deprecatedRunners.split(", ").naturalJoinToString()
         this.bids = bids.toMutableList()
         vods = overrides.vods.toMutableList()
-        startTime = overrides.startTime
-            ?: calculateOffsetTime(previousRun?.endTime, run.value.setupTime)
+        startTime = overrides.startTime?.let { it - run.value.setupTime }
+            ?: previousRun?.endTime
             ?: run.value.startTime
         runTime = overrides.runTime ?: run.value.runTime
-        endTime = startTime + runTime
         if (previousRun != null) {
-            var duration = Duration.between(previousRun.endTime, startTime)
+            var duration = Duration.between(previousRun.endTime, startTime + run.value.setupTime)
             if (duration.isNegative)
                 duration = Duration.ZERO
             setupTime = duration
         } else {
             setupTime = run.value.setupTime
         }
+        endTime = startTime + runTime + setupTime
         timeStatus = run {
             val now = Instant.now()
             when {
