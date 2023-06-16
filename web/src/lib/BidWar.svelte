@@ -8,24 +8,28 @@
     let max_bid_total = Math.max(...bid.children.map(c => c.donationTotal));
 </script>
 
-<div class="bid-war-bars">
-    {#each bid.children.slice(0,3) as child}
-        <div class="bid-war-bar" style="width: {child.donationTotal / max_bid_total * 90}%"></div>
-    {/each}
-</div>
-<div class="bid-body">
-    <p>
-        <b>{bid.name}&nbsp;</b>
-        <span class="bid-contributions">{formatter.money(bid.donationTotal)}</span>
-    </p>
-    <p>{bid.description}</p>
-    <p>
-        <b>Top Options:</b>
-        {#each bid.children.slice(0,3) as child, index}
-            {#if index > 0}
-                ,
-            {/if}
-            <span class:underline={index===0}>{child.name}</span>
+
+<div class="bid-war-stats">
+
+    <div class="bid-war-bars">
+        {#if bid.donationTotal > 0}
+        {#each bid.children.slice(0,3) as child}
+            <div class="bid-war-bar" style="width: {child.donationTotal / max_bid_total * 90}%"></div>
         {/each}
-    </p>
+        {/if}
+    </div>
+
+    <div class="bid-war-legend">
+        {#each bid.children.slice(0,3) as child}
+            <div>{child.name}</div>
+        {/each}
+    </div>
 </div>
+
+<div class="bid-body">
+    <b>{bid.name}</b>
+    <span class="bid-contributions">{formatter.money(bid.donationTotal)}</span>
+</div>
+{#if bid.description}
+    <div class="bid-description">{bid.description}</div>
+{/if}

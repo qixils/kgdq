@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.8.21" apply true
-    kotlin("plugin.serialization") version "1.8.21" apply false
+    kotlin("jvm") version "1.8.22" apply true
+    kotlin("plugin.serialization") version "1.8.22" apply false
     id("com.github.johnrengelman.shadow") version "7.1.2" apply false
 }
 
@@ -14,7 +14,7 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     dependencies {
-        api("org.jetbrains.kotlin:kotlin-stdlib:1.8.21")
+        api("org.jetbrains.kotlin:kotlin-stdlib:1.8.22")
     }
 
     tasks.compileKotlin {

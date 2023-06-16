@@ -3,10 +3,15 @@
   import {user} from "../stores";
   import {onMount} from "svelte";
 
-  onMount(() => {
+  onMount(async () => {
     let user_local = localStorage.getItem("user");
     if (user_local) {
       $user = JSON.parse(user_local);
+    }
+    if ($user && ($user.expires === undefined || $user.expires < Date.now())) {
+      //
+      $user = null;
+      localStorage.removeItem("user");
     }
   })
 </script>

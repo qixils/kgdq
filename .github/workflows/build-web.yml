@@ -25,7 +25,7 @@ jobs:
         working-directory: web
         run: npm install
 
-      - name: Build with Node
+      - name: Build frontend
         working-directory: web
         run: npm run build
 

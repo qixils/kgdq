@@ -11,7 +11,10 @@
     onMount(async () => {
         try {
             $user = await getUser();
-            localStorage.setItem("user", JSON.stringify($user));
+            // TODO: api should tell when the token expires other than in the cookie
+            // related: token refreshes
+            let week = 1000 * 60 * 60 * 24 * 7;
+            localStorage.setItem("user", JSON.stringify({ ...$user, expires: Date.now() + week }));
         } catch (e) {
             user_error = e;
             console.error(e);

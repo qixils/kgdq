@@ -231,6 +231,15 @@ abstract class Marathon(
                 }
             }
             runData.add(data)
+            if (data.setupTime != run.value.setupTime) {
+                logger.error("Setup time mismatch for run ${run.value.name} (${run.id}): ${data.setupTime} != ${run.value.setupTime}")
+            }
+            if (data.startTime != run.value.startTime) {
+                logger.warn("Start time mismatch for run ${run.value.name} (${run.id}): ${data.startTime} != ${run.value.startTime}")
+            }
+            if (data.endTime != run.value.endTime) {
+                logger.warn("End time mismatch for run ${run.value.name} (${run.id}): ${data.endTime} != ${run.value.endTime}")
+            }
         }
 
         // update override
