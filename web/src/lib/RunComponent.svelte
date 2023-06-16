@@ -34,13 +34,13 @@
 
         // null: not an admin (no replacement)
         // "": no replacement
-        // "<id>": replace
-        let replace_id = (document.getElementById(`suggest-${run_index}-replace`) as HTMLSelectElement | null)?.value ?? null;
+        // "<url>": replace
+        let replace_url = (document.getElementById(`suggest-${run_index}-replace`) as HTMLSelectElement | null)?.value ?? null;
 
         submit_status = "SUBMITTING";
 
-        if (replace_id !== null && replace_id !== "") {
-            let delete_response = await fetch(`${BASE_URL}/suggest/vod?id=${encodeURIComponent(replace_id)}`, {
+        if (replace_url !== null && replace_url !== "") {
+            let delete_response = await fetch(`${BASE_URL}/suggest/vod?url=${encodeURIComponent(replace_url)}`, {
                 credentials: "include",
                 method: "DELETE"
             });
@@ -123,7 +123,7 @@
                         <select id="suggest-{run_index}-replace" name="replace">
                             <option value="">None</option>
                             {#each run.vods as vod}
-                                <option value="{ vod.id }">{ vod.url }</option>
+                                <option value="{ vod.url }">{ vod.url }</option>
                             {/each}
                         </select>
                     {/if}

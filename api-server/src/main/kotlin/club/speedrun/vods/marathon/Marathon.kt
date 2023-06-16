@@ -36,6 +36,7 @@ import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
+import java.util.function.Predicate
 import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 import kotlin.collections.set
@@ -304,10 +305,10 @@ abstract class Marathon(
         return getOrganizationData(query.stats)
     }
 
-    fun getVodSuggestionAndRun(id: String): Pair<VodSuggestion, RunOverrides>? {
+    fun getVodSuggestionAndRun(predicate: Predicate<VodSuggestion>): Pair<VodSuggestion, RunOverrides>? {
         for (run in db.runs.getAll()) {
             for (suggestion in run.vodSuggestions) {
-                if (suggestion.id == id) {
+                if (predicate.test(suggestion)) {
                     return Pair(suggestion, run)
                 }
             }
