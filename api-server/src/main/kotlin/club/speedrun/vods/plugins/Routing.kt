@@ -150,10 +150,12 @@ fun Application.configureRouting() {
                     delete("/vod") { // ?id=<suggestion_id>
                         val user = getUser(call) ?: return@delete
 
-                        val id = call.parameters["id"] ?: throw UserError("Missing suggestion ID parameter")
+                        // TODO: lookup by URL is OK, they are unique for a VOD, but is not straightforward when it is
+                        // not the primary key.
+                        val url = call.parameters["url"] ?: throw UserError("Missing suggestion URL parameter")
 
-                        val (marathon, suggestion, run) = (marathons.firstNotNullOfOrNull {
-                            it.getVodSuggestionAndRun(id)?.let { (s, r) -> Triple(it, s, r) }
+                        val (marathon, suggestion, run) = (marathons.firstNotNullOfOrNull { marathon ->
+                            marathon.getVodSuggestionAndRun { it.vod.url == url }?.let { (s, r) -> Triple(marathon, s, r) }
                         }) ?: throw UserError("Invalid suggestion ID")
 
                         // Admins OR the contributor are allowed
@@ -213,8 +215,8 @@ fun Application.configureRouting() {
                             throw AuthorizationException()
                         val body: ModifySuggestionBody = call.body()
 
-                        val (marathon, suggestion, run) = (marathons.firstNotNullOfOrNull {
-                            it.getVodSuggestionAndRun(body.id)?.let { (s, r) -> Triple(it, s, r) }
+                        val (marathon, suggestion, run) = (marathons.firstNotNullOfOrNull { marathon ->
+                            marathon.getVodSuggestionAndRun { it.id == body.id }?.let { (s, r) -> Triple(marathon, s, r) }
                         }) ?: throw UserError("Invalid suggestion ID")
 
                         suggestion.state = body.action
