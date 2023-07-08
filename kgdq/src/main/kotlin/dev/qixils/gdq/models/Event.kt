@@ -1,8 +1,7 @@
 package dev.qixils.gdq.models
 
 import dev.qixils.gdq.GDQ
-import dev.qixils.gdq.serializers.InstantAsStringSerializer
-import dev.qixils.gdq.serializers.ZoneIdSerializer
+import dev.qixils.gdq.serializers.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -17,8 +16,8 @@ data class Event(
     val hashtag: String = "#$short",
 //    @SerialName("use_one_step_screening") val useOneStepScreening: Boolean, - some sort of internal variable. commenting out because it's not in ESA's API
     @SerialName("receivername") val charityName: String,
-    @SerialName("targetamount") val targetAmount: Float,
-    @SerialName("minimumdonation") val minimumDonation: Float,
+    @Serializable(with = NoneNullableDoubleFixer::class) @SerialName("targetamount") val targetAmount: Double?,
+    @Serializable(with = NoneNullableDoubleFixer::class) @SerialName("minimumdonation") val minimumDonation: Double?,
 //    @SerialName("paypalemail") val paypalEmail: String, - don't see a reason to expose this
     @SerialName("paypalcurrency") val paypalCurrency: String,
     @SerialName("datetime") @Serializable(with = InstantAsStringSerializer::class) private var _starttime: Instant? = null,
@@ -28,10 +27,10 @@ data class Event(
     @SerialName("allow_donations") val allowDonations: Boolean = !locked,
     @SerialName("canonical_url") private var _canonicalUrl: String? = null,
     val public: String,
-    val amount: Double,
-    val count: Int,
-    val max: Double,
-    val avg: Double,
+    @Serializable(with = NoneNullableDoubleFixer::class) val amount: Double?,
+    @Serializable(with = NoneIntFixer::class) val count: Int,
+    @Serializable(with = NoneDoubleFixer::class) val max: Double,
+    @Serializable(with = NoneDoubleFixer::class) val avg: Double,
     @SerialName("horaro_name") private val horaroName: String? = null,
 ) : Model {
 

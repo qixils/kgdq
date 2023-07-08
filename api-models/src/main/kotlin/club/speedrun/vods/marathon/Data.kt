@@ -4,13 +4,7 @@ package club.speedrun.vods.marathon
 
 import club.speedrun.vods.naturalJoinToString
 import dev.qixils.gdq.InternalGdqApi
-import dev.qixils.gdq.models.Bid
-import dev.qixils.gdq.models.BidState
-import dev.qixils.gdq.models.Event
-import dev.qixils.gdq.models.Headset
-import dev.qixils.gdq.models.Run
-import dev.qixils.gdq.models.Runner
-import dev.qixils.gdq.models.Wrapper
+import dev.qixils.gdq.models.*
 import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import dev.qixils.gdq.serializers.ZoneIdSerializer
@@ -309,8 +303,8 @@ class EventData {
     val name: String
     val hashtag: String
     val charityName: String
-    val targetAmount: Float
-    val minimumDonation: Float
+    val targetAmount: Double?
+    val minimumDonation: Double?
     val paypalCurrency: String
     @Serializable(with = InstantAsStringSerializer::class) val startTime: Instant?
     @Serializable(with = InstantAsStringSerializer::class) val endTime: Instant?
@@ -320,7 +314,7 @@ class EventData {
     val allowDonations: Boolean
     val canonicalUrl: String
     val public: String
-    val amount: Double
+    val amount: Double?
     val count: Int
     val max: Double
     val avg: Double
@@ -425,7 +419,7 @@ class OrganizationData {
         homepageUrl = organization.homepageUrl
         autoVODs = organization.autoVODs
         if (events != null) {
-            amountRaised = events.sumOf { it.amount }
+            amountRaised = events.sumOf { it.amount ?: 0.0 }
             donationCount = events.sumOf { it.count }
         }
     }
