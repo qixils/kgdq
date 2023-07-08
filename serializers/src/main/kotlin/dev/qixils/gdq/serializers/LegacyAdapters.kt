@@ -4,6 +4,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.*
@@ -30,44 +31,33 @@ object LegacyStringAdapter : AbstractLegacyStringAdapter<List<String>>(ListSeria
     }
 }
 
-open class NoneFixer<T : Any>(delegate: KSerializer<T>, val default: JsonElement = JsonNull) : JsonTransformingSerializer<T>(delegate) {
-
-    override fun transformDeserialize(element: JsonElement): JsonElement {
-        if (element is JsonPrimitive && element.contentOrNull == "None")
-            return default
-        return element
-    }
-
-    override fun transformSerialize(element: JsonElement): JsonElement {
-        if (element == default)
-            return JsonPrimitive("None")
-        return element
-    }
-}
-
-@OptIn(ExperimentalSerializationApi::class)
-class NullableSerializer<T : Any>(val delegate: KSerializer<T>) : KSerializer<T?> {
+open class NoneFixer<DefaultOrT, T: DefaultOrT>(val delegate: KSerializer<T>, val default: DefaultOrT) : KSerializer<DefaultOrT> {
     override val descriptor = delegate.descriptor
 
-    override fun deserialize(decoder: Decoder): T? {
-        return if (decoder.decodeNotNullMark()) {
-            decoder.decodeSerializableValue(delegate)
+    override fun deserialize(decoder: Decoder): DefaultOrT {
+        val maybeString = decoder.runCatching { decodeString() } .getOrNull()
+        return if (maybeString == "None") {
+            default
         } else {
-            decoder.decodeNull()
+            delegate.deserialize(decoder)
         }
     }
 
-    override fun serialize(encoder: Encoder, value: T?) {
-        if (value == null) {
-            encoder.encodeNull()
-        } else {
-            encoder.encodeNotNullMark()
-            encoder.encodeSerializableValue(delegate, value)
+    override fun serialize(encoder: Encoder, value: DefaultOrT) {
+        if (value == default)
+            encoder.encodeString("None")
+        else {
+            // Safety: value is of type T excluding DefaultOrT
+            // all DefaultOrT values that are not T are assumed to be exactly the set of {val default}
+            // assumes default implements structured equality
+            val vAsDerived = value as T
+            delegate.serialize(encoder, vAsDerived)
         }
+
     }
 }
 
-object NoneDoubleFixer : NoneFixer<Double>(Double.serializer(), JsonPrimitive("0.0"))
-object NoneNullableDoubleFixer : NoneFixer<Double>(Double.serializer())
-object NoneIntFixer : NoneFixer<Int>(Int.serializer(), JsonPrimitive("0"))
-object NoneNullableIntFixer : NoneFixer<Int>(Int.serializer())
+object NoneDoubleFixer : NoneFixer<Double, Double>(Double.serializer(), 0.0)
+object NoneNullableDoubleFixer : NoneFixer<Double?, Double>(Double.serializer(), null)
+object NoneIntFixer : NoneFixer<Int, Int>(Int.serializer(), 0)
+object NoneNullableIntFixer : NoneFixer<Int, Int>(Int.serializer(), 0)
