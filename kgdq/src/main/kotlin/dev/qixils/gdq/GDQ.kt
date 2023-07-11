@@ -560,4 +560,4 @@ open class ESA(
 }
 
 class HEK : ESA("https://hekathon.esamarathon.com/search/")
-class RPGLB : GDQ("https://rpglimitbreak.com/tracker/search/", ModelType.ALL.minus(ModelType.HEADSET))
+class RPGLB : GDQ("https://tracker.rpglimitbreak.com/search/", ModelType.ALL.minus(ModelType.HEADSET))
