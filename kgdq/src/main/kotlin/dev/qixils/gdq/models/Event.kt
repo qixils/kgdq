@@ -16,8 +16,8 @@ data class Event(
     val hashtag: String = "#$short",
 //    @SerialName("use_one_step_screening") val useOneStepScreening: Boolean, - some sort of internal variable. commenting out because it's not in ESA's API
     @SerialName("receivername") val charityName: String,
-    @Serializable(with = NoneNullableDoubleFixer::class) @SerialName("targetamount") val targetAmount: Double?,
-    @Serializable(with = NoneNullableDoubleFixer::class) @SerialName("minimumdonation") val minimumDonation: Double?,
+    @Serializable(with = DoubleOrNoneNullSerializer::class) @SerialName("targetamount") val targetAmount: Double?,
+    @Serializable(with = DoubleOrNoneNullSerializer::class) @SerialName("minimumdonation") val minimumDonation: Double?,
 //    @SerialName("paypalemail") val paypalEmail: String, - don't see a reason to expose this
     @SerialName("paypalcurrency") val paypalCurrency: String,
     @SerialName("datetime") @Serializable(with = InstantAsStringSerializer::class) private var _starttime: Instant? = null,
@@ -27,10 +27,10 @@ data class Event(
     @SerialName("allow_donations") val allowDonations: Boolean = !locked,
     @SerialName("canonical_url") private var _canonicalUrl: String? = null,
     val public: String,
-    @Serializable(with = NoneNullableDoubleFixer::class) val amount: Double?,
-    @Serializable(with = NoneIntFixer::class) val count: Int,
-    @Serializable(with = NoneDoubleFixer::class) val max: Double,
-    @Serializable(with = NoneDoubleFixer::class) val avg: Double,
+    @Serializable(with = DoubleOrNoneZeroSerializer::class) val amount: Double,
+    @Serializable(with = IntOrNoneZeroSerializer::class) val count: Int,
+    @Serializable(with = DoubleOrNoneZeroSerializer::class) val max: Double,
+    @Serializable(with = DoubleOrNoneZeroSerializer::class) val avg: Double,
     @SerialName("horaro_name") private val horaroName: String? = null,
 ) : Model {
 

@@ -314,7 +314,7 @@ class EventData {
     val allowDonations: Boolean
     val canonicalUrl: String
     val public: String
-    val amount: Double?
+    val amount: Double
     val count: Int
     val max: Double
     val avg: Double
@@ -419,7 +419,7 @@ class OrganizationData {
         homepageUrl = organization.homepageUrl
         autoVODs = organization.autoVODs
         if (events != null) {
-            amountRaised = events.sumOf { it.amount ?: 0.0 }
+            amountRaised = events.sumOf { it.amount }
             donationCount = events.sumOf { it.count }
         }
     }

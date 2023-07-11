@@ -33,12 +33,12 @@ object LegacyStringAdapter : AbstractLegacyStringAdapter<List<String>>(ListSeria
 open class FnSerializer<T>(override val descriptor: SerialDescriptor, val fromJson: (JsonElement) -> T, val toJson: (JsonEncoder, T) -> Unit) : KSerializer<T> {
 
     override fun deserialize(decoder: Decoder): T {
-        var jsonDecoder = decoder as? JsonDecoder ?: error("FnSerializer can only be used with JsonDecoder")
+        val jsonDecoder = decoder as? JsonDecoder ?: error("FnSerializer can only be used with JsonDecoder")
         return fromJson(jsonDecoder.decodeJsonElement())
     }
 
     override fun serialize(encoder: Encoder, value: T) {
-        var jsonEncoder = encoder as? JsonEncoder ?: error("FnSerializer can only be used with JsonEncoder")
+        val jsonEncoder = encoder as? JsonEncoder ?: error("FnSerializer can only be used with JsonEncoder")
         toJson(jsonEncoder, value)
     }
 }
