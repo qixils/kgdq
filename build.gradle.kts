@@ -14,7 +14,7 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     dependencies {
-        api("org.jetbrains.kotlin:kotlin-stdlib:1.8.22")
+        api("org.jetbrains.kotlin:kotlin-stdlib:1.9.0")
     }
 
     tasks.compileKotlin {
