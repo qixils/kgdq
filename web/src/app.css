@@ -578,6 +578,30 @@ form button[type="submit"] {
     text-align: center;
 }
 
+.schedule-btn {
+    display: flex;
+    padding: 5px;
+    color: var(--text);
+    background-color: var(--raise-bg);
+    border-radius: 2px;
+    margin: 1em 2em;
+    border: 2px solid var(--run-finished);
+    box-shadow: #713 0 3px 0 0;
+    cursor: pointer;
+    align-items: center;
+    text-align: center;
+    text-decoration: none;
+}
+
+.schedule-btn::before {
+    /*noinspection CssNoGenericFontName*/
+    font-family: 'Material Symbols Rounded';
+    content: 'format_list_bulleted';
+    font-size: 150%;
+    margin-right: 5px;
+
+}
+
 .suggest-dialog.submitting button[type="submit"] {
     cursor: wait;
     border: 2px solid var(--bid-open);

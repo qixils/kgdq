@@ -33,8 +33,8 @@
     {/if}
 
     {#if event.startTime && event.endTime}
-        <p><a href="/event/{org}/{event.short}">View schedule and VODs</a></p>
-        <p><a href="{event.scheduleUrl}" target="_blank">View official schedule on the {org.toUpperCase()} website</a></p>
+        <a class="schedule-btn" href="/event/{org}/{event.short}">View schedule and VODs</a>
+        <p>See also the <a href="{event.scheduleUrl}" target="_blank">official schedule on the {org.toUpperCase()} website ↗</a></p>
     {/if}
 </li>
 
