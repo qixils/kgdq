@@ -631,6 +631,7 @@ form button[type="submit"] {
     color: var(--text);
     font-size: 200%;
     padding: 0;
+    cursor: pointer;
 }
 
 .event-summary {
