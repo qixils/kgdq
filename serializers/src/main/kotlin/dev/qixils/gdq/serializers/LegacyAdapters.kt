@@ -1,6 +1,5 @@
 package dev.qixils.gdq.serializers
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
@@ -31,33 +30,39 @@ object LegacyStringAdapter : AbstractLegacyStringAdapter<List<String>>(ListSeria
     }
 }
 
-open class NoneFixer<DefaultOrT, T: DefaultOrT>(val delegate: KSerializer<T>, val default: DefaultOrT) : KSerializer<DefaultOrT> {
-    override val descriptor = delegate.descriptor
+open class FnSerializer<T>(override val descriptor: SerialDescriptor, val fromJson: (JsonElement) -> T, val toJson: (JsonEncoder, T) -> Unit) : KSerializer<T> {
 
-    override fun deserialize(decoder: Decoder): DefaultOrT {
-        val maybeString = decoder.runCatching { decodeString() } .getOrNull()
-        return if (maybeString == "None") {
-            default
-        } else {
-            delegate.deserialize(decoder)
-        }
+    override fun deserialize(decoder: Decoder): T {
+        var jsonDecoder = decoder as? JsonDecoder ?: error("FnSerializer can only be used with JsonDecoder")
+        return fromJson(jsonDecoder.decodeJsonElement())
     }
 
-    override fun serialize(encoder: Encoder, value: DefaultOrT) {
-        if (value == default)
-            encoder.encodeString("None")
-        else {
-            // Safety: value is of type T excluding DefaultOrT
-            // all DefaultOrT values that are not T are assumed to be exactly the set of {val default}
-            // assumes default implements structured equality
-            val vAsDerived = value as T
-            delegate.serialize(encoder, vAsDerived)
-        }
-
+    override fun serialize(encoder: Encoder, value: T) {
+        var jsonEncoder = encoder as? JsonEncoder ?: error("FnSerializer can only be used with JsonEncoder")
+        toJson(jsonEncoder, value)
     }
 }
 
-object NoneDoubleFixer : NoneFixer<Double, Double>(Double.serializer(), 0.0)
-object NoneNullableDoubleFixer : NoneFixer<Double?, Double>(Double.serializer(), null)
-object NoneIntFixer : NoneFixer<Int, Int>(Int.serializer(), 0)
-object NoneNullableIntFixer : NoneFixer<Int, Int>(Int.serializer(), 0)
+object DoubleOrNoneNullSerializer: FnSerializer<Double?>(Double.serializer().descriptor, { it.jsonPrimitive.doubleOrNull }, {
+    encoder, value ->
+    if (value == null)
+        encoder.encodeString("None")
+    else
+        encoder.encodeDouble(value)
+})
+
+object DoubleOrNoneZeroSerializer: FnSerializer<Double>(Double.serializer().descriptor, { it.jsonPrimitive.doubleOrNull ?: 0.0 }, {
+    encoder, value -> encoder.encodeDouble(value)
+})
+
+object IntOrNoneNullSerializer: FnSerializer<Int?>(Int.serializer().descriptor, { it.jsonPrimitive.intOrNull }, {
+    encoder, value ->
+    if (value == null)
+        encoder.encodeString("None")
+    else
+        encoder.encodeInt(value)
+})
+
+object IntOrNoneZeroSerializer: FnSerializer<Int>(Int.serializer().descriptor, { it.jsonPrimitive.intOrNull ?: 0 }, {
+    encoder, value -> encoder.encodeInt(value)
+})
