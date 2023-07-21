@@ -147,8 +147,10 @@ fun Application.configureRouting() {
                         call.respond(HttpStatusCode.OK)
                     }
 
-                    delete("/vod") { // ?id=<suggestion_id>
+                    delete("/vod") { // ?url=<suggestion_url>
                         val user = getUser(call) ?: return@delete
+                        if (user.role < Role.ADMIN)
+                            throw AuthorizationException()
 
                         // TODO: lookup by URL is OK, they are unique for a VOD, but is not straightforward when it is
                         // not the primary key.
@@ -156,7 +158,7 @@ fun Application.configureRouting() {
 
                         val (marathon, suggestion, run) = (marathons.firstNotNullOfOrNull { marathon ->
                             marathon.getVodSuggestionAndRun { it.vod.url == url }?.let { (s, r) -> Triple(marathon, s, r) }
-                        }) ?: throw UserError("Invalid suggestion ID")
+                        }) ?: throw UserError("Invalid suggestion URL: $url")
 
                         // Admins OR the contributor are allowed
                         if (!(user.role >= Role.MODERATOR || suggestion.vod.contributorId == user.id))
