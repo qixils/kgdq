@@ -3,11 +3,8 @@
 package club.speedrun.vods.plugins
 
 import club.speedrun.vods.*
-import club.speedrun.vods.marathon.Organization
-import club.speedrun.vods.marathon.VOD
-import club.speedrun.vods.marathon.VODType
-import club.speedrun.vods.marathon.VodSuggestion
-import club.speedrun.vods.marathon.VodSuggestionState
+import club.speedrun.vods.marathon.*
+import dev.qixils.gdq.models.Run
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.locations.*
@@ -149,20 +146,38 @@ fun Application.configureRouting() {
 
                     delete("/vod") { // ?url=<suggestion_url>
                         val user = getUser(call) ?: return@delete
-                        if (user.role < Role.ADMIN)
-                            throw AuthorizationException()
 
                         // TODO: lookup by URL is OK, they are unique for a VOD, but is not straightforward when it is
                         // not the primary key.
                         val url = call.parameters["url"] ?: throw UserError("Missing suggestion URL parameter")
-
-                        val (marathon, suggestion, run) = (marathons.firstNotNullOfOrNull { marathon ->
-                            marathon.getVodSuggestionAndRun { it.vod.url == url }?.let { (s, r) -> Triple(marathon, s, r) }
-                        }) ?: throw UserError("Invalid suggestion URL: $url")
+                        var marathon: Marathon? = null
+                        var vod: VOD? = null
+                        var run: RunOverrides? = null
+                        for (marathon_ in marathons) {
+                            for (run_ in marathon_.db.runs.getAll()) {
+                                for (vod_ in run_.vods) {
+                                    if (vod_.url == url) {
+                                        marathon = marathon_
+                                        vod = vod_
+                                        run = run_
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                        if (marathon == null || vod == null || run == null)
+                            throw UserError("Invalid suggestion URL: $url")
 
                         // Admins OR the contributor are allowed
-                        if (!(user.role >= Role.MODERATOR || suggestion.vod.contributorId == user.id))
+                        if (!(user.role >= Role.MODERATOR || vod.contributorId == user.id))
                             throw AuthorizationException()
+
+                        run.vods.remove(vod)
+
+                        // also remove suggestion, IF present
+                        val (_, suggestion, _) = (marathons.firstNotNullOfOrNull { marathon ->
+                            marathon.getVodSuggestionAndRun { it.vod.url == url }?.let { (s, r) -> Triple(marathon, s, r) }
+                        }) ?: Triple(null, null, null)
 
                         run.vodSuggestions.remove(suggestion)
 

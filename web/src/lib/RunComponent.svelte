@@ -54,7 +54,7 @@
 
             let post_response = await fetch(`${BASE_URL}/suggest/vod`, {
                 credentials: "include",
-                method: "POST",
+                method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
                 },
