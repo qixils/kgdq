@@ -188,8 +188,8 @@ class ScheduleManager(
         if (threadKey in channelData.threads) {
             val threadId = channelData.threads[threadKey]!!
             val pred = { it: ThreadChannel -> it.idLong == threadId }
-            thread = owningChannel.threadChannels.first(pred)
-                ?: owningChannel.retrieveArchivedPublicThreadChannels().first(pred)
+            thread = owningChannel.threadChannels.firstOrNull(pred)
+                ?: owningChannel.retrieveArchivedPublicThreadChannels().firstOrNull(pred)
                 ?: run {
                 logger.error("Could not find thread ${channelData.threads[threadKey]}")
                 return
