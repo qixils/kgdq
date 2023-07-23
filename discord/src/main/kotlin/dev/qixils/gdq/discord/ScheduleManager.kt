@@ -194,7 +194,8 @@ class ScheduleManager(
                 logger.error("Could not find thread ${channelData.threads[threadKey]}")
                 return
             }
-            thread.manager.setArchived(false).await()
+            if (thread.isArchived)
+                thread.manager.setArchived(false).await()
         } else {
             thread = owningChannel.createThreadChannel(event.name)
                 .setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK)
