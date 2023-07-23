@@ -183,7 +183,7 @@ class ScheduleManager(
         // Get channel data
         val channelData = db.get(owningChannel.id) ?: ChannelData(owningChannel.id)
         // Get or create thread
-        val threadKey = "${config.org}-${event.id}"
+        val threadKey = "${config.org}-${event.id}" // TODO: .lowercase() ?
         val thread: ThreadChannel
         if (threadKey in channelData.threads) {
             val threadId = channelData.threads[threadKey]!!
@@ -194,6 +194,7 @@ class ScheduleManager(
                 logger.error("Could not find thread ${channelData.threads[threadKey]}")
                 return
             }
+            thread.manager.setArchived(false).await()
         } else {
             thread = owningChannel.createThreadChannel(event.name)
                 .setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK)
