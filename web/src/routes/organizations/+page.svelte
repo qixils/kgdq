@@ -1,16 +1,15 @@
 <script lang="ts">
     import type {Organization} from "vods.speedrun.club-client";
-    import PageHeadTags from "$lib/PageHeadTags.svelte";
     import ErrorReport from "$lib/ErrorReport.svelte";
+    import {meta} from "../../stores";
 
     export let data: { orgs: Organization[] | Error };
-</script>
 
-<svelte:head>
-    <PageHeadTags
-            title="Organizations"
-            description="Learn about the charity marathon organizations that host events covered by this site." />
-</svelte:head>
+    $meta = {
+        title: "Organizations",
+        description: "Learn about the charity marathon organizations that host events covered by this site."
+    }
+</script>
 
 <h1>Organizations</h1>
 

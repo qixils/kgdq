@@ -1,5 +1,4 @@
 <script lang="ts">
-	import PageHeadTags from '$lib/PageHeadTags.svelte';
 	import type {MarathonEvent} from "vods.speedrun.club-client";
 	import {SvcClient} from "vods.speedrun.club-client";
 	import EventSummary from "$lib/EventSummary.svelte";
@@ -7,6 +6,7 @@
 	import {BASE_URL, compareEventStartTime} from "$lib/kgdq";
 	import LoadingSkeleton from "$lib/LoadingSkeleton.svelte";
 	import ErrorReport from "$lib/ErrorReport.svelte";
+	import {meta} from "../stores";
 
 	let events: MarathonEvent[];
 	let events_error: Error | null = null;
@@ -21,13 +21,12 @@
 			events_error = e;
 		}
 	});
-</script>
 
-<svelte:head>
-	<PageHeadTags
-		description="Find VODs of speedruns from charity marathon streams."
-	    url="https://vods.speedrun.club" />
-</svelte:head>
+	$meta = {
+		description: "Find VODs of speedruns from charity marathon streams.",
+		url: "https://vods.speedrun.club"
+	}
+</script>
 
 <div style="text-align: center; max-width: 600px; margin: 0 auto">
 	<p class="hero-text">A site to find VODs of speedruns that are available online from charity marathon streams.</p>

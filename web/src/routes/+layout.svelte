@@ -1,7 +1,9 @@
 <script lang="ts">
   import "../app.css";
-  import {user} from "../stores";
+  import {user, meta} from "../stores";
   import {onMount} from "svelte";
+  import {page} from "$app/stores";
+
 
   onMount(async () => {
     let user_local = localStorage.getItem("user");
@@ -15,6 +17,27 @@
     }
   })
 </script>
+
+<svelte:head>
+  {#if $meta.title}
+    <title>Speedrun VOD Club · { $meta.title }</title>
+    <meta property="og:title" content="Speedrun VOD Club · { $meta.title }" />
+    <meta property="og:site_name" content="Speedrun VOD Club" />
+  {:else}
+    <title>Speedrun VOD Club</title>
+    <meta property="og:title" content="Speedrun VOD Club" />
+  {/if}
+
+  <meta name="description" content="{ $meta.description }">
+  <meta property="og:description" content="{ $meta.description }" />
+
+  <meta property="og:url" content="{ $meta.url ?? $page.url }" />
+  <link rel="canonical" href="{ $meta.url ?? $page.url }">
+
+  {#if $meta.noindex}
+    <meta name="robots" content="noindex">
+  {/if}
+</svelte:head>
 
 <header>
   <a href="/"><img src="/icon.svg" alt="Speedrun VOD Club" /></a>

@@ -1,14 +1,14 @@
 <script lang="ts">
     import {BASE_URL} from "$lib/kgdq.ts";
-    import PageHeadTags from "$lib/PageHeadTags.svelte";
     import {page} from "$app/stores";
-</script>
+    import {meta} from "../../stores";
 
-<svelte:head>
-    <PageHeadTags
-            title="Log In"
-            description="Log in to submit VODs to appear on the website." />
-</svelte:head>
+    $meta = {
+        title: "Log In",
+        description: "Log in to submit VODs to appear on the website.",
+        noindex: true
+    }
+</script>
 
 <h1>Log in for VOD Submission</h1>
 

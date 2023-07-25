@@ -5,9 +5,9 @@
     import {BASE_URL} from "$lib/kgdq";
     import {onMount} from "svelte";
     import EventSummary from "$lib/EventSummary.svelte";
-    import PageHeadTags from "$lib/PageHeadTags.svelte";
     import LoadingButton from "$lib/LoadingButton.svelte";
     import ErrorReport from "$lib/ErrorReport.svelte";
+    import {meta} from "../../../stores";
 
     export let data: { org: Organization };
     let events: MarathonEvent[];
@@ -21,13 +21,12 @@
             error = e;
         }
     });
-</script>
 
-<svelte:head>
-    <PageHeadTags
-        title="{data.org.displayName} Events"
-        description="List of events hosted by {data.org.displayName}." />
-</svelte:head>
+    $meta = {
+        title: `${data.org.displayName} Events`,
+        description: `List of events hosted by ${data.org.displayName}.`
+    }
+</script>
 
 <h1>Events by { data.org.displayName }</h1>
 

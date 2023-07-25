@@ -1,17 +1,16 @@
 <script lang="ts">
     import type {MarathonEvent} from "vods.speedrun.club-client";
-    import PageHeadTags from "$lib/PageHeadTags.svelte";
     import EventSummary from "$lib/EventSummary.svelte";
     import ErrorReport from "$lib/ErrorReport.svelte";
+    import {meta} from "../../../stores";
 
     export let data: { events: MarathonEvent[] | Error };
-</script>
 
-<svelte:head>
-    <PageHeadTags
-            title="Recent Events"
-            description="List of past marathon events." />
-</svelte:head>
+    $meta = {
+        title: "Recent Events",
+        description: "List of past marathon events."
+    }
+</script>
 
 <h1>Recent Events</h1>
 

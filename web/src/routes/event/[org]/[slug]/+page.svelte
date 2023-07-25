@@ -8,9 +8,9 @@
     import {Formatters} from "$lib/Formatters";
     import {BASE_URL, guessStreamNameAndUrl, niceShortName} from "$lib/kgdq";
     import {onMount} from "svelte";
-    import PageHeadTags from "$lib/PageHeadTags.svelte";
     import LoadingButton from "$lib/LoadingButton.svelte";
     import ErrorReport from "$lib/ErrorReport.svelte";
+    import {meta} from "../../../../stores";
 
     export let data: { event: MarathonEvent } = undefined as never;
     let SVC = new SvcClient(BASE_URL, fetch);
@@ -35,13 +35,12 @@
             run_error = e;
         }
     });
-</script>
 
-<svelte:head>
-    <PageHeadTags
-        title={ data.event.name }
-        description="View the schedule of {niceShortName(data.event)} and watch back the VODs." />
-</svelte:head>
+    $meta = {
+        title: data.event.name,
+        description: `View the schedule of ${niceShortName(data.event)} and watch back the VODs.`
+    }
+</script>
 
 <section>
     <div class="event-description">

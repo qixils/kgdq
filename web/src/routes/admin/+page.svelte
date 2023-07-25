@@ -5,8 +5,8 @@
     import {BASE_URL, getSuggestions} from "$lib/kgdq";
     import type {MarathonEvent, Run} from "vods.speedrun.club-client";
     import {svc} from "vods.speedrun.club-client";
-    import PageHeadTags from "$lib/PageHeadTags.svelte";
     import LoadingSkeleton from "$lib/LoadingSkeleton.svelte";
+    import {meta} from "../../stores";
 
     let suggests: VODSuggestion[];
 
@@ -73,15 +73,12 @@
 
     }
 
-
+    $meta = {
+        noindex: true,
+        title: "Admin >:3",
+        description: "Modify event data and approve VOD suggestions."
+    }
 </script>
-
-<svelte:head>
-    <PageHeadTags
-            noindex={true}
-            title="Admin >:3"
-            description="Modify event data and approve VOD suggestions." />
-</svelte:head>
 
 <p>SECRET ADMIN VOD APPROVAL PAGE</p>
 

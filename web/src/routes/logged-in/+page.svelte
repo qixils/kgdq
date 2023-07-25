@@ -2,8 +2,7 @@
 
     import {onMount} from "svelte";
     import {getUser} from "$lib/kgdq.ts";
-    import {user} from "../../stores";
-    import PageHeadTags from "$lib/PageHeadTags.svelte";
+    import {meta, user} from "../../stores";
     import ErrorReport from "$lib/ErrorReport.svelte";
 
     let user_error: string | null = null;
@@ -20,14 +19,13 @@
             console.error(e);
         }
     });
-</script>
 
-<svelte:head>
-    <PageHeadTags
-            noindex={true}
-            title="Log In Success"
-            description="Check your account status." />
-</svelte:head>
+    $meta = {
+        title: "Log In Success",
+        description: "Check your account status.",
+        noindex: true
+    }
+</script>
 
 {#if $user}
     <p>Logged in as {$user.name}</p>
