@@ -13,7 +13,7 @@ import net.dean.jraw.RateLimitException
 import net.dean.jraw.RedditClient
 import org.slf4j.LoggerFactory
 import java.time.Instant
-import java.util.Locale
+import java.util.*
 import kotlin.time.Duration.Companion.seconds
 
 class ThreadManager(
@@ -61,12 +61,9 @@ class ThreadManager(
             .append("Don't gild the thread, donate the money instead! \\^_\\^\n\n")
             .append("This thread is powered by the [thread updater](https://github.com/qixils/kgdq/tree/main/reddit) ")
             .append("using data from [${marathon.displayName}](${marathon.homepageUrl})")
-        if (!marathon.autoVODs)
-            body.append(", [Speedrun.com](https://www.speedrun.com), and the contributors to the ")
-                .append("[VOD site](https://vods.speedrun.club/). ")
-                .append("Thank you to the volunteers that keep this thread running!\n")
-        else
-            body.append(" and [Speedrun.com](https://www.speedrun.com).\n")
+            .append(", [Speedrun.com](https://www.speedrun.com), and the contributors to the ")
+            .append("[VOD site](https://vods.speedrun.club/). ")
+            .append("Thank you to the volunteers that keep this thread running!\n")
     }
 
     private fun generateSubHeader(body: StringBuilder, event: EventData, eventConfig: EventConfig) {

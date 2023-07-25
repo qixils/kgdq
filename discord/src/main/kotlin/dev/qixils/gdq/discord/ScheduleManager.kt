@@ -22,8 +22,7 @@ import java.text.NumberFormat
 import java.time.Duration
 import java.time.Instant
 import java.time.format.DateTimeFormatter
-import java.util.Currency
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -184,13 +183,19 @@ class ScheduleManager(
         // Get channel data
         val channelData = db.get(owningChannel.id) ?: ChannelData(owningChannel.id)
         // Get or create thread
-        val threadKey = "${config.org}-${event.id}"
+        val threadKey = "${config.org}-${event.id}" // TODO: .lowercase() ?
         val thread: ThreadChannel
         if (threadKey in channelData.threads) {
-            thread = owningChannel.guild.getThreadChannelById(channelData.threads[threadKey]!!) ?: run {
+            val threadId = channelData.threads[threadKey]!!
+            val pred = { it: ThreadChannel -> it.idLong == threadId }
+            thread = owningChannel.threadChannels.firstOrNull(pred)
+                ?: owningChannel.retrieveArchivedPublicThreadChannels().firstOrNull(pred)
+                ?: run {
                 logger.error("Could not find thread ${channelData.threads[threadKey]}")
                 return
             }
+            if (thread.isArchived)
+                thread.manager.setArchived(false).await()
         } else {
             thread = owningChannel.createThreadChannel(event.name)
                 .setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK)
