@@ -5,6 +5,29 @@ export let BASE_URL= 'https://' + API_DOMAIN + '/api/v2';
 
 export const EPOCH = "1970-01-01T00:00:00Z";
 
+export const ESA_RE = /^esa(w?)(\d+)(?:s(\d+))?$/i;
+
+export function guessStreamNameAndUrl(org: string, eventSlug: string) {
+    const esaMatch = ESA_RE.exec(eventSlug);
+    let url = null;
+    let name = null;
+    if (esaMatch) {
+        const streamSuffix = esaMatch[3] == '2' ? '2' : ''
+        url = `https://twitch.tv/esamarathon${streamSuffix}`;
+        name = `ESAMarathon${streamSuffix} on Twitch`;
+    } else if (org === 'gdq') {
+        url =  `https://twitch.tv/gamesdonequick`;
+        name = 'GamesDoneQuick on Twitch';
+    } else if (org === 'rpglb') {
+        url =  `https://twitch.tv/rpglimitbreak`;
+        name = "RPGLimitBreak on Twitch";
+    } else if (org === 'hek') {
+        url = 'https://twitch.tv/esamarathon';
+        name = "ESAMarathon on Twitch";
+    }
+    return [name, url];
+}
+
 export function compareEventStartTime(a: MarathonEvent, b: MarathonEvent) {
     return (a.startTime || EPOCH).localeCompare(b.startTime || EPOCH);
 }
@@ -53,11 +76,10 @@ export async function getUser(): Promise<User> {
     return await get<User>(`${BASE_URL}/profile`);
 }
 export function niceShortName(event: MarathonEvent) {
-    let ESA_RE = /^esa([sw])(\d+)(?:s(\d+))?$/i;
     let match = event.short.match(ESA_RE);
     if (match) {
         let [_, season, year, stream_number] = match;
-        let season_nice = season === "s" ? "Summer" : "Winter";
+        let season_nice = season === "w" ? "Winter" : "Summer";
         if (stream_number) {
             return `ESA ${season_nice} ${year} S${stream_number}`;
         }

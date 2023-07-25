@@ -1,6 +1,7 @@
 <script lang="ts">
     import type {MarathonEvent} from 'vods.speedrun.club-client';
     import {Formatters} from "$lib/Formatters";
+    import {guessStreamNameAndUrl} from "$lib/kgdq";
 
     export let org: string;
 
@@ -8,6 +9,7 @@
 
     let formatter = new Formatters(event.paypalCurrency);
 
+    const [streamName, streamUrl] = guessStreamNameAndUrl(org, event.short);
 </script>
 
 <li class="event-summary">
@@ -35,6 +37,10 @@
     {#if event.startTime && event.endTime}
         <a class="schedule-btn" href="/event/{org}/{event.short}">View schedule and VODs</a>
         <p>See also the <a href="{event.scheduleUrl}" target="_blank">official schedule on the {org.toUpperCase()} website ↗</a></p>
+    {/if}
+
+    {#if event.timeStatus == "IN_PROGRESS" && streamUrl && streamName}
+        <p>Watch the event live: <a href="{streamUrl}" target="_blank">{streamName} ↗</a></p>
     {/if}
 </li>
 
