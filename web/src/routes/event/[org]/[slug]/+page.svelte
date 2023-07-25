@@ -6,7 +6,7 @@
     import RunComponent from "$lib/RunComponent.svelte";
     import {page} from "$app/stores";
     import {Formatters} from "$lib/Formatters";
-    import {BASE_URL, niceShortName} from "$lib/kgdq";
+    import {BASE_URL, guessStreamNameAndUrl, niceShortName} from "$lib/kgdq";
     import {onMount} from "svelte";
     import PageHeadTags from "$lib/PageHeadTags.svelte";
     import LoadingButton from "$lib/LoadingButton.svelte";
@@ -19,6 +19,8 @@
     let run_error: Error;
 
     let current_run_index: number | null = null;
+
+    const { streamUsername } = guessStreamNameAndUrl(data.event.organization, data.event.short);
 
     onMount(async () => {
         try {
@@ -63,6 +65,21 @@
         </p>
         {#if current_run_index !== null}
             <p><a href="#run-{current_run_index}">Jump to current run</a></p>
+            {#if data.event.timeStatus === "IN_PROGRESS" && streamUsername}
+                <iframe src="https://player.twitch.tv/?channel={streamUsername}&parent={$page.url.hostname}"
+                        allowfullscreen
+                        style="
+                         margin: 0 auto;
+                         display: block;
+                         max-width: 900px;
+                         width: calc(100% - 4px - 10px);
+                         aspect-ratio: 16/9;
+                         border: 2px solid #9146ff;
+                         border-radius: 5px;
+                         margin: 0 5px;
+                        ">
+                </iframe>
+            {/if}
         {/if}
     </div>
 

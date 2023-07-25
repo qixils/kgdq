@@ -14,18 +14,18 @@ export function guessStreamNameAndUrl(org: string, eventSlug: string) {
     if (esaMatch) {
         const streamSuffix = esaMatch[3] == '2' ? '2' : ''
         url = `https://twitch.tv/esamarathon${streamSuffix}`;
-        name = `ESAMarathon${streamSuffix} on Twitch`;
+        name = `ESAMarathon${streamSuffix}`;
     } else if (org === 'gdq') {
         url =  `https://twitch.tv/gamesdonequick`;
-        name = 'GamesDoneQuick on Twitch';
+        name = 'GamesDoneQuick';
     } else if (org === 'rpglb') {
         url =  `https://twitch.tv/rpglimitbreak`;
-        name = "RPGLimitBreak on Twitch";
+        name = "RPGLimitBreak";
     } else if (org === 'hek') {
         url = 'https://twitch.tv/esamarathon';
-        name = "ESAMarathon on Twitch";
+        name = "ESAMarathon";
     }
-    return [name, url];
+    return { streamName: `${name} on Twitch`, streamUrl: url, streamUsername: name };
 }
 
 export function compareEventStartTime(a: MarathonEvent, b: MarathonEvent) {

@@ -9,7 +9,7 @@
 
     let formatter = new Formatters(event.paypalCurrency);
 
-    const [streamName, streamUrl] = guessStreamNameAndUrl(org, event.short);
+    const {streamName, streamUrl} = guessStreamNameAndUrl(org, event.short);
 </script>
 
 <li class="event-summary">
