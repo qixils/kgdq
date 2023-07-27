@@ -297,7 +297,6 @@ sup {
     aspect-ratio: 1/1;
     place-content: center;
     border-radius: 9999px;
-    background-color: transparent;
     vertical-align: middle;
     box-sizing: content-box;
     background-color: var(--bg-bg);
@@ -347,8 +346,7 @@ sup {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    margin: 0.5em;
-    margin-left: 0;
+    margin: 0.5em 0.5em 0.5em 0;
     gap: 1em;
 }
 
@@ -560,7 +558,7 @@ form button[type="submit"] {
 /* bottom right of div, and also dont make any taller*/
 .suggest-btn,
 .suggest-dialog button[type="submit"] {
-    display: inline-block;
+    display: flex;
     /*padding: 0.5em 1em;*/
     padding: 5px;
     color: var(--text);
@@ -571,7 +569,6 @@ form button[type="submit"] {
     border: 2px solid var(--run-finished);
     box-shadow: #713 0 3px 0 0;
     cursor: pointer;
-    display: flex;
     align-items: center;
     text-align: center;
 }
