@@ -538,7 +538,7 @@ form label {
     grid-column: 1;
 }
 
-form input {
+form input, form select {
     grid-column: 2;
     background-color: var(--bg-bg);
     color: var(--text);
