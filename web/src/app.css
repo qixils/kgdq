@@ -196,25 +196,25 @@ footer {
 }
 
 @media (max-width: 600px) {
+    html {
+        font-size: small;
+    }
+
     .run-schedule-time {
         font-size: 100%;
     }
 
-    .event-runs li {
-        grid-template-columns: var(--bar-width) 5ch 1fr;
+    .event-runs > li {
+        grid-template-columns: var(--bar-width) 4ch 1fr;
+        --bar-width: 30px;
     }
 
     .schedule-bar-bit {
-        --bar-size: 20px;
-    }
-
-    .event-runs > li {
-        --bar-width: 40px;
-
+        --bar-size: 18px;
     }
 
     .run-content {
-        margin-left: 0.5em;
+        margin-left: 0;
     }
 }
 
