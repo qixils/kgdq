@@ -544,14 +544,11 @@ form input, form select {
     color: var(--text);
     border: none;
     padding: 0.25em;
+    width: 100%;
 }
 
 form input[disabled] {
     opacity: 50%;
-}
-
-form input[type="text"] {
-    width: 50ch;
 }
 
 form button[type="submit"] {
