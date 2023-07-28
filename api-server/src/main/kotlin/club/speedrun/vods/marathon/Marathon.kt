@@ -7,12 +7,8 @@ import club.speedrun.vods.httpClient
 import club.speedrun.vods.json
 import club.speedrun.vods.plugins.UserError
 import club.speedrun.vods.srcDb
-import dev.qixils.gdq.ESA
-import dev.qixils.gdq.GDQ
-import dev.qixils.gdq.HEK
+import dev.qixils.gdq.*
 import dev.qixils.gdq.Hook
-import dev.qixils.gdq.ModelType
-import dev.qixils.gdq.RPGLB
 import dev.qixils.gdq.models.Bid
 import dev.qixils.gdq.models.Event
 import dev.qixils.gdq.models.Run
@@ -21,13 +17,14 @@ import dev.qixils.horaro.Horaro
 import dev.qixils.horaro.models.FullSchedule
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.locations.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -38,7 +35,6 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.function.Predicate
 import java.util.regex.Pattern
-import kotlin.collections.ArrayList
 import kotlin.collections.set
 
 abstract class Marathon(
@@ -233,13 +229,13 @@ abstract class Marathon(
             }
             runData.add(data)
             if (data.setupTime != run.value.setupTime) {
-                logger.error("Setup time mismatch for run ${run.value.name} (${run.id}): ${data.setupTime} != ${run.value.setupTime}")
+                logger.atDebug().log { "Setup time mismatch for run ${run.value.name} (${run.id}): ${data.setupTime} != ${run.value.setupTime}" }
             }
             if (data.startTime != run.value.startTime) {
-                logger.warn("Start time mismatch for run ${run.value.name} (${run.id}): ${data.startTime} != ${run.value.startTime}")
+                logger.atDebug().log { "Start time mismatch for run ${run.value.name} (${run.id}): ${data.startTime} != ${run.value.startTime}" }
             }
             if (data.endTime != run.value.endTime) {
-                logger.warn("End time mismatch for run ${run.value.name} (${run.id}): ${data.endTime} != ${run.value.endTime}")
+                logger.atDebug().log { "End time mismatch for run ${run.value.name} (${run.id}): ${data.endTime} != ${run.value.endTime}" }
             }
         }
 
