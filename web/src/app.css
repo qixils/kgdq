@@ -32,11 +32,13 @@ html, body, .page-container {
     max-width: 900px;
     margin: 0 auto;
 
-    display: grid;
-    grid-template-rows:
-            auto  /* header */
-            1fr   /*  main  */
-            auto  /* footer */ ;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+main {
+    flex-grow: 1;
 }
 
 .hero-text {
