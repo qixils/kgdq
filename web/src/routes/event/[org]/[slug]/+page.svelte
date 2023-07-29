@@ -71,7 +71,6 @@
                         style="
                          margin: 0 auto;
                          display: block;
-                         max-width: 900px;
                          width: calc(100% - 4px - 10px);
                          aspect-ratio: 16/9;
                          border: 2px solid #9146ff;
