@@ -29,7 +29,7 @@ html, body, .page-container {
 }
 
 .page-container {
-    max-width: 900px;
+    max-width: 64em;
     margin: 0 auto;
 
     display: flex;
