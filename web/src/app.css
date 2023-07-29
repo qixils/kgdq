@@ -48,10 +48,10 @@ main {
 }
 
 header {
-    --logo-size: 80px;
+    --logo-size: 5em;
     padding: 1em;
     display: grid;
-    grid-template-columns: calc(var(--logo-size) + 20px) auto;
+    grid-template-columns: calc(var(--logo-size) + 1.25em) auto;
 }
 
 /*  Border underneath header */
@@ -64,7 +64,8 @@ header::after {
 
 header img {
     width: var(--logo-size);
-    margin: 10px;
+    height: auto;
+    margin: .625em;
 }
 
 header nav {
@@ -109,7 +110,7 @@ header nav ul {
 
 header nav li {
     list-style-type: none;
-    margin: 0 10px;
+    margin: 0 .625em;
 }
 
 main {
@@ -146,9 +147,9 @@ footer {
 
 .event-runs > li {
     display: grid;
-    --bar-width: 80px;
+    --bar-width: 5em;
     grid-template-columns: var(--bar-width) calc(1.2 * 5ch) 1fr;
-    margin: 5px;
+    margin: .3125em;
 }
 
 .run {
@@ -190,7 +191,7 @@ footer {
 
 
 .schedule-bar-bit {
-    --bar-size: 40px;
+    --bar-size: 2.5em;
     position: relative;
     display: flex;
     justify-content: center;
@@ -208,11 +209,11 @@ footer {
 
     .event-runs > li {
         grid-template-columns: var(--bar-width) 5ch 1fr;
-        --bar-width: 30px;
+        --bar-width: 1.875em;
     }
 
     .schedule-bar-bit {
-        --bar-size: 18px;
+        --bar-size: 1.125em;
     }
 
     .run-content {
@@ -246,7 +247,7 @@ footer {
 /* lines that appear next to runs */
 .schedule-bar-bit::before {
     width: calc(var(--bar-size)/4);
-    height: calc(100% + 10px);
+    height: calc(100% + .625em);
     position: absolute;
 
 }
@@ -291,14 +292,14 @@ sup {
 
 
 .radial-progress {
-    --thickness: 4px;
+    --thickness: .25em;
     position: relative;
     --size: calc(2*var(--size));
     display: inline-grid;
     height: var(--size);
     aspect-ratio: 1/1;
     place-content: center;
-    border-radius: 9999px;
+    border-radius: 100%;
     vertical-align: middle;
     box-sizing: content-box;
     background-color: var(--bg-bg);
@@ -308,7 +309,7 @@ sup {
 .radial-progress::before,
 .radial-progress::after {
     position: absolute;
-    border-radius: 9999px;
+    border-radius: 100%;
     content: "";
 }
 
@@ -374,7 +375,7 @@ sup {
     /*noinspection CssNoGenericFontName*/
     font-family: 'Material Symbols Rounded';
     font-size: 150%;
-    margin: 5px;
+    margin: .3125em;
     color: var(--text-quiet);
     width: 1ch;
 }
@@ -400,21 +401,21 @@ sup {
     content: ' ';
     /*noinspection CssUnknownTarget*/
     background-image: url("/trohpy.svg");
-    background-size: 20px;
+    background-size: 1.25em;
     background-repeat: no-repeat;
 
-    margin: 0 5px;
+    margin: 0 .3125em;
     vertical-align: bottom;
     text-decoration: none;
     border-bottom: 1px solid currentColor;
 
-    padding-left: 20px;
+    padding-left: 1.25em;
 }
 
 .run-src:hover {
     /*noinspection CssUnknownTarget*/
     background-image: url("/trohpy.svg"), url("/trohpy.svg"); /* hack to make bg svg brighten */
-    background-size: 20px, 20px;
+    background-size: 1.25em, 1.25em;
     background-repeat: no-repeat, no-repeat;
     background-blend-mode: screen, screen;
 }
@@ -441,26 +442,26 @@ sup {
     font-family: 'Material Symbols Rounded';
     content: 'play_circle';
     font-size: 150%;
-    margin: 5px;
+    margin: .3125em;
     width: 1ch;
 }
 
 .vod.youtube::before {
     text-shadow:
-            var(--youtube)   -2px 0 0,
-            rgba(var(--youtube-rgb), 0.8) -4px 0 0,
-            rgba(var(--youtube-rgb), 0.6) -6px 0 0,
-            rgba(var(--youtube-rgb), 0.4) -8px 0 0,
-            rgba(var(--youtube-rgb), 0.2) -10px 0 0;
+            var(--youtube)   -.125em 0 0,
+            rgba(var(--youtube-rgb), 0.8) -.25em 0 0,
+            rgba(var(--youtube-rgb), 0.6) -.375em 0 0,
+            rgba(var(--youtube-rgb), 0.4) -.5em 0 0,
+            rgba(var(--youtube-rgb), 0.2) -.625em 0 0;
 }
 
 .vod.twitch::before {
     text-shadow:
-            var(--twitch)   -2px 0 0,
-            rgba(var(--twitch-rgb), 0.8) -4px 0 0,
-            rgba(var(--twitch-rgb), 0.6) -6px 0 0,
-            rgba(var(--twitch-rgb), 0.4) -8px 0 0,
-            rgba(var(--twitch-rgb), 0.2) -10px 0 0;
+            var(--twitch)   -.125em 0 0,
+            rgba(var(--twitch-rgb), 0.8) -.25em 0 0,
+            rgba(var(--twitch-rgb), 0.6) -.375em 0 0,
+            rgba(var(--twitch-rgb), 0.4) -.5em 0 0,
+            rgba(var(--twitch-rgb), 0.2) -.625em 0 0;
 }
 
 .bid-war-stats {
@@ -472,9 +473,9 @@ sup {
     content: '';
     display: inline-flex;
     flex-direction: column;
-    gap: 3px;
+    gap: .1875em;
     margin: 0.5em;
-    width: 70px;
+    width: 4.375em;
     border-right: 2px solid var(--text-quiet);
 }
 
@@ -562,8 +563,7 @@ form button[type="submit"] {
 .suggest-btn,
 .suggest-dialog button[type="submit"] {
     display: flex;
-    /*padding: 0.5em 1em;*/
-    padding: 5px;
+    padding: .3125em;
     color: var(--text);
     background-color: var(--raise-bg);
     border-radius: 2px;
@@ -578,7 +578,7 @@ form button[type="submit"] {
 
 .schedule-btn {
     display: flex;
-    padding: 5px;
+    padding: .3125em;
     background-color: var(--raise-bg);
     border-radius: 2px;
     margin: 1em 2em;
@@ -596,7 +596,7 @@ form button[type="submit"] {
     font-family: 'Material Symbols Rounded';
     content: 'format_list_bulleted';
     font-size: 150%;
-    margin-right: 5px;
+    margin-right: .3125em;
 
 }
 
@@ -621,7 +621,7 @@ form button[type="submit"] {
     font-family: 'Material Symbols Rounded';
     content: 'add_circle';
     font-size: 150%;
-    margin-right: 5px;
+    margin-right: .3125em;
     width: 1ch;
 }
 
@@ -636,7 +636,7 @@ form button[type="submit"] {
     border: 1px solid var(--run-finished);
     border-radius: 2px;
     padding: 1.5em;
-    box-shadow: var(--bg-bg) 0 0 30px 10px;
+    box-shadow: var(--bg-bg) 0 0 1.875em 0.625em;
 }
 
 .suggest-dialog > h1 {
@@ -692,7 +692,7 @@ form button[type="submit"] {
     float: left;
     font-size: 200%;
     grid-row: 1 / span 2;
-    margin: 15px;
+    margin: 1em;
 }
 
 .error-box h2 {
