@@ -420,14 +420,15 @@ sup {
 .vod {
     display: flex;
     align-items: center;
-    min-width: 170px;
+    min-width: min(11em, 100%);
 }
 
 .vods-list {
     /*float: right;*/
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    grid-gap: 1em;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1em 2em;
     list-style: none;
     padding: 0;
     margin: 0.5em;
