@@ -14,11 +14,22 @@
     export let formatter: Formatters = undefined as Formatters;
 
     let run = runs[run_index];
-    // TODO: step_color style var
-    let step_color = run.timeStatus === "UPCOMING" ? "" : (run.timeStatus === "IN_PROGRESS" ? "#fff" : "#d2a");
 
     let previous_status = run_index === 0 ? null : runs[run_index - 1].timeStatus;
     let current_status = run.timeStatus;
+    let next_status = run_index === runs.length - 1 ? null : runs[run_index + 1].timeStatus;
+
+    if (previous_status === "IN_PROGRESS" && current_status === "IN_PROGRESS") {
+        previous_status = "FINISHED";
+        current_status = "UPCOMING";
+    }
+    if (current_status === "IN_PROGRESS" && next_status === "IN_PROGRESS") {
+        previous_status = "FINISHED";
+        current_status = "FINISHED";
+    }
+
+    // TODO: step_color style var
+    let step_color = run.timeStatus === "UPCOMING" ? "" : (current_status === "IN_PROGRESS" ? "#fff" : "#d2a");
 
     let suggest_dialog = () => (document.getElementById(`suggest-${run_index}`) as HTMLDialogElement );
 
