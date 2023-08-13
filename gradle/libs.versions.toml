@@ -1,14 +1,14 @@
 [versions]
-ktor = "2.3.2"
+ktor = "2.3.3"
 kotlin = "1.9.0"
 configurate = "4.1.2"
-coroutines = "1.7.2"
+coroutines = "1.7.3"
 serialization = "1.5.1"
 
 [libraries]
-logback = { module = "ch.qos.logback:logback-classic", version = "1.4.8" }
+logback = { module = "ch.qos.logback:logback-classic", version = "1.4.11" }
 amqp-client = { module = "com.rabbitmq:amqp-client", version = "5.18.0" }
-twitch4j-helix = { module = "com.github.twitch4j:twitch4j-helix", version = "1.15.0" }
+twitch4j-helix = { module = "com.github.twitch4j:twitch4j-helix", version = "1.16.0" }
 ktor-server-core-jvm = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
 ktor-server-auth-jvm = { module = "io.ktor:ktor-server-auth-jvm", version.ref = "ktor" }
 ktor-server-locations-jvm = { module = "io.ktor:ktor-server-locations-jvm", version.ref = "ktor" }
@@ -36,7 +36,7 @@ kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", versi
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-serialization-cbor = { module = "org.jetbrains.kotlinx:kotlinx-serialization-cbor", version.ref = "serialization" }
 slf4j = { module = "org.slf4j:slf4j-api", version = "2.0.7" }
-jda = { module = "net.dv8tion:JDA", version = "5.0.0-beta.12" }
+jda = { module = "net.dv8tion:JDA", version = "5.0.0-beta.13" }
 jda-ktx = { module = "com.github.minndevelopment:jda-ktx", version = "9370cb13cc" }
 configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate" }
 configurate-extra-kotlin = { module = "org.spongepowered:configurate-extra-kotlin", version.ref = "configurate" }

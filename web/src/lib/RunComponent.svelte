@@ -2,7 +2,6 @@
     import {Formatters} from "$lib/Formatters";
     import VODs from "$lib/VODs.svelte";
     import type {Run} from "vods.speedrun.club-client";
-    import {svc} from "vods.speedrun.club-client";
     import BidTarget from "$lib/BidTarget.svelte";
     import BidWar from "$lib/BidWar.svelte";
     import {BASE_URL} from "$lib/kgdq";
@@ -113,6 +112,13 @@
             <dialog id="suggest-{run_index}"  class="suggest-dialog { submit_status?.toLowerCase() ?? '' }">
                 <button class="close-btn material-symbols-rounded" on:click={ () => suggest_dialog().close() }>close</button>
                 <h1>Suggest a VOD</h1>
+                <p>
+                    <b class="run-name">{run.name}</b>
+
+                    {#if run.category !== ""}
+                        <span class="run-category">{run.category}</span>
+                    {/if}
+                </p>
 
                 <form>
                     <label for="suggest-{run_index}-url">URL</label>

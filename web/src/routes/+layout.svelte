@@ -1,6 +1,6 @@
 <script lang="ts">
   import "../app.css";
-  import {user, meta} from "../stores";
+  import {meta, user} from "../stores";
   import {onMount} from "svelte";
   import {page} from "$app/stores";
 
@@ -40,7 +40,7 @@
 </svelte:head>
 
 <header>
-  <a href="/"><img src="/icon.svg" alt="Speedrun VOD Club" /></a>
+  <a href="/"><img src="/icon.svg" alt="Speedrun VOD Club" width="80px" height="60.8px" /></a>
   <a href="/"> <h1>Speedrun VOD Club</h1> </a>
   <nav>
     <ul>
