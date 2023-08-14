@@ -369,6 +369,10 @@ class RPGLBMarathon : Marathon(RPGLB(), "rpglb", "RPG Limit Break", "https://rpg
     override fun getDonationUrl(event: EventData): String = "https://rpglimitbreak.com/tracker/ui/donate/${event.short}"
     override fun getScheduleUrl(event: EventData): String = "https://rpglimitbreak.com/tracker/runs/${event.id}"
 }
+class BSGMarathon : Marathon(BSG(), "bsg", "Benelux Speedrunner Gathering", "https://bsgmarathon.com/") {
+    override fun getDonationUrl(event: EventData): String = "https://tracker.bsgmarathon.com/ui/donate/${event.short}"
+    override fun getScheduleUrl(event: EventData): String = "https://oengus.io/marathon/${event.short.lowercase()}/schedule" // this is so icky
+}
 
 suspend fun Event.horaroSchedule(): FullSchedule? {
     if (horaroEvent == null || horaroSchedule == null) return null
