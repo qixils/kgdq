@@ -318,7 +318,7 @@ abstract class Marathon(
         }
 
         get<EventList> { query ->
-            call.respond(getEventsData(query))
+            call.respond(getEventsData(query, query.skipLoad))
         }
 
         get<RunList> { query ->
@@ -348,7 +348,7 @@ abstract class Marathon(
 data class Organization(val stats: Boolean = true)
 
 @Location("/events")
-data class EventList(val id: String? = null) // TODO: move to subroute
+data class EventList(val id: String? = null, val skipLoad: Boolean = false) // TODO: move to subroute
 
 @Location("/runs")
 data class RunList(val id: String? = null, val event: String? = null, val runner: Int? = null)
