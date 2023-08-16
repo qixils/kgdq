@@ -8,11 +8,7 @@ import com.github.twitch4j.helix.domain.StreamList
 import com.github.twitch4j.helix.domain.Video
 import com.github.twitch4j.helix.domain.VideoList
 import com.netflix.hystrix.HystrixCommand
-import com.rabbitmq.client.CancelCallback
-import com.rabbitmq.client.Channel
-import com.rabbitmq.client.ConnectionFactory
-import com.rabbitmq.client.DeliverCallback
-import com.rabbitmq.client.Delivery
+import com.rabbitmq.client.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
@@ -129,7 +125,8 @@ class DeliverHandler(
             val runStart = sceneChanged.time.instant
             logger.info("Updating start time of run ${status.currentRun} to ${sceneChanged.time.iso}")
             val overrides = db.getOrCreateRunOverrides(null, status.currentRun)
-            overrides.startTime = runStart
+            if (overrides.startTime == null)
+                overrides.startTime = runStart
             // Fetching stream's video (should always be the latest video)
             val stream = streams.await().streams.firstOrNull() ?: return@coroutineScope
             val videos = async { twitch.videos(userId = stream.userId, type = Video.Type.ARCHIVE, limit = 1).execute() }
