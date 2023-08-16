@@ -6,7 +6,6 @@
 	import {BASE_URL, compareEventStartTime} from "$lib/kgdq";
 	import LoadingSkeleton from "$lib/LoadingSkeleton.svelte";
 	import ErrorReport from "$lib/ErrorReport.svelte";
-	import {meta} from "../stores";
 
 	let events: MarathonEvent[];
 	let events_error: Error | null = null;
@@ -21,11 +20,6 @@
 			events_error = e;
 		}
 	});
-
-	$meta = {
-		description: "Find VODs of speedruns from charity marathon streams.",
-		url: "https://vods.speedrun.club"
-	}
 </script>
 
 <div style="text-align: center; max-width: 600px; margin: 0 auto">

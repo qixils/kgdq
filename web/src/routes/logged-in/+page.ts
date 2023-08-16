@@ -1,5 +1,5 @@
 import {meta} from "../../stores";
-import type {ServerLoad} from "@sveltejs/kit";
+import type {Load} from "@sveltejs/kit";
 
 export const load = (async () => {
     meta.set({
@@ -7,5 +7,5 @@ export const load = (async () => {
         description: "Check your account status.",
         noindex: true
     })
-}) satisfies ServerLoad;
+}) satisfies Load;
 

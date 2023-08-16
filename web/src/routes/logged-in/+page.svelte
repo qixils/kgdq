@@ -2,7 +2,7 @@
 
     import {onMount} from "svelte";
     import {getUser} from "$lib/kgdq.ts";
-    import {meta, user} from "../../stores";
+    import {user} from "../../stores";
     import ErrorReport from "$lib/ErrorReport.svelte";
 
     let user_error: string | null = null;
@@ -19,12 +19,6 @@
             console.error(e);
         }
     });
-
-    $meta = {
-        title: "Log In Success",
-        description: "Check your account status.",
-        noindex: true
-    }
 </script>
 
 {#if $user}

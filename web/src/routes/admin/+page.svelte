@@ -6,7 +6,6 @@
     import type {MarathonEvent, Run} from "vods.speedrun.club-client";
     import {svc} from "vods.speedrun.club-client";
     import LoadingSkeleton from "$lib/LoadingSkeleton.svelte";
-    import {meta} from "../../stores";
 
     let suggests: VODSuggestion[];
 
@@ -73,11 +72,6 @@
 
     }
 
-    $meta = {
-        noindex: true,
-        title: "Admin >:3",
-        description: "Modify event data and approve VOD suggestions."
-    }
 </script>
 
 <p>SECRET ADMIN VOD APPROVAL PAGE</p>

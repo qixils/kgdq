@@ -1,5 +1,5 @@
 import {meta} from "../../stores";
-import type {ServerLoad} from "@sveltejs/kit";
+import type {Load} from "@sveltejs/kit";
 
 export const load = (async () => {
     meta.set({
@@ -7,5 +7,5 @@ export const load = (async () => {
         title: "Admin >:3",
         description: "Modify event data and approve VOD suggestions."
     })
-}) satisfies ServerLoad;
+}) satisfies Load;
 

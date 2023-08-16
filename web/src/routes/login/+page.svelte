@@ -1,13 +1,6 @@
 <script lang="ts">
     import {BASE_URL} from "$lib/kgdq.ts";
     import {page} from "$app/stores";
-    import {meta} from "../../stores";
-
-    $meta = {
-        title: "Log In",
-        description: "Log in to submit VODs to appear on the website.",
-        noindex: true
-    }
 </script>
 
 <h1>Log in for VOD Submission</h1>
