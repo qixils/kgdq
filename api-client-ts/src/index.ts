@@ -327,7 +327,7 @@ export class SvcClient {
      * @returns A Promise that resolves to the Organization object representing the marathon.
      */
     async getMarathon(id: string, stats?: false): Promise<Organization>
-    async getMarathon(id: string, stats?: true): Promise<|OrganizationWithStats>
+    async getMarathon(id: string, stats?: true): Promise<OrganizationWithStats>
     async getMarathon(id: string, stats: boolean = true): Promise<Organization|OrganizationWithStats> {
         return { id,  ...await this.get<any>(`marathons/${id}?stats=${stats}`) };
     }
@@ -354,8 +354,8 @@ export class SvcClient {
      * @param event The ID of the event to retrieve.
      * @returns A Promise that resolves to the Event object representing the event.
      */
-    async getEvent(organization: string, event: string): Promise<MarathonEvent> {
-        let json = await this.get<any[]>(`marathons/${organization}/events?id=${event}`);
+    async getEvent(organization: string, event: string, skipLoad: boolean = false): Promise<MarathonEvent> {
+        let json = await this.get<any[]>(`marathons/${organization}/events?id=${event}&skipLoad=${skipLoad}`);
         return { organization, ...json[0] };
     }
 
