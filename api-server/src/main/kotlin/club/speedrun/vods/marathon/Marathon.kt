@@ -318,7 +318,7 @@ abstract class Marathon(
         }
 
         get<EventList> { query ->
-            call.respond(getEventsData(query))
+            call.respond(getEventsData(query, query.skipLoad))
         }
 
         get<RunList> { query ->
@@ -348,7 +348,7 @@ abstract class Marathon(
 data class Organization(val stats: Boolean = true)
 
 @Location("/events")
-data class EventList(val id: String? = null) // TODO: move to subroute
+data class EventList(val id: String? = null, val skipLoad: Boolean = false) // TODO: move to subroute
 
 @Location("/runs")
 data class RunList(val id: String? = null, val event: String? = null, val runner: Int? = null)
@@ -368,6 +368,10 @@ class HEKMarathon : Marathon(HEK(), "hek", "Hekathon", "https://hekathon.com/", 
 class RPGLBMarathon : Marathon(RPGLB(), "rpglb", "RPG Limit Break", "https://rpglimitbreak.com/") {
     override fun getDonationUrl(event: EventData): String = "https://rpglimitbreak.com/tracker/ui/donate/${event.short}"
     override fun getScheduleUrl(event: EventData): String = "https://rpglimitbreak.com/tracker/runs/${event.id}"
+}
+class BSGMarathon : Marathon(BSG(), "bsg", "Benelux Speedrunner Gathering", "https://bsgmarathon.com/") {
+    override fun getDonationUrl(event: EventData): String = "https://tracker.bsgmarathon.com/ui/donate/${event.short}"
+    override fun getScheduleUrl(event: EventData): String = "https://oengus.io/marathon/${event.short.lowercase()}/schedule" // this is so icky
 }
 
 suspend fun Event.horaroSchedule(): FullSchedule? {

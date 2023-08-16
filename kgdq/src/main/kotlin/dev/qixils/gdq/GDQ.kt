@@ -561,3 +561,4 @@ open class ESA(
 
 class HEK : ESA("https://hekathon.esamarathon.com/search/")
 class RPGLB : GDQ("https://tracker.rpglimitbreak.com/search/", ModelType.ALL.minus(ModelType.HEADSET))
+class BSG : GDQ("https://tracker.bsgmarathon.com/search/") // shockingly using a fresh fork of the GDQ tracker instead of ESA's ancient fork

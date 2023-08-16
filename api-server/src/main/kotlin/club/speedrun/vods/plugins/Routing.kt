@@ -4,7 +4,6 @@ package club.speedrun.vods.plugins
 
 import club.speedrun.vods.*
 import club.speedrun.vods.marathon.*
-import dev.qixils.gdq.models.Run
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.locations.*
@@ -83,6 +82,7 @@ fun Application.configureRouting() {
                 route("/esa", esa.route())
                 route("/hek", hek.route())
                 route("/rpglb", rpglb.route())
+                route("/bsg", bsg.route())
             }
 
             route("/v2") {
