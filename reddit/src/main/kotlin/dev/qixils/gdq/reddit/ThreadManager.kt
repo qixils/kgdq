@@ -58,7 +58,6 @@ class ThreadManager(
     private fun generateMainHeader(body: StringBuilder) {
         body.append("The event's schedule may change without notice so this thread can be out-of-date by several minutes. ")
             .append("Please check the event's website for the most accurate reference.\n\n")
-            .append("Don't gild the thread, donate the money instead! \\^_\\^\n\n")
             .append("This thread is powered by the [thread updater](https://github.com/qixils/kgdq/tree/main/reddit) ")
             .append("using data from [${marathon.displayName}](${marathon.homepageUrl})")
             .append(", [Speedrun.com](https://www.speedrun.com), and the contributors to the ")
