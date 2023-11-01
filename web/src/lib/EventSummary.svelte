@@ -35,11 +35,11 @@
     {/if}
 
     {#if event.startTime && event.endTime}
-        <a class="schedule-btn" href="/event/{org}/{event.short}">View schedule and VODs</a>
+        <a class="schedule-btn" href="/event/{org}/{event.short.toLowerCase()}">View schedule and VODs</a>
         <p>See also the <a href="{event.scheduleUrl}" target="_blank">official schedule on the {org.toUpperCase()} website ↗</a></p>
     {/if}
 
-    {#if event.timeStatus == "IN_PROGRESS" && streamUrl && streamName}
+    {#if event.timeStatus === "IN_PROGRESS" && streamUrl && streamName}
         <p>Watch the event live: <a href="{streamUrl}" target="_blank">{streamName} ↗</a></p>
     {/if}
 </li>

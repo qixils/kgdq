@@ -6,7 +6,7 @@
     import RunComponent from "$lib/RunComponent.svelte";
     import {page} from "$app/stores";
     import {Formatters} from "$lib/Formatters";
-    import {BASE_URL, guessStreamNameAndUrl, niceShortName} from "$lib/kgdq";
+    import {API_DOMAIN, BASE_URL, guessStreamNameAndUrl, niceShortName} from "$lib/kgdq";
     import {onMount} from "svelte";
     import LoadingButton from "$lib/LoadingButton.svelte";
     import ErrorReport from "$lib/ErrorReport.svelte";
@@ -38,7 +38,8 @@
 
     $meta = {
         title: data.event.name,
-        description: `View the schedule of ${niceShortName(data.event)} and watch back the VODs.`
+        description: `View the schedule of ${niceShortName(data.event)} and watch back the VODs.`,
+        url: `https://${API_DOMAIN}/event/${data.event.organization}/${data.event.short}`.toLowerCase()
     }
 </script>
 

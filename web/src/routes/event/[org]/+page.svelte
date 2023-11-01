@@ -2,7 +2,7 @@
     import type {MarathonEvent, Organization} from "vods.speedrun.club-client";
     import {SvcClient} from "vods.speedrun.club-client";
     import {page} from "$app/stores";
-    import {BASE_URL} from "$lib/kgdq";
+    import {API_DOMAIN, BASE_URL} from "$lib/kgdq";
     import {onMount} from "svelte";
     import EventSummary from "$lib/EventSummary.svelte";
     import LoadingButton from "$lib/LoadingButton.svelte";
@@ -24,7 +24,8 @@
 
     $meta = {
         title: `${data.org.displayName} Events`,
-        description: `List of events hosted by ${data.org.displayName}.`
+        description: `List of events hosted by ${data.org.displayName}.`,
+        url: `https://${API_DOMAIN}/event/${data.org.id}`.toLowerCase()
     }
 </script>
 
