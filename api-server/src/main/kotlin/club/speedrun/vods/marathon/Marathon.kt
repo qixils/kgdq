@@ -25,9 +25,7 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
@@ -107,26 +105,32 @@ abstract class Marathon(
         }
     }
 
-    private suspend inline fun getRedditYouTubeVODs(short: String): List<VOD?> {
-        return getRedditWiki<String>("${short}yt").map {
-            try {
-                VODType.YOUTUBE.fromUrl("https://youtu.be/$it")
-            } catch (e: Exception) {
-                logger.warn("Failed to parse YouTube VOD $it for $short", e)
-                null
+    private suspend inline fun getRedditYouTubeVODs(short: String): List<List<VOD>> {
+        return getRedditWiki<JsonElement>("${short}yt").map { element ->
+            val strs = if (element is JsonArray)
+                element.map { it.jsonPrimitive.content }
+            else
+                listOf(element.jsonPrimitive.content)
+            strs.mapNotNull {
+                try {
+                    VODType.YOUTUBE.fromUrl("https://youtu.be/$it")
+                } catch (e: Exception) {
+                    logger.warn("Failed to parse YouTube VOD $it for $short", e)
+                    null
+                }
             }
         }
     }
 
     private suspend inline fun getRedditVODs(short: String): List<List<VOD>> {
-        val twitch = getRedditTwitchVODs(short)
-        val yt = getRedditYouTubeVODs(short)
+        val twitch = try { getRedditTwitchVODs(short) } catch (e: Exception) { logger.error("Failed to load Twitch VODs for $short", e); emptyList() }
+        val yt = try { getRedditYouTubeVODs(short) } catch (e: Exception) { logger.error("Failed to load YouTube VODs for $short", e); emptyList() }
         // merge
         val vods = mutableListOf<List<VOD>>()
         for (i in 0 until maxOf(twitch.size, yt.size)) {
             val list = mutableListOf<VOD>()
             if (i < twitch.size) list.addAll(twitch[i])
-            if (i < yt.size) yt[i]?.let { list.add(it) }
+            if (i < yt.size) list.addAll(yt[i])
             vods.add(list)
         }
         return vods
