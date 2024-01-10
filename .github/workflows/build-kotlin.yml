@@ -31,19 +31,19 @@ jobs:
           ./gradlew build --no-daemon
 
       - name: Upload API Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: api
           path: "api/build/distributions/*.zip" # TODO: does ktor support shadowing?
 
       - name: Upload Discord Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: vodchat
           path: "discord/build/libs/*-all.jar"
 
       - name: Upload Reddit Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: vodthread
           path: "reddit/build/libs/*-all.jar"
