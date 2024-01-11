@@ -9,12 +9,6 @@ application {
 }
 
 repositories {
-    maven("https://jitpack.io") {
-        name = "jitpack"
-        content {
-            includeGroup("com.github.minndevelopment")
-        }
-    }
 }
 
 dependencies {
