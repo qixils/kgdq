@@ -1,10 +1,8 @@
 package dev.qixils.gdq.v1.models
 
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
-import dev.qixils.gdq.v1.GDQ
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import java.time.Instant
 
 @Serializable
@@ -27,21 +25,19 @@ data class Bid(
     val pinned: Boolean = false,
     @SerialName("canonical_url") private var _canonicalUrl: String? = null,
     val public: String,
-) : Model {
+) : AbstractModel() {
 
-    @Transient override var api: GDQ? = null
-    override var id: Int? = null
     val canonicalUrl: String get() = _canonicalUrl
-        ?: (api!!.apiPath.replaceFirst("/search/", "/bid/", false) + id)
+        ?: (api.apiPath.replaceFirst("/search/", "/bid/", false) + id)
 
     suspend fun fetchEvent(): Event {
-        return api!!.getEvent(eventId)!!
+        return api.getEvent(eventId)!!
     }
     suspend fun fetchRun(): Run? {
-        return runId?.let { api!!.getRun(it) }
+        return runId?.let { api.getRun(it) }
     }
     suspend fun fetchParent(): Bid? {
-        return parentId?.let { api?.getBidParent(it) }
+        return parentId?.let { api.getBidParent(it) }
     }
 }
 

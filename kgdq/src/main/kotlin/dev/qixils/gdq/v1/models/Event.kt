@@ -1,7 +1,6 @@
 package dev.qixils.gdq.v1.models
 
 import dev.qixils.gdq.serializers.*
-import dev.qixils.gdq.v1.GDQ
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -42,10 +41,7 @@ data class Event(
     @Serializable(with = DoubleOrNoneZeroSerializer::class) val max: Double,
     @Serializable(with = DoubleOrNoneZeroSerializer::class) val avg: Double,
     @SerialName("horaro_name") private val horaroName: String? = null,
-) : Model {
-
-    @Transient override var api: GDQ? = null
-    override var id: Int? = null
+) : AbstractModel() {
 
     /**
      * The [ZonedDateTime] at which the event will start.
@@ -65,7 +61,7 @@ data class Event(
      * The public-facing URL of the event from the donation tracker website.
      */
     val canonicalUrl: String get() = _canonicalUrl
-        ?: (api!!.apiPath.replaceFirst("/search/", "/index/", false) + short)
+        ?: (api.apiPath.replaceFirst("/search/", "/index/", false) + short)
 
     @Transient private val horaroNameSplit = horaroName?.split("/") ?: emptyList()
 

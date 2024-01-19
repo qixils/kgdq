@@ -87,10 +87,7 @@ open class GDQ(
             .toMutableList()
 
         // load data
-        models.forEach {
-            it.value.id = it.id
-            it.value.api = this
-        }
+        models.forEach { it.value.init(this, it.id) }
 
         // remove invalid models
         models.removeIf { !it.value.isValid() }
@@ -365,7 +362,7 @@ open class GDQ(
  */
 open class ESA(
     apiPath: String = "https://donations.esamarathon.com/search/"
-) : GDQ(apiPath, ModelType.ALL.minus(ModelType.HEADSET), false, false)
+) : GDQ(apiPath, ModelType.ALL.minus(ModelType.HEADSET), false)
 
 class HEK : ESA("https://hekathon.esamarathon.com/search/")
 class RPGLB : GDQ("https://tracker.rpglimitbreak.com/search/", ModelType.ALL.minus(ModelType.HEADSET))

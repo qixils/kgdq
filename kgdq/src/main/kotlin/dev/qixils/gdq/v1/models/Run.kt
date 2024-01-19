@@ -2,10 +2,8 @@ package dev.qixils.gdq.v1.models
 
 import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
-import dev.qixils.gdq.v1.GDQ
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
@@ -36,7 +34,7 @@ data class Run(
     @SerialName("canonical_url") private var _canonicalUrl: String? = null,
     val public: String,
     @SerialName("external_id") val horaroId: String? = null, // ESA exclusive
-) : Model {
+) : AbstractModel() {
 
     override fun isValid(): Boolean {
         return _startTime != null && _endTime != null && _order != null
@@ -49,18 +47,15 @@ data class Run(
     val runTimeText: String get() = DurationAsStringSerializer.format(runTime)
     val setupTimeText: String get() = DurationAsStringSerializer.format(setupTime)
 
-    @Transient override var api: GDQ? = null
-    override var id: Int? = null
-
     val canonicalUrl: String get() = _canonicalUrl
-        ?: (api!!.apiPath.replaceFirst("/search/", "/run/", false) + id)
+        ?: (api.apiPath.replaceFirst("/search/", "/run/", false) + id)
 
     suspend fun fetchEvent(): Event {
-        return api!!.getEvent(eventId)!!
+        return api.getEvent(eventId)!!
     }
 
     suspend fun fetchRunners(): List<Runner> {
-        return runnerIds.mapNotNull { api?.getRunner(it) }
+        return runnerIds.mapNotNull { api.getRunner(it) }
     }
 
     suspend fun fetchCommentators(): List<Headset> {
@@ -68,13 +63,13 @@ data class Run(
             is JsonPrimitive ->
                 rawCommentators.contentOrNull?.split(", ?".toRegex())?.map(String::trim)?.filter(String::isNotEmpty)?.map { Headset(it) } ?: emptyList()
             is JsonArray ->
-                rawCommentators.mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.toIntOrNull()?.let { id -> api!!.getHeadset(id) } }
+                rawCommentators.mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.toIntOrNull()?.let { id -> api.getHeadset(id) } }
             else ->
                 throw IllegalStateException("Unknown commentators type: ${rawCommentators::class.simpleName}")
         }
     }
 
     suspend fun fetchHosts(): List<Headset> {
-        return hostIds.mapNotNull { api?.getHeadset(it) }
+        return hostIds.mapNotNull { api.getHeadset(it) }
     }
 }

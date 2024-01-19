@@ -1,8 +1,6 @@
 package dev.qixils.gdq.v1.models
 
-import dev.qixils.gdq.v1.GDQ
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 /**
  * A person wearing a headset.
@@ -16,7 +14,4 @@ data class Headset(
     val pronouns: String = "",
     // val runner: Int, | TODO: not sure yet of this type
     val public: String = if (pronouns.isEmpty()) name else "$name ($pronouns)",
-) : Model {
-    @Transient override var api: GDQ? = null
-    override var id: Int? = null
-}
+) : AbstractModel()
