@@ -4,9 +4,9 @@ import club.speedrun.vods.db.Database
 import club.speedrun.vods.db.Filter.Companion.eq
 import club.speedrun.vods.db.Filter.Companion.or
 import club.speedrun.vods.rabbit.ScheduleStatus
-import dev.qixils.gdq.models.Event
-import dev.qixils.gdq.models.Run
-import dev.qixils.gdq.models.Wrapper
+import dev.qixils.gdq.v1.models.Event
+import dev.qixils.gdq.v1.models.Run
+import dev.qixils.gdq.v1.models.Wrapper
 
 class GdqDatabase(organization: String) : Database("api", "orgs", organization) {
     val runs = getCollection(RunOverrides.serializer(), RunOverrides.COLLECTION_NAME)

@@ -1,7 +1,7 @@
-package dev.qixils.gdq.models
+package dev.qixils.gdq.v1.models
 
-import dev.qixils.gdq.GDQ
 import dev.qixils.gdq.serializers.*
+import dev.qixils.gdq.v1.GDQ
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -20,8 +20,18 @@ data class Event(
     @Serializable(with = DoubleOrNoneNullSerializer::class) @SerialName("minimumdonation") val minimumDonation: Double?,
 //    @SerialName("paypalemail") val paypalEmail: String, - don't see a reason to expose this
     @SerialName("paypalcurrency") val paypalCurrency: String,
-    @SerialName("datetime") @Serializable(with = InstantAsStringSerializer::class) private var _starttime: Instant? = null,
-    @SerialName("endtime") @Serializable(with = InstantAsStringSerializer::class) private var _endtime: Instant? = null,
+    /**
+     * The [Instant] at which the event will start.
+     *
+     * @see zonedStartTime
+     */
+    @SerialName("datetime") @Serializable(with = InstantAsStringSerializer::class) var startTime: Instant? = null,
+    /**
+     * The [Instant] at which the event will end.
+     *
+     * @see zonedEndTime
+     */
+    @SerialName("endtime") @Serializable(with = InstantAsStringSerializer::class) var endTime: Instant? = null,
     @Serializable(with = ZoneIdSerializer::class) val timezone: ZoneId,
     val locked: Boolean,
     @SerialName("allow_donations") val allowDonations: Boolean = !locked,
@@ -34,40 +44,8 @@ data class Event(
     @SerialName("horaro_name") private val horaroName: String? = null,
 ) : Model {
 
-    @Transient private var skipLoad = false
-    override fun skipLoad() {
-        skipLoad = true
-    }
-    override val skippedLoad: Boolean get() = skipLoad
-
-    override suspend fun loadData(api: GDQ, id: Int) {
-        // datetime fallback
-        if (_starttime == null || _endtime == null) {
-            api.updateEvent(id, skipLoad)
-            if (_starttime == null)
-                _starttime = api.eventStartedAt[id]
-            if (_endtime == null)
-                _endtime = api.eventEndedAt[id]
-        }
-
-        // canonical URL fallback
-        if (_canonicalUrl == null)
-            _canonicalUrl = api.apiPath.replaceFirst("/search/", "/index/", false) + short
-    }
-
-    /**
-     * The [Instant] at which the event will start.
-     *
-     * @see zonedStartTime
-     */
-    val startTime: Instant? get() = _starttime
-
-    /**
-     * The [Instant] at which the event will end.
-     *
-     * @see zonedEndTime
-     */
-    val endTime: Instant? get() = _endtime
+    @Transient override var api: GDQ? = null
+    override var id: Int? = null
 
     /**
      * The [ZonedDateTime] at which the event will start.
@@ -86,7 +64,8 @@ data class Event(
     /**
      * The public-facing URL of the event from the donation tracker website.
      */
-    val canonicalUrl: String get() = _canonicalUrl!!
+    val canonicalUrl: String get() = _canonicalUrl
+        ?: (api!!.apiPath.replaceFirst("/search/", "/index/", false) + short)
 
     @Transient private val horaroNameSplit = horaroName?.split("/") ?: emptyList()
 

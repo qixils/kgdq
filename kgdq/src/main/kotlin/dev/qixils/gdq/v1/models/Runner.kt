@@ -1,6 +1,8 @@
-package dev.qixils.gdq.models
+package dev.qixils.gdq.v1.models
 
+import dev.qixils.gdq.v1.GDQ
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.util.regex.Pattern
 
 @Serializable
@@ -14,6 +16,9 @@ data class Runner(
 //    @SerialName("donor") private val _donor: Int? = null,
     val public: String,
 ) : Model {
+
+    @Transient override var api: GDQ? = null
+    override var id: Int? = null
 
     val url: String? = computeUrl()
 

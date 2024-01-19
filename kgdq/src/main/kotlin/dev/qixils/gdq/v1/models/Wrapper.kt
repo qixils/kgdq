@@ -1,6 +1,6 @@
-package dev.qixils.gdq.models
+package dev.qixils.gdq.v1.models
 
-import dev.qixils.gdq.ModelType
+import dev.qixils.gdq.v1.ModelType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient

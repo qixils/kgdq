@@ -8,11 +8,11 @@ import club.speedrun.vods.json
 import club.speedrun.vods.plugins.UserError
 import club.speedrun.vods.srcDb
 import dev.qixils.gdq.*
-import dev.qixils.gdq.Hook
-import dev.qixils.gdq.models.Bid
-import dev.qixils.gdq.models.Event
-import dev.qixils.gdq.models.Run
-import dev.qixils.gdq.models.Wrapper
+import dev.qixils.gdq.v1.*
+import dev.qixils.gdq.v1.models.Bid
+import dev.qixils.gdq.v1.models.Event
+import dev.qixils.gdq.v1.models.Run
+import dev.qixils.gdq.v1.models.Wrapper
 import dev.qixils.horaro.Horaro
 import dev.qixils.horaro.models.FullSchedule
 import io.ktor.client.call.*
@@ -191,10 +191,10 @@ abstract class Marathon(
 
         // compute bid data
         val topLevelBidMap = bids
-            .filter { it.value.parent() == null && it.value.run() != null }
+            .filter { it.value.fetchParent() == null && it.value.fetchRun() != null }
             .map { it.id }
             .associateWith { mutableListOf<Wrapper<Bid>>() }
-        bids.forEach { if (it.value.parent() != null) topLevelBidMap[it.value.parent()!!.id]?.add(it) }
+        bids.forEach { if (it.value.fetchParent() != null) topLevelBidMap[it.value.fetchParent()!!.id]?.add(it) }
 
         // compute run data
         val runBidMap = runs.associate { it.id to mutableListOf<Pair<Wrapper<Bid>, MutableList<Wrapper<Bid>>>>() }
@@ -202,7 +202,7 @@ abstract class Marathon(
             // map bid ids to bids
             .map { entry -> (bids.first { bid -> bid.id == entry.key }) to entry.value }
             // add to runBidMap
-            .forEach { runBidMap[it.first.value.run()!!.id]?.add(it) }
+            .forEach { runBidMap[it.first.value.fetchRun()!!.id]?.add(it) }
 
         // finalize & respond
         val runData: MutableList<RunData> = ArrayList()

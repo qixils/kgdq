@@ -1,9 +1,8 @@
-package dev.qixils.gdq.models
+package dev.qixils.gdq.v1.models
 
-import dev.qixils.gdq.GDQ
-import dev.qixils.gdq.ModelType
 import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
+import dev.qixils.gdq.v1.GDQ
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -22,8 +21,8 @@ data class Run(
     @SerialName("twitch_name") val twitchName: String = "",
     @SerialName("deprecated_runners") val deprecatedRunners: String,
     val console: String,
-    @SerialName("commentators") private val rawCommentators: JsonElement,
-    @SerialName("hosts") private val hostIds: List<Int> = emptyList(),
+    @SerialName("commentators") val rawCommentators: JsonElement,
+    @SerialName("hosts") val hostIds: List<Int> = emptyList(),
     val description: String,
     @Serializable(with = InstantAsStringSerializer::class) @SerialName("starttime") private val _startTime: Instant? = null,
     @Serializable(with = InstantAsStringSerializer::class) @SerialName("endtime") private val _endTime: Instant? = null,
@@ -50,52 +49,32 @@ data class Run(
     val runTimeText: String get() = DurationAsStringSerializer.format(runTime)
     val setupTimeText: String get() = DurationAsStringSerializer.format(setupTime)
 
-    @Transient private var api: GDQ? = null
-    @Transient private var id: Int? = null
-    @Transient private var _event: Wrapper<Event>? = null
-    @Transient private var _runners: List<Wrapper<Runner>>? = null
-    @Transient private var _commentators: List<Wrapper<Headset>>? = null
-    @Transient private var _hosts: List<Wrapper<Headset>>? = null
+    @Transient override var api: GDQ? = null
+    override var id: Int? = null
 
-    override suspend fun loadData(api: GDQ, id: Int) {
-        this.api = api
-        this.id = id
-        // canonical URL fallback
-        if (_canonicalUrl == null)
-            _canonicalUrl = api.apiPath.replaceFirst("/search/", "/run/", false) + id
+    val canonicalUrl: String get() = _canonicalUrl
+        ?: (api!!.apiPath.replaceFirst("/search/", "/run/", false) + id)
+
+    suspend fun fetchEvent(): Event {
+        return api!!.getEvent(eventId)!!
     }
 
-    val canonicalUrl: String get() = _canonicalUrl!!
-
-    suspend fun event(): Wrapper<Event> {
-        if (_event == null)
-            _event = api!!.getEvent(eventId)
-        return _event!!
+    suspend fun fetchRunners(): List<Runner> {
+        return runnerIds.mapNotNull { api?.getRunner(it) }
     }
 
-    suspend fun runners(): List<Wrapper<Runner>> {
-        if (_runners == null)
-            _runners = runnerIds.mapNotNull { api?.getRunner(it) }
-        return _runners!!
-    }
-
-    suspend fun commentators(): List<Wrapper<Headset>> {
-        if (_commentators == null) {
-            _commentators = when (rawCommentators) {
-                is JsonPrimitive ->
-                    rawCommentators.contentOrNull?.split(", ?".toRegex())?.map(String::trim)?.filter(String::isNotEmpty)?.map { Wrapper(ModelType.HEADSET, 0, Headset(it)) } ?: emptyList()
-                is JsonArray ->
-                    rawCommentators.mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.toIntOrNull()?.let { id -> api!!.getHeadset(id) } }
-                else ->
-                    throw IllegalStateException("Unknown commentators type: ${rawCommentators::class.simpleName}")
-            }
+    suspend fun fetchCommentators(): List<Headset> {
+        return when (rawCommentators) {
+            is JsonPrimitive ->
+                rawCommentators.contentOrNull?.split(", ?".toRegex())?.map(String::trim)?.filter(String::isNotEmpty)?.map { Headset(it) } ?: emptyList()
+            is JsonArray ->
+                rawCommentators.mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.toIntOrNull()?.let { id -> api!!.getHeadset(id) } }
+            else ->
+                throw IllegalStateException("Unknown commentators type: ${rawCommentators::class.simpleName}")
         }
-        return _commentators!!
     }
 
-    suspend fun hosts(): List<Wrapper<Headset>> {
-        if (_hosts == null)
-            _hosts = hostIds.mapNotNull { api?.getHeadset(it) }
-        return _hosts!!
+    suspend fun fetchHosts(): List<Headset> {
+        return hostIds.mapNotNull { api?.getHeadset(it) }
     }
 }

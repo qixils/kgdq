@@ -2,11 +2,11 @@ package club.speedrun.vods.marathon
 
 import club.speedrun.vods.db.Identified
 import club.speedrun.vods.db.ULID
-import dev.qixils.gdq.models.Event
-import dev.qixils.gdq.models.Run
-import dev.qixils.gdq.models.Wrapper
 import dev.qixils.gdq.serializers.DurationAsSecondsSerializer
 import dev.qixils.gdq.serializers.InstantAsSecondsSerializer
+import dev.qixils.gdq.v1.models.Event
+import dev.qixils.gdq.v1.models.Run
+import dev.qixils.gdq.v1.models.Wrapper
 import kotlinx.serialization.Serializable
 import java.time.Duration
 import java.time.Instant

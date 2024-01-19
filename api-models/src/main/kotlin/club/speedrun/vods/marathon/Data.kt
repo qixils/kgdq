@@ -5,9 +5,11 @@ package club.speedrun.vods.marathon
 import club.speedrun.vods.naturalJoinToString
 import dev.qixils.gdq.InternalGdqApi
 import dev.qixils.gdq.models.*
+import dev.qixils.gdq.models.v1.*
 import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import dev.qixils.gdq.serializers.ZoneIdSerializer
+import dev.qixils.gdq.v1.models.*
 import dev.qixils.horaro.Horaro
 import dev.qixils.horaro.models.FullSchedule
 import kotlinx.serialization.EncodeDefault
@@ -168,9 +170,9 @@ class RunData{
                 ?.split(", ")
                 ?.map { calculateHoraroFakeRunner(it) } ?: emptyList())
         } else {
-            runners.addAll(trackerSource!!.runners().map { it.value })
-            commentators.addAll(trackerSource!!.commentators().map { it.value })
-            hosts.addAll(trackerSource!!.hosts().map { it.value })
+            runners.addAll(trackerSource!!.fetchRunners().map { it.value })
+            commentators.addAll(trackerSource!!.fetchCommentators().map { it.value })
+            hosts.addAll(trackerSource!!.fetchHosts().map { it.value })
         }
     }
 
