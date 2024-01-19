@@ -1,6 +1,6 @@
-# KGDQ Web
+# Speedrun VOD Club Frontend
 
-Frontend for KGDQ with Svelte and Tailwind.
+Frontend for [Speedrun VOD Club](https://vods.speedrun.club) with Svelte.
 
 ## Requirements
 
