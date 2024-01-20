@@ -1,7 +1,7 @@
 package club.speedrun.vods.marathon
 
+import dev.qixils.gdq.BidState
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
-import dev.qixils.gdq.v1.models.BidState
 import kotlinx.serialization.Serializable
 import java.time.Instant
 

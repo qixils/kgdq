@@ -2,8 +2,6 @@ package club.speedrun.vods.marathon
 
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import dev.qixils.gdq.serializers.ZoneIdSerializer
-import dev.qixils.horaro.Horaro
-import dev.qixils.horaro.models.FullSchedule
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import java.time.Instant
@@ -38,11 +36,6 @@ data class EventData(
     var horaroEvent: String? = null,
     var horaroSchedule: String? = null,
 ) {
-    suspend fun horaroSchedule(): FullSchedule? {
-        if (horaroEvent == null || horaroSchedule == null) return null
-        return Horaro.getSchedule(horaroEvent!!, horaroSchedule!!)
-    }
-
     val horaroUrl: String?
         = if (horaroEvent == null || horaroSchedule == null) null
         else "https://horaro.org/$horaroEvent/$horaroSchedule"

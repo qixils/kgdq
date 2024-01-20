@@ -4,9 +4,6 @@ import club.speedrun.vods.db.Identified
 import club.speedrun.vods.db.ULID
 import dev.qixils.gdq.serializers.DurationAsSecondsSerializer
 import dev.qixils.gdq.serializers.InstantAsSecondsSerializer
-import dev.qixils.gdq.v1.models.Event
-import dev.qixils.gdq.v1.models.Run
-import dev.qixils.gdq.v1.models.Wrapper
 import kotlinx.serialization.Serializable
 import java.time.Duration
 import java.time.Instant
@@ -22,13 +19,9 @@ data class RunOverrides(
     @Serializable(with = DurationAsSecondsSerializer::class) var runTime: Duration? = null,
     var src: String? = null,
 ) : Identified {
-    constructor(run: Wrapper<Run>) : this(
-        runId = run.id,
-        horaroId = run.value.horaroId
-    )
-
-    constructor(run: dev.qixils.horaro.models.Run) : this(
-        horaroId = run.getValue("ID")
+    constructor(run: RunData) : this(
+        runId = run.gdqId,
+        horaroId = run.horaroId,
     )
 
     fun mergeIn(other: RunOverrides) {
@@ -53,9 +46,6 @@ data class EventOverrides(
     @Serializable(with = InstantAsSecondsSerializer::class) var endedAt: Instant? = null,
     var redditMergedIn: Boolean = false,
 ) : Identified {
-    constructor(event: Wrapper<Event>) : this(
-        id = event.id.toString(),
-    )
 
     companion object {
         const val COLLECTION_NAME = "EventOverrides"

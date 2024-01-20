@@ -1,5 +1,6 @@
 package dev.qixils.gdq.v2.models
 
+import dev.qixils.gdq.BidState
 import dev.qixils.gdq.serializers.InstantAsString
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -10,7 +11,7 @@ class Bid(
     override val id: Int,
     val name: String,
     @SerialName("speedrun") val runId: Int,
-    val state: String, // TODO: enum
+    val state: BidState,
     @SerialName("parent") val parentId: Int? = null,
     val description: String = "",
     @SerialName("shortdescription") val shortDescription: String = "",

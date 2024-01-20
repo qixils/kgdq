@@ -1,5 +1,6 @@
 package dev.qixils.gdq.v1.models
 
+import dev.qixils.gdq.BidState
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -27,22 +28,19 @@ data class Bid(
     val public: String,
 ) : AbstractModel() {
 
-    val canonicalUrl: String get() = _canonicalUrl
-        ?: (api.apiPath.replaceFirst("/search/", "/bid/", false) + id)
+    val canonicalUrl: String
+        get() = _canonicalUrl
+            ?: (api.apiPath.replaceFirst("/search/", "/bid/", false) + id)
 
     suspend fun fetchEvent(): Event {
         return api.getEvent(eventId)!!
     }
+
     suspend fun fetchRun(): Run? {
         return runId?.let { api.getRun(it) }
     }
+
     suspend fun fetchParent(): Bid? {
         return parentId?.let { api.getBidParent(it) }
     }
-}
-
-@Serializable
-enum class BidState {
-    CLOSED,
-    OPENED
 }
