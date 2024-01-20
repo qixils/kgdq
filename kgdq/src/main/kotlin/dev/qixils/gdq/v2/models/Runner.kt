@@ -1,9 +1,10 @@
 package dev.qixils.gdq.v2.models
 
+import dev.qixils.gdq.computeStreamUrl
 import kotlinx.serialization.Serializable
 
 @Serializable
-class Runner(
+data class Runner(
     override val type: String,
     override val id: Int,
     val name: String = "",
@@ -12,4 +13,6 @@ class Runner(
     val twitter: String = "",
     val youtube: String = "",
     val platform: String = "TWITCH",
-) : TypedModel()
+) : TypedModel() {
+    val url: String? = computeStreamUrl(stream, youtube, twitter)
+}
