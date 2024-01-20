@@ -66,9 +66,10 @@
         {#if current_run_index !== null}
             <p><a href="#run-{current_run_index}">Jump to current run</a></p>
             {#if data.event.timeStatus === "IN_PROGRESS" && streamUsername}
+                <!-- TODO: `allow: autoplay;` search param -->
                 <iframe src="https://player.twitch.tv/?channel={streamUsername}&parent={$page.url.hostname}"
                         title="Stream"
-                        allow="autoplay; fullscreen"
+                        allow="fullscreen"
                         style="
                          margin: 0 auto;
                          display: block;
