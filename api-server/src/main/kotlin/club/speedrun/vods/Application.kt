@@ -36,6 +36,10 @@ val srcDb = SrcDatabase()
 val httpClient = HttpClient(OkHttp) {
     install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) { json(json) }
 }
+val rabbit = try { RabbitManager() } catch (e: Exception) {
+    logger.warn("Failed to instantiate RabbitManager", e)
+    null
+}
 
 fun main() {
     embeddedServer(Netty, port = 4010, host = "0.0.0.0", module = Application::kgdqApiModule).start(wait = true)
@@ -53,8 +57,8 @@ fun Application.kgdqApiModule() {
     install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) { json(json) }
     configureOAuth()
     configureRouting()
-    RabbitManager.declareQueue("cg_events_reddit_esa2022s1", "ESAMarathon", esa.db)
-    RabbitManager.declareQueue("cg_events_reddit_esa2022s2", "ESAMarathon2", esa.db)
+    rabbit?.declareQueue("cg_events_reddit_esa2022s1", "ESAMarathon", esa.db)
+    rabbit?.declareQueue("cg_events_reddit_esa2022s2", "ESAMarathon2", esa.db)
     runBlocking {
         marathons.forEach { it.api.cacheAll() }
     }
