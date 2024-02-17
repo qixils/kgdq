@@ -6,22 +6,22 @@ import club.speedrun.vods.db.Filter.Companion.or
 import club.speedrun.vods.rabbit.ScheduleStatus
 import dev.qixils.gdq.v1.models.Event
 import dev.qixils.gdq.v1.models.Run
-import dev.qixils.gdq.v1.models.Wrapper
+import dev.qixils.horaro.models.Run as HoraroRun
 
 class GdqDatabase(organization: String) : Database("api", "orgs", organization) {
     val runs = getCollection(RunOverrides.serializer(), RunOverrides.COLLECTION_NAME)
     val events = getCollection(EventOverrides.serializer(), EventOverrides.COLLECTION_NAME)
     val statuses = getCollection(ScheduleStatus.serializer(), ScheduleStatus.COLLECTION_NAME)
 
-    fun getOrCreateRunOverrides(run: Wrapper<Run>): RunOverrides {
+    fun getOrCreateRunOverrides(run: Run): RunOverrides {
         // get
         var filter = RunOverrides::runId eq run.id
-        if (run.value.horaroId != null)
-            filter = or(filter, RunOverrides::horaroId eq run.value.horaroId)
+        if (run.horaroId != null)
+            filter = or(filter, RunOverrides::horaroId eq run.horaroId)
         var overrides: RunOverrides? = runs.find(filter)
         // create
         if (overrides == null) {
-            overrides = RunOverrides(run)
+            overrides = RunOverrides(runId = run.id, horaroId = run.horaroId)
             runs.insert(overrides)
         }
         // update
@@ -29,25 +29,25 @@ class GdqDatabase(organization: String) : Database("api", "orgs", organization) 
             overrides.runId = run.id
             runs.update(overrides)
         }
-        if (overrides.horaroId == null && run.value.horaroId != null) {
-            val oldOverrides = runs.findAndDelete(RunOverrides::horaroId eq run.value.horaroId)
+        if (overrides.horaroId == null && run.horaroId != null) {
+            val oldOverrides = runs.findAndDelete(RunOverrides::horaroId eq run.horaroId)
             if (oldOverrides != null)
                 overrides.mergeIn(oldOverrides)
             else
-                overrides.horaroId = run.value.horaroId
+                overrides.horaroId = run.horaroId
             runs.update(overrides)
         }
         // return
         return overrides
     }
 
-    fun getOrCreateRunOverrides(run: dev.qixils.horaro.models.Run): RunOverrides? {
+    fun getOrCreateRunOverrides(run: HoraroRun): RunOverrides? {
         // get
         val horaroId = run.getValue("ID") ?: return null
         var overrides: RunOverrides? = runs.find(RunOverrides::horaroId eq horaroId)
         // create
         if (overrides == null) {
-            overrides = RunOverrides(run)
+            overrides = RunOverrides(horaroId = run.getValue("ID"))
             runs.insert(overrides)
         }
         // return
@@ -95,12 +95,12 @@ class GdqDatabase(organization: String) : Database("api", "orgs", organization) 
         return overrides
     }
 
-    fun getOrCreateEventOverrides(event: Wrapper<Event>): EventOverrides {
+    fun getOrCreateEventOverrides(event: Event): EventOverrides {
         // get
         var overrides: EventOverrides? = events.get(event.id.toString())
         // create
         if (overrides == null) {
-            overrides = EventOverrides(event)
+            overrides = EventOverrides(id = event.id.toString())
             events.insert(overrides)
         }
         // return

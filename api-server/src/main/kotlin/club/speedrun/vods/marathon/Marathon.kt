@@ -2,11 +2,8 @@
 
 package club.speedrun.vods.marathon
 
-import club.speedrun.vods.getDB
-import club.speedrun.vods.httpClient
-import club.speedrun.vods.json
+import club.speedrun.vods.*
 import club.speedrun.vods.plugins.UserError
-import club.speedrun.vods.srcDb
 import dev.qixils.gdq.*
 import dev.qixils.gdq.v1.*
 import dev.qixils.gdq.v1.models.Bid
@@ -136,7 +133,7 @@ abstract class Marathon(
         return vods
     }
 
-    private suspend fun getEvent(id: String, skipLoad: Boolean = false): Wrapper<Event>? {
+    private suspend fun getEvent(id: String, skipLoad: Boolean = false): Event? {
         val cacher = if (skipLoad) eventLoadSkipper else eventCacher
         val updater = if (skipLoad) null else eventUpdater
 
@@ -147,9 +144,9 @@ abstract class Marathon(
         }
 
         val events = ArrayList(api.getEvents(preLoad = cacher, postLoad = updater))
-        events.forEach { eventIdCache[it.value.short] = it.id }
+        events.forEach { eventIdCache[it.short] = it.id }
 
-        val event = events.firstOrNull { it.value.short.equals(id, true) }
+        val event = events.firstOrNull { it.short.equals(id, true) }
         if (event != null)
             eventIdCache[id] = event.id
         return event
@@ -174,14 +171,14 @@ abstract class Marathon(
                 null
 
         // do queries
-        val runs: List<Wrapper<Run>> = ArrayList(
+        val runs: List<Run> = ArrayList(
             api.query(
                 type = ModelType.RUN,
                 id = query.id?.toInt(),
                 event = event.id,
                 runner = query.runner
             )
-        ).sortedBy { it.value.order }
+        ).sortedBy { it.order }
 
         // TODO: pagination (if not ESA...)
         val bids = api.getBids(
@@ -191,18 +188,18 @@ abstract class Marathon(
 
         // compute bid data
         val topLevelBidMap = bids
-            .filter { it.value.fetchParent() == null && it.value.fetchRun() != null }
+            .filter { it.fetchParent() == null && it.fetchRun() != null }
             .map { it.id }
-            .associateWith { mutableListOf<Wrapper<Bid>>() }
-        bids.forEach { if (it.value.fetchParent() != null) topLevelBidMap[it.value.fetchParent()!!.id]?.add(it) }
+            .associateWith { mutableListOf<Bid>() }
+        bids.forEach { if (it.fetchParent() != null) topLevelBidMap[it.fetchParent()!!.id]?.add(it) }
 
         // compute run data
-        val runBidMap = runs.associate { it.id to mutableListOf<Pair<Wrapper<Bid>, MutableList<Wrapper<Bid>>>>() }
+        val runBidMap = runs.associate { it.id to mutableListOf<Pair<Bid, MutableList<Bid>>>() }
         topLevelBidMap.entries
             // map bid ids to bids
             .map { entry -> (bids.first { bid -> bid.id == entry.key }) to entry.value }
             // add to runBidMap
-            .forEach { runBidMap[it.first.value.fetchRun()!!.id]?.add(it) }
+            .forEach { runBidMap[it.first.fetchRun()!!.id]?.add(it) }
 
         // finalize & respond
         val runData: MutableList<RunData> = ArrayList()
@@ -211,16 +208,15 @@ abstract class Marathon(
             val rawRunBids = runBidMap[run.id]!!
             val runBids = rawRunBids.map { bid ->
                 val children = bid.second
-                    .map { value -> BidData(value, emptyList(), run) }
+                    .map { value -> createBid(value, emptyList(), run) }
                     .sortedByDescending { it.donationTotal }
-                BidData(bid.first, children, run)
+                createBid(bid.first, children, run)
             }.sortedWith(compareBy<BidData>{ it.revealedAt }.thenBy{ it.id })
             // get other data
             val overrides = db.getOrCreateRunOverrides(run)
             val previousRun = runData.lastOrNull()
             // create run data
-            val data = RunData(run, runBids, previousRun, overrides)
-            data.loadData()
+            val data = createRun(run, runBids, previousRun, overrides)
             data.loadSrcGame(overrides)
             vods?.await()?.getOrNull(index)?.let {
                 val existingVODTypes: Set<VODType> = data.vods.mapTo(mutableSetOf()) { vod -> vod.type }
@@ -385,6 +381,7 @@ suspend fun Event.horaroSchedule(): FullSchedule? {
 
 val excludedGameTitles = listOf("bonus game", "daily recap", "tasbot plays")
 
+@Deprecated(message = "move somewhere else idk", level = DeprecationLevel.ERROR)
 fun RunData.loadSrcGame(overrides: RunOverrides?) {
     src = if (overrides?.src == "")
         null
