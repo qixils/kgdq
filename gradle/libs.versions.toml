@@ -6,7 +6,7 @@ coroutines = "1.7.3"
 serialization = "1.6.2"
 
 [libraries]
-logback = { module = "ch.qos.logback:logback-classic", version = "1.4.14" }
+logback = { module = "ch.qos.logback:logback-classic", version = "1.5.0" }
 amqp-client = { module = "com.rabbitmq:amqp-client", version = "5.20.0" }
 twitch4j-helix = { module = "com.github.twitch4j:twitch4j-helix", version = "1.19.0" }
 ktor-server-core-jvm = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
