@@ -2,7 +2,7 @@
 ktor = "2.3.8"
 kotlin = "1.9.22"
 configurate = "4.1.2"
-coroutines = "1.7.3"
+coroutines = "1.8.0"
 serialization = "1.6.2"
 
 [libraries]
