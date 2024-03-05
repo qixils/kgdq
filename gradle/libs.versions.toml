@@ -1,5 +1,5 @@
 [versions]
-ktor = "2.3.8"
+ktor = "2.3.9"
 kotlin = "1.9.22"
 configurate = "4.1.2"
 coroutines = "1.8.0"
