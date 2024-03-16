@@ -26,8 +26,6 @@ html {
 
     --youtube-rgb: 255, 0, 0;
     --twitch-rgb: 100, 65, 165;
-    --youtube: rgba(var(--youtube-rgb), 1);
-    --twitch: rgba(var(--twitch-rgb), 1);
 
     color: var(--text);
     background-color: var(--bg-bg);
@@ -361,6 +359,7 @@ sup {
 .bid {
     display: flex;
     align-items: center;
+    position: relative;
 }
 
 .bid-body {
@@ -486,6 +485,11 @@ sup {
     --whatever-rgb: var(--twitch-rgb);
 }
 
+.bid-war-stats {
+    display: flex;
+    flex-direction: row;
+}
+
 .bid-war-bars {
     content: '';
     display: inline-flex;
@@ -526,7 +530,7 @@ sup {
     border: 1px solid var(--text-quiet);
     padding: 1em;
     bottom: 100%; /* above name of bid incentive */
-    box-shadow: black 0 0 1em;
+    box-shadow: var(--dialog-shadow) 0 0 1em;
 }
 
 .bid-description::after {
