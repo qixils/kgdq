@@ -5,7 +5,7 @@ import {defineConfig} from "vite";
 const common_config: UserConfig = {
 	plugins: [sveltekit()]
 };
-export default defineConfig(({ command, mode, ssrBuild }) => {
+export default defineConfig(({ command }) => {
 	let config = common_config;
 	if (command === 'serve') {
 		config = {
