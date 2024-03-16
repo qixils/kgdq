@@ -15,11 +15,8 @@ html {
     --run-nothing: #001;
 
     --bid-full: var(--run-in-progress);
-    --bid-full-text: var(--bid-full);
     --bid-open: #dda;
-    --bid-open-text: var(--bid-open);
     --bid-closed: #d36;
-    --bid-closed-text: var(--bid-closed);
 
     --youtube-rgb: 255, 0, 0;
     --twitch-rgb: 100, 65, 165;
@@ -345,7 +342,7 @@ sup {
     display: block;
     width: var(--size);
     aspect-ratio: 1/1;
-    background: radial-gradient(farthest-side, var(--edge-color) 98%, #0000) top/var(--thickness) var(--thickness) no-repeat, conic-gradient(var(--edge-color) calc(var(--value) * 1%), #0000 0);
+    background: radial-gradient(farthest-side, currentColor 98%, #0000) top/var(--thickness) var(--thickness) no-repeat, conic-gradient(currentColor calc(var(--value) * 1%), #0000 0);
     -webkit-mask: radial-gradient(farthest-side, #0000 calc(99% - var(--thickness)), #000 calc(100% - var(--thickness)));
     mask: radial-gradient(farthest-side, #0000 calc(99% - var(--thickness)), #000 calc(100% - var(--thickness)));
 }
@@ -355,7 +352,7 @@ sup {
     aspect-ratio: 1/1;
     inset: calc(50% - var(--thickness) / 2);
     transform: rotate(calc(var(--value) * 3.6deg - 90deg)) translate(calc(var(--size) / 2 - 50%));
-    background-color: var(--edge-color);
+    background-color: currentColor;
 }
 
 .bid {
