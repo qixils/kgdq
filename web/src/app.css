@@ -3,16 +3,23 @@ html {
 
     --bg-bg: #001;
     --raise-bg: #20252e;
+    --raise-outline: #FFF8;
     --text-quiet: #88A;
     --text: #EEF;
+    --link: #AAF;
+    --link-visited: #BBE;
+    --link-hover: #FFF;
 
     --run-in-progress: #5e7;
     --run-finished: #d2a;
     --run-nothing: #001;
 
     --bid-full: var(--run-in-progress);
+    --bid-full-text: var(--bid-full);
     --bid-open: #dda;
+    --bid-open-text: var(--bid-open);
     --bid-closed: #d36;
+    --bid-closed-text: var(--bid-closed);
 
     --youtube-rgb: 255, 0, 0;
     --twitch-rgb: 100, 65, 165;
@@ -21,6 +28,27 @@ html {
 
     color: var(--text);
     background-color: var(--bg-bg);
+}
+
+@media (prefers-color-scheme: light) {
+    html {
+        --bg-bg: #faf8ff;
+        --raise-bg: hsl(264, 15%, 95%);
+        --raise-outline: #CCC;
+        --text-quiet: #303040;
+        --text: #112;
+        --link: hsl(251, 75%, 48%);
+        --link-visited: hsl(271, 75%, 55%);
+        --link-hover: #97e;
+
+        --bid-full-text: #3c8d43;
+        --bid-open-text: #7b7943;
+        --bid-closed-text: #8d3c4e;
+    }
+
+    .vod::before {
+        color: white;
+    }
 }
 
 html, body, .page-container {
@@ -71,7 +99,7 @@ header nav {
 
 
 header h1 {
-    color: #EEF;
+    color: var(--text);
 }
 
 header a {
@@ -79,15 +107,15 @@ header a {
 }
 
 a {
-    color: #AAF;
+    color: var(--link);
 }
 
 a:visited {
-    color: #BBE;
+    color: var(--link-visited);
 }
 
 a:hover {
-    color: white;
+    color: var(--link-hover);
 }
 
 /*a[target='_blank']::after {*/
@@ -145,8 +173,8 @@ footer {
 }
 
 .run {
-    background-color: #20252e;
-    box-shadow: inset #fff8 0 0 2px;
+    background-color: var(--raise-bg);
+    box-shadow: inset var(--raise-outline) 0 0 2px;
     border-radius: 2px;
 }
 
@@ -292,7 +320,6 @@ sup {
     aspect-ratio: 1/1;
     place-content: center;
     border-radius: 9999px;
-    background-color: transparent;
     vertical-align: middle;
     box-sizing: content-box;
     background-color: var(--bg-bg);
@@ -310,7 +337,7 @@ sup {
     display: block;
     width: var(--size);
     aspect-ratio: 1/1;
-    background: radial-gradient(farthest-side, currentColor 98%, #0000) top/var(--thickness) var(--thickness) no-repeat, conic-gradient(currentColor calc(var(--value) * 1%), #0000 0);
+    background: radial-gradient(farthest-side, var(--edge-color) 98%, #0000) top/var(--thickness) var(--thickness) no-repeat, conic-gradient(var(--edge-color) calc(var(--value) * 1%), #0000 0);
     -webkit-mask: radial-gradient(farthest-side, #0000 calc(99% - var(--thickness)), #000 calc(100% - var(--thickness)));
     mask: radial-gradient(farthest-side, #0000 calc(99% - var(--thickness)), #000 calc(100% - var(--thickness)));
 }
@@ -320,13 +347,17 @@ sup {
     aspect-ratio: 1/1;
     inset: calc(50% - var(--thickness) / 2);
     transform: rotate(calc(var(--value) * 3.6deg - 90deg)) translate(calc(var(--size) / 2 - 50%));
-    background-color: currentColor;
+    background-color: var(--edge-color);
 }
 
 .bid {
     grid-template-columns: auto 1fr;
     display: grid;
     align-items: center;
+}
+
+.event-runs.disable-bids .bid {
+    display: none;
 }
 
 .bid-body {
@@ -353,10 +384,6 @@ sup {
 
 .run-details > div > * {
     vertical-align: middle;
-}
-
-.run-details > .run-runners a {
-
 }
 
 .run-details > div:before {
@@ -436,24 +463,23 @@ sup {
     font-size: 150%;
     margin: 5px;
     width: 1ch;
+    text-shadow:
+            rgba(var(--whatever-rgb), 1.0) -2px 0 0,
+            rgba(var(--whatever-rgb), 0.8) -4px 0 0,
+            rgba(var(--whatever-rgb), 0.6) -6px 0 0,
+            rgba(var(--whatever-rgb), 0.4) -8px 0 0,
+            rgba(var(--whatever-rgb), 0.2) -10px 0 0,
+            #000A 0px 1px 3px,
+            #000A -10px 1px 5px
+            ;
 }
 
 .vod.youtube::before {
-    text-shadow:
-            var(--youtube)   -2px 0 0,
-            rgba(var(--youtube-rgb), 0.8) -4px 0 0,
-            rgba(var(--youtube-rgb), 0.6) -6px 0 0,
-            rgba(var(--youtube-rgb), 0.4) -8px 0 0,
-            rgba(var(--youtube-rgb), 0.2) -10px 0 0;
+    --whatever-rgb: var(--youtube-rgb);
 }
 
 .vod.twitch::before {
-    text-shadow:
-            var(--twitch)   -2px 0 0,
-            rgba(var(--twitch-rgb), 0.8) -4px 0 0,
-            rgba(var(--twitch-rgb), 0.6) -6px 0 0,
-            rgba(var(--twitch-rgb), 0.4) -8px 0 0,
-            rgba(var(--twitch-rgb), 0.2) -10px 0 0;
+    --whatever-rgb: var(--twitch-rgb);
 }
 
 .bid-war-bars {
@@ -588,8 +614,8 @@ form button[type="submit"] {
 }
 
 .event-summary {
-    background-color: #20252e;
-    box-shadow: inset #fff8 0 0 2px;
+    background-color: var(--raise-bg);
+    box-shadow: inset var(--raise-outline) 0 0 2px;
     border-radius: 2px;
     padding: 1em;
     margin: 1em;
@@ -609,7 +635,7 @@ form button[type="submit"] {
 }
 
 .error-box {
-    background-color: #201;
+    background-color: rgba(141, 0, 70, 0.44);
     border: 2px solid hsl(0, 95%, 56%);
     margin: 1em auto;
     border-radius: 2px;
