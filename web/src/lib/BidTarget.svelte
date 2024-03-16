@@ -6,7 +6,10 @@
     export let formatter: Formatters;
 
     let percent = Math.round((bid.donationTotal / bid.goal) * 100);
-    let color = percent >= 100 ? "var(--bid-full)" : (bid.state === "OPENED" ? "var(--bid-open)" : "var(--bid-closed)");
+    let color = "--bid-" + (percent >= 100 ? "full" : (bid.state === "OPENED" ? "open" : "closed"));
+    let textColor = `var(${color}-text)`;
+    color = `var(${color})`;
+
 </script>
 
 <span class="radial-progress" style="--value:{percent}; --size:30px; color:{color}"></span>
