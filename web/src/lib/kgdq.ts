@@ -1,7 +1,11 @@
 import type {MarathonEvent} from "vods.speedrun.club-client";
 
-export const API_DOMAIN = 'vods.speedrun.club';
-export const BASE_URL= 'https://' + API_DOMAIN + '/api/v2';
+import { dev } from "$app/environment";
+export let WEBSITE_BASE = 'https://vods.speedrun.club';
+if (dev) {
+    WEBSITE_BASE = 'http://localhost:5173'
+}
+export const BASE_URL = WEBSITE_BASE + '/api/v2';
 
 export const EPOCH = "1970-01-01T00:00:00Z";
 
