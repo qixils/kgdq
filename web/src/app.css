@@ -44,10 +44,6 @@ html {
         --link-visited: hsl(271, 75%, 55%);
         --link-hover: #97e;
         --dialog-shadow: #0006;
-
-        --bid-full-text: #3c8d43;
-        --bid-open-text: #7b7943;
-        --bid-closed-text: #8d3c4e;
     }
 
     .vod::before {
@@ -582,6 +578,7 @@ form button[type="submit"] {
 .action-btn {
     display: flex;
     color: var(--text);
+    background-color: var(--raise-bg);
     border: 2px solid var(--run-finished);
     box-shadow: var(--run-finished-half) 0 3px 0 0;
     padding: .3125em;
