@@ -363,10 +363,6 @@ sup {
     align-items: center;
 }
 
-.event-runs.disable-bids .bid {
-    display: none;
-}
-
 .bid-body {
     margin: 0 0.5em;
 
@@ -723,4 +719,13 @@ form button[type="submit"] {
 .error-box p {
     /* TODO: consolidate various margin and padding values on text elements */
     margin-right: 1em;
+}
+
+#event-controls {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.event-runs.hide-bids .bid {
+    display: none;
 }
