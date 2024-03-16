@@ -109,7 +109,7 @@
     <div class="run-schedule-time">{ Formatters.time(run.startTime) }</div>
     <div class="run-content">
         {#if $user && (current_status === "FINISHED" || current_status === "IN_PROGRESS") && (run.gdqId !== null || run.horaroId !== null) }
-            <dialog id="suggest-{run_index}"  class="suggest-dialog { submit_status?.toLowerCase() ?? '' }">
+            <dialog id="suggest-{run_index}" class="suggest-dialog">
                 <button class="close-btn material-symbols-rounded" on:click={ () => suggest_dialog().close() }>close</button>
                 <h1>Suggest a VOD</h1>
                 <p>
@@ -145,7 +145,7 @@
                         </select>
                     {/if}
 
-                    <button id="suggest-{run_index}-btn" type="submit" on:click={ submit_suggestion }>
+                    <button id="suggest-{run_index}-btn" class="action-btn { submit_status?.toLowerCase() ?? '' }" type="submit" on:click={ submit_suggestion }>
                         {#if submit_status === null}
                             Submit
                         {:else if submit_status === "SUBMITTING"}
@@ -160,7 +160,7 @@
 
             </dialog>
 
-            <button class="suggest-btn" on:click={ () => suggest_dialog().showModal() }>
+            <button class="suggest-btn action-btn" on:click={ () => suggest_dialog().showModal() }>
                 Suggest VOD
             </button>
         {/if}
