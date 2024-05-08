@@ -1,6 +1,6 @@
 plugins {
     kotlin("jvm") version "1.9.22" apply true
-    kotlin("plugin.serialization") version "1.9.22" apply false
+    kotlin("plugin.serialization") version "1.9.24" apply false
     id("com.github.johnrengelman.shadow") version "8.1.1" apply false
 }
 
