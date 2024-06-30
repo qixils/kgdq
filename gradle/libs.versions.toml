@@ -1,15 +1,15 @@
 [versions]
-ktor = "2.3.7"
-kotlin = "1.9.22"
+ktor = "2.3.11"
+kotlin = "1.9.24"
 configurate = "4.1.2"
-coroutines = "1.7.3"
-serialization = "1.6.2"
+coroutines = "1.8.0"
+serialization = "1.6.3"
 okhttp = "5.0.0-alpha.12"
 
 [libraries]
-logback = { module = "ch.qos.logback:logback-classic", version = "1.4.14" }
+logback = { module = "ch.qos.logback:logback-classic", version = "1.5.6" }
 amqp-client = { module = "com.rabbitmq:amqp-client", version = "5.20.0" }
-twitch4j-helix = { module = "com.github.twitch4j:twitch4j-helix", version = "1.19.0" }
+twitch4j-helix = { module = "com.github.twitch4j:twitch4j-helix", version = "1.20.0" }
 ktor-server-core-jvm = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
 ktor-server-auth-jvm = { module = "io.ktor:ktor-server-auth-jvm", version.ref = "ktor" }
 ktor-server-locations-jvm = { module = "io.ktor:ktor-server-locations-jvm", version.ref = "ktor" }
@@ -36,9 +36,9 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "
 kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-serialization-cbor = { module = "org.jetbrains.kotlinx:kotlinx-serialization-cbor", version.ref = "serialization" }
-slf4j = { module = "org.slf4j:slf4j-api", version = "2.0.11" }
-jda = { module = "net.dv8tion:JDA", version = "5.0.0-beta.19" }
-jda-ktx = { module = "club.minnced:jda-ktx", version = "0.11.0-beta.19" }
+slf4j = { module = "org.slf4j:slf4j-api", version = "2.0.12" }
+jda = { module = "net.dv8tion:JDA", version = "5.0.0-beta.20" }
+jda-ktx = { module = "club.minnced:jda-ktx", version = "0.11.0-beta.20" }
 configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate" }
 configurate-extra-kotlin = { module = "org.spongepowered:configurate-extra-kotlin", version.ref = "configurate" }
 jraw = { module = "com.github.dukestreet.JRAW:lib", version = "8e2305db29" }

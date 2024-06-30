@@ -354,7 +354,7 @@ data class EventList(val id: String? = null, val skipLoad: Boolean = false) // T
 data class RunList(val id: String? = null, val event: String? = null, val runner: Int? = null)
 
 class GDQMarathon : Marathon(GDQ(), "gdq", "Games Done Quick", "https://gamesdonequick.com/") {
-    override fun getDonationUrl(event: EventData): String = "https://gamesdonequick.com/tracker/ui/donate/${event.short}"
+    override fun getDonationUrl(event: EventData): String = "https://tracker.gamesdonequick.com/tracker/ui/donate/${event.short}"
     override fun getScheduleUrl(event: EventData): String = "https://gamesdonequick.com/schedule/${event.id}"
 }
 class ESAMarathon : Marathon(ESA(), "esa", "European Speedrunner Assembly", "https://esamarathon.com/", autoVODs = true) {
@@ -370,7 +370,7 @@ class RPGLBMarathon : Marathon(RPGLB(), "rpglb", "RPG Limit Break", "https://rpg
     override fun getScheduleUrl(event: EventData): String = "https://rpglimitbreak.com/tracker/runs/${event.id}"
 }
 class BSGMarathon : Marathon(BSG(), "bsg", "Benelux Speedrunner Gathering", "https://bsgmarathon.com/") {
-    override fun getDonationUrl(event: EventData): String = "https://tracker.bsgmarathon.com/ui/donate/${event.short}"
+    override fun getDonationUrl(event: EventData): String = "https://tracker.bsgmarathon.com/tracker/ui/donate/${event.short}"
     override fun getScheduleUrl(event: EventData): String = "https://oengus.io/marathon/${event.short.lowercase()}/schedule" // this is so icky
 }
 

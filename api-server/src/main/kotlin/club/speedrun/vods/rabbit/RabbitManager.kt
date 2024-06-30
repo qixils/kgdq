@@ -21,7 +21,7 @@ import java.time.Instant
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-object RabbitManager {
+class RabbitManager {
     private val logger: Logger = LoggerFactory.getLogger(RabbitManager::class.java)
     private val connection = run {
         val factory = ConnectionFactory()
@@ -34,7 +34,7 @@ object RabbitManager {
         factory.newConnection()
     } ?: throw IllegalStateException("Failed to connect to RabbitMQ")
     private val channel = connection.createChannel()
-    private const val consumerTag = "SpeedrunClubVODs"
+    private val consumerTag = "SpeedrunClubVODs"
     private val cancelCallback = CancelCallback { consumerTag: String? ->
         logger.info("$consumerTag was canceled")
     }
