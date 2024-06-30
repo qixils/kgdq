@@ -21,7 +21,7 @@ class DonationTracker(
     /**
      * The base URL of the donation tracker API.
      */
-    apiPath: String = "https://gamesdonequick.com/tracker/api/v2/",
+    apiPath: String = "https://tracker.gamesdonequick.com/tracker/api/v2/",
 ) {
     val apiPath: String
     private val logger = LoggerFactory.getLogger(DonationTracker::class.java)

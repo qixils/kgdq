@@ -20,7 +20,7 @@ open class GDQ(
     /**
      * The base URL of the GDQ donation tracker API.
      */
-    apiPath: String = "https://gamesdonequick.com/tracker/search/",
+    apiPath: String = "https://tracker.gamesdonequick.com/tracker/search/",
     /**
      * The types of models supported by this instance of the donation tracker.
      */
@@ -366,4 +366,4 @@ open class ESA(
 
 class HEK : ESA("https://hekathon.esamarathon.com/search/")
 class RPGLB : GDQ("https://tracker.rpglimitbreak.com/search/", ModelType.ALL.minus(ModelType.HEADSET))
-class BSG : GDQ("https://tracker.bsgmarathon.com/search/") // shockingly using a fresh fork of the GDQ tracker instead of ESA's ancient fork
+class BSG : GDQ("https://tracker.bsgmarathon.com/tracker/search/") // shockingly using a fresh fork of the GDQ tracker instead of ESA's ancient fork
