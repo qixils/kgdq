@@ -23,7 +23,7 @@ open class GDQ(
     /**
      * The base URL of the GDQ donation tracker API.
      */
-    apiPath: String = "https://gamesdonequick.com/tracker/search/",
+    apiPath: String = "https://tracker.gamesdonequick.com/tracker/search/",
     /**
      * The types of models supported by this instance of the donation tracker.
      */

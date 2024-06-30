@@ -358,7 +358,7 @@ data class EventList(val id: String? = null, val skipLoad: Boolean = false) // T
 data class RunList(val id: String? = null, val event: String? = null, val runner: Int? = null)
 
 class GDQMarathon : Marathon(GDQ(), "gdq", "Games Done Quick", "https://gamesdonequick.com/") {
-    override fun getDonationUrl(event: EventData): String = "https://gamesdonequick.com/tracker/ui/donate/${event.short}"
+    override fun getDonationUrl(event: EventData): String = "https://tracker.gamesdonequick.com/tracker/ui/donate/${event.short}"
     override fun getScheduleUrl(event: EventData): String = "https://gamesdonequick.com/schedule/${event.id}"
 }
 class ESAMarathon : Marathon(ESA(), "esa", "European Speedrunner Assembly", "https://esamarathon.com/", autoVODs = true) {
