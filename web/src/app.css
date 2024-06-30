@@ -3,8 +3,13 @@ html {
 
     --bg-bg: #001;
     --raise-bg: #20252e;
+    --raise-outline: #FFF8;
     --text-quiet: #88A;
     --text: #EEF;
+    --link: #AAF;
+    --link-visited: #BBE;
+    --link-hover: #FFF;
+    --dialog-shadow: var(--bg-bg);
 
     --run-in-progress: #5e7;
     --run-finished: #d2a;
@@ -14,13 +19,34 @@ html {
     --bid-open: #dda;
     --bid-closed: #d36;
 
+    --run-finished-half: #d2a7;
+    --run-in-progress-half: #5e77;
+    --bid-open-half: #dda7;
+    --bid-closed-half: #d367;
+
     --youtube-rgb: 255, 0, 0;
     --twitch-rgb: 100, 65, 165;
-    --youtube: rgba(var(--youtube-rgb), 1);
-    --twitch: rgba(var(--twitch-rgb), 1);
 
     color: var(--text);
     background-color: var(--bg-bg);
+}
+
+@media (prefers-color-scheme: light) {
+    html {
+        --bg-bg: #faf8ff;
+        --raise-bg: hsl(264, 15%, 95%);
+        --raise-outline: #CCC;
+        --text-quiet: #303040;
+        --text: #112;
+        --link: hsl(251, 75%, 48%);
+        --link-visited: hsl(271, 75%, 55%);
+        --link-hover: #97e;
+        --dialog-shadow: #0006;
+    }
+
+    .vod::before {
+        color: white;
+    }
 }
 
 html, body, .page-container {
@@ -79,7 +105,7 @@ header nav ul {
 
 
 header h1 {
-    color: #EEF;
+    color: var(--text);
 }
 
 header a {
@@ -87,15 +113,15 @@ header a {
 }
 
 a {
-    color: #AAF;
+    color: var(--link);
 }
 
 a:visited {
-    color: #BBE;
+    color: var(--link-visited);
 }
 
 a:hover {
-    color: white;
+    color: var(--link-hover);
 }
 
 /*a[target='_blank']::after {*/
@@ -153,8 +179,8 @@ footer {
 }
 
 .run {
-    background-color: #20252e;
-    box-shadow: inset #fff8 0 0 2px;
+    background-color: var(--raise-bg);
+    box-shadow: inset var(--raise-outline) 0 0 2px;
     border-radius: 2px;
 }
 
@@ -333,6 +359,7 @@ sup {
 .bid {
     display: flex;
     align-items: center;
+    position: relative;
 }
 
 .bid-body {
@@ -364,10 +391,6 @@ sup {
 
 .run-details > div > * {
     vertical-align: middle;
-}
-
-.run-details > .run-runners a {
-
 }
 
 .run-details > div:before {
@@ -443,24 +466,23 @@ sup {
     font-size: 150%;
     margin: .3125em;
     width: 1ch;
+    text-shadow:
+            rgba(var(--whatever-rgb), 1.0) -2px 0 0,
+            rgba(var(--whatever-rgb), 0.8) -4px 0 0,
+            rgba(var(--whatever-rgb), 0.6) -6px 0 0,
+            rgba(var(--whatever-rgb), 0.4) -8px 0 0,
+            rgba(var(--whatever-rgb), 0.2) -10px 0 0,
+            #000A 0px 1px 3px,
+            #000A -10px 1px 5px
+            ;
 }
 
 .vod.youtube::before {
-    text-shadow:
-            var(--youtube)   -.125em 0 0,
-            rgba(var(--youtube-rgb), 0.8) -.25em 0 0,
-            rgba(var(--youtube-rgb), 0.6) -.375em 0 0,
-            rgba(var(--youtube-rgb), 0.4) -.5em 0 0,
-            rgba(var(--youtube-rgb), 0.2) -.625em 0 0;
+    --whatever-rgb: var(--youtube-rgb);
 }
 
 .vod.twitch::before {
-    text-shadow:
-            var(--twitch)   -.125em 0 0,
-            rgba(var(--twitch-rgb), 0.8) -.25em 0 0,
-            rgba(var(--twitch-rgb), 0.6) -.375em 0 0,
-            rgba(var(--twitch-rgb), 0.4) -.5em 0 0,
-            rgba(var(--twitch-rgb), 0.2) -.625em 0 0;
+    --whatever-rgb: var(--twitch-rgb);
 }
 
 .bid-war-stats {
@@ -508,7 +530,7 @@ sup {
     border: 1px solid var(--text-quiet);
     padding: 1em;
     bottom: 100%; /* above name of bid incentive */
-    box-shadow: black 0 0 1em;
+    box-shadow: var(--dialog-shadow) 0 0 1em;
 }
 
 .bid-description::after {
@@ -557,37 +579,29 @@ form button[type="submit"] {
     grid-column: 1 / span 2;
 }
 
+.action-btn {
+    display: flex;
+    color: var(--text);
+    background-color: var(--raise-bg);
+    border: 2px solid var(--run-finished);
+    box-shadow: var(--run-finished-half) 0 3px 0 0;
+    padding: .3125em;
+    border-radius: 2px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
 
 /* bottom right of div, and also dont make any taller*/
 .suggest-btn,
 .suggest-dialog button[type="submit"] {
-    display: flex;
-    padding: .3125em;
-    color: var(--text);
-    background-color: var(--raise-bg);
-    border-radius: 2px;
     margin: 0.5em;
     float: right;
-    border: 2px solid var(--run-finished);
-    box-shadow: #713 0 3px 0 0;
-    cursor: pointer;
-    align-items: center;
-    text-align: center;
 }
 
 .schedule-btn {
-    display: flex;
-    padding: .3125em;
-    background-color: var(--raise-bg);
-    border-radius: 2px;
     margin: 1em 2em;
-    border: 2px solid var(--run-finished);
-    box-shadow: #713 0 3px 0 0;
-    cursor: pointer;
-    align-items: center;
-    text-align: center;
     text-decoration: none;
-    justify-content: center;
 }
 
 .schedule-btn::before {
@@ -599,20 +613,20 @@ form button[type="submit"] {
 
 }
 
-.suggest-dialog.submitting button[type="submit"] {
+.action-btn.submitting {
     cursor: wait;
-    border: 2px solid var(--bid-open);
-    box-shadow: #663 0 3px 0 0;
+    border-color: var(--bid-open);
+    box-shadow: var(--bid-open-half) 0 3px 0 0;
 }
 
-.suggest-dialog.ok button[type="submit"] {
-    border: 2px solid var(--run-in-progress);
-    box-shadow: #173 0 3px 0 0;
+.action-btn.ok {
+    border-color: var(--run-in-progress);
+    box-shadow: var(--run-in-progress-half) 0 3px 0 0;
 }
 
-.suggest-dialog.error button[type="submit"] {
-    border: 2px solid var(--bid-closed);
-    box-shadow: #713 0 3px 0 0;
+.action-btn.error {
+    border-color: var(--bid-closed);
+    box-shadow: var(--bid-closed-half) 0 3px 0 0;
 }
 
 .suggest-btn::before {
@@ -635,7 +649,7 @@ form button[type="submit"] {
     border: 1px solid var(--run-finished);
     border-radius: 2px;
     padding: 1.5em;
-    box-shadow: var(--bg-bg) 0 0 1.875em 0.625em;
+    box-shadow: var(--dialog-shadow) 0 0 1.875em 0.625em;
 }
 
 .suggest-dialog > h1 {
@@ -656,8 +670,8 @@ form button[type="submit"] {
 }
 
 .event-summary {
-    background-color: #20252e;
-    box-shadow: inset #fff8 0 0 2px;
+    background-color: var(--raise-bg);
+    box-shadow: inset var(--raise-outline) 0 0 2px;
     border-radius: 2px;
     padding: 1em;
     margin: 1em;
@@ -677,7 +691,7 @@ form button[type="submit"] {
 }
 
 .error-box {
-    background-color: #201;
+    background-color: rgba(141, 0, 70, 0.44);
     border: 2px solid hsl(0, 95%, 56%);
     margin: 1em auto;
     border-radius: 2px;
@@ -701,4 +715,13 @@ form button[type="submit"] {
 .error-box p {
     /* TODO: consolidate various margin and padding values on text elements */
     margin-right: 1em;
+}
+
+#event-controls {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.event-runs.hide-bids .bid {
+    display: none;
 }

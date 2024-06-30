@@ -6,7 +6,7 @@
     import RunComponent from "$lib/RunComponent.svelte";
     import {page} from "$app/stores";
     import {Formatters} from "$lib/Formatters";
-    import {API_DOMAIN, BASE_URL, guessStreamNameAndUrl, niceShortName} from "$lib/kgdq";
+    import {WEBSITE_BASE, BASE_URL, guessStreamNameAndUrl, niceShortName} from "$lib/kgdq";
     import {onMount} from "svelte";
     import LoadingButton from "$lib/LoadingButton.svelte";
     import ErrorReport from "$lib/ErrorReport.svelte";
@@ -22,7 +22,14 @@
 
     const { streamUsername } = guessStreamNameAndUrl(data.event.organization, data.event.short);
 
+    let hideBids = false;
+    let saveHideBids = (x: boolean) => {
+        localStorage.setItem("hideBids", JSON.stringify(x));
+        hideBids = x;
+    };
+
     onMount(async () => {
+        hideBids = JSON.parse(localStorage.getItem("hideBids") || "false");
         try {
             runs = await SVC.getRuns($page.params.org.toLowerCase(), $page.params.slug);
             if (runs.length > 0) {
@@ -39,7 +46,7 @@
     $meta = {
         title: data.event.name,
         description: `View the schedule of ${niceShortName(data.event)} and watch back the VODs.`,
-        url: `https://${API_DOMAIN}/event/${data.event.organization}/${data.event.short}`.toLowerCase()
+        url: `${WEBSITE_BASE}/event/${data.event.organization}/${data.event.short}`.toLowerCase()
     }
 </script>
 
@@ -82,12 +89,18 @@
                 </iframe>
             {/if}
         {/if}
+        <div id="event-controls">
+            <div>
+                <input type="checkbox" on:change={evt => saveHideBids(evt.currentTarget.checked)} checked={hideBids}>
+                <label>Hide bids</label>
+            </div>
+        </div>
     </div>
 
     {#if runs === undefined && run_error === undefined}
         <LoadingButton />
     {:else if runs !== undefined}
-        <ul class="event-runs">
+        <ul class="event-runs" class:hide-bids={hideBids}>
 
             {#each runs as run, run_index}
 
