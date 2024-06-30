@@ -36,7 +36,7 @@ open class GDQ(
         isLenient = true
         coerceInputValues = true
     }
-    private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(20)).build()
+    private val client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(20)).followRedirects(HttpClient.Redirect.NORMAL).build()
     private val modelCache: MutableMap<Pair<CacheType, Int>, Pair<Wrapper<*>, Instant>> = mutableMapOf()
     private val responseCache: MutableMap<String, Pair<List<Wrapper<*>>, Instant>> = mutableMapOf()
     protected var lastCachedRunners: Instant? = null
@@ -182,9 +182,13 @@ open class GDQ(
         val body = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).await().body()
 
         // deserialize | TODO: handle deserializing errors (error: String, exception: String)
-        val models = json
-            .decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
-            .toMutableList()
+        val models = try {
+            json
+                .decodeFromString(ListSerializer(Wrapper.serializer(modelSerializer)), body)
+                .toMutableList()
+        } catch (e: Exception) {
+            throw RuntimeException("Failed to decode JSON from $uri `$body`", e)
+        }
         val jobs = mutableListOf<Job>()
 
         // load data
@@ -561,4 +565,4 @@ open class ESA(
 
 class HEK : ESA("https://hekathon.esamarathon.com/search/")
 class RPGLB : GDQ("https://tracker.rpglimitbreak.com/search/", ModelType.ALL.minus(ModelType.HEADSET))
-class BSG : GDQ("https://tracker.bsgmarathon.com/search/") // shockingly using a fresh fork of the GDQ tracker instead of ESA's ancient fork
+class BSG : GDQ("https://tracker.bsgmarathon.com/tracker/search/") // shockingly using a fresh fork of the GDQ tracker instead of ESA's ancient fork
