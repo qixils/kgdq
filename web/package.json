@@ -21,7 +21,7 @@
     "svelte-preprocess": "^6.0.1",
     "tslib": "^2.6.3",
     "typescript": "^5.5.2",
-    "vite": "^5.3.2",
+    "vite": "^5.3.4",
     "vods.speedrun.club-client": "file:../api-client-ts"
   },
   "type": "module"
