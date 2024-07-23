@@ -26,17 +26,19 @@ val json = Json {
     encodeDefaults = true
 }
 val gdq = GDQMarathon()
-val esa = ESAMarathon()
+// val esa = ESAMarathon()
 val hek = HEKMarathon()
 val rpglb = RPGLBMarathon()
 val bsg = BSGMarathon()
-val marathons: List<Marathon> = listOf(gdq, esa, hek, rpglb, bsg)
+val marathons: List<Marathon> = listOf(gdq, /* esa, */ hek, rpglb, bsg)
 val rootDb = RootDatabase()
 val srcDb = SrcDatabase()
 val httpClient = HttpClient(OkHttp) {
     install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) { json(json) }
 }
-val rabbit = try { RabbitManager() } catch (e: Exception) {
+val rabbit = try {
+    RabbitManager()
+} catch (e: Exception) {
     logger.warn("Failed to instantiate RabbitManager", e)
     null
 }
@@ -57,8 +59,10 @@ fun Application.kgdqApiModule() {
     install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) { json(json) }
     configureOAuth()
     configureRouting()
+    /*
     rabbit?.declareQueue("cg_events_reddit_esa2022s1", "ESAMarathon", esa.db)
     rabbit?.declareQueue("cg_events_reddit_esa2022s2", "ESAMarathon2", esa.db)
+     */
     runBlocking {
         marathons.forEach { it.api.cacheAll() }
     }
