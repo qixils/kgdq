@@ -79,7 +79,7 @@ fun Application.configureRouting() {
         route("/api") {
             route("/v1") {
                 route("/gdq", gdq.route())
-                route("/esa", esa.route())
+                // route("/esa", esa.route())
                 route("/hek", hek.route())
                 route("/rpglb", rpglb.route())
                 route("/bsg", bsg.route())
