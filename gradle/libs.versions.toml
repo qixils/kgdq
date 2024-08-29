@@ -3,7 +3,7 @@ ktor = "2.3.12"
 kotlin = "2.0.20"
 configurate = "4.1.2"
 coroutines = "1.8.1"
-serialization = "1.7.1"
+serialization = "1.7.2"
 
 [libraries]
 logback = { module = "ch.qos.logback:logback-classic", version = "1.5.6" }
