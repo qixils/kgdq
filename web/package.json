@@ -14,7 +14,7 @@
     "@playwright/test": "^1.48.2",
     "@sveltejs/adapter-node": "^5.2.9",
     "@sveltejs/kit": "^2.7.3",
-    "@types/cookie": "^0.6.0",
+    "@types/cookie": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^8.12.2",
     "svelte": "^5.1.6",
     "svelte-check": "^3.8.5",
