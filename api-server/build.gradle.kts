@@ -26,5 +26,5 @@ dependencies {
     implementation(libs.kotlinx.serialization.cbor)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.ktor.server.tests.jvm)
-    implementation("org.neo4j.driver:neo4j-java-driver:5.26.1")
+    implementation("org.neo4j.driver:neo4j-java-driver:5.26.3")
 }
