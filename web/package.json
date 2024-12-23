@@ -16,7 +16,7 @@
     "@sveltejs/kit": "^2.7.3",
     "@types/cookie": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^8.12.2",
-    "svelte": "^5.1.9",
+    "svelte": "^5.15.0",
     "svelte-check": "^4.0.5",
     "svelte-preprocess": "^6.0.3",
     "tslib": "^2.8.1",
