@@ -4,7 +4,7 @@ import dev.qixils.gdq.computeStreamUrl
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Runner(
+data class Talent(
     override val type: String,
     override val id: Int,
     val name: String = "",

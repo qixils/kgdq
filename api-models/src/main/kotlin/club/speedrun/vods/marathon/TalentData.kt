@@ -3,7 +3,7 @@ package club.speedrun.vods.marathon
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RunnerData(
+data class TalentData(
     val name: String,
     val stream: String? = null,
     val twitter: String? = null,

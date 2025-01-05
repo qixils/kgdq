@@ -18,13 +18,8 @@ class DonationTrackerDatabase(organization: String) : Database("cache", "orgs", 
         Duration.ofHours(12),
     )
 
-    override val runners = CacheManager(
-        getCollection(BaseRunner.serializer(), "runners"),
-        Duration.ofDays(1),
-    )
-
-    override val headsets = CacheManager(
-        getCollection(BaseHeadset.serializer(), "headsets"),
+    override val talent = CacheManager(
+        getCollection(BaseTalent.serializer(), "talent"),
         Duration.ofDays(1),
     )
 

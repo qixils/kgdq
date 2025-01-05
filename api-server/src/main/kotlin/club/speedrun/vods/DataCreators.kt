@@ -1,10 +1,12 @@
 package club.speedrun.vods
 
 import club.speedrun.vods.marathon.*
-import club.speedrun.vods.marathon.db.*
+import club.speedrun.vods.marathon.db.BaseBid
+import club.speedrun.vods.marathon.db.BaseEvent
+import club.speedrun.vods.marathon.db.BaseRun
+import club.speedrun.vods.marathon.db.BaseTalent
 import club.speedrun.vods.marathon.gdq.DonationTrackerDatabase
 import dev.qixils.gdq.BidState
-import dev.qixils.gdq.v1.models.*
 import java.time.Duration
 import java.time.Instant
 import java.util.regex.Pattern
@@ -48,7 +50,7 @@ private fun calculateHoraroRunnerNames(run: HoraroRun): List<String>? {
     }
 }
 
-private fun calculateHoraroFakeRunner(rawName: String): RunnerData {
+private fun calculateHoraroFakeRunner(rawName: String): TalentData {
     val matcher = MARKDOWN_LINK.matcher(rawName)
     val name: String
     val stream: String
@@ -59,7 +61,7 @@ private fun calculateHoraroFakeRunner(rawName: String): RunnerData {
         name = rawName
         stream = ""
     }
-    return RunnerData(name, stream)
+    return TalentData(name, stream)
 }
 
 private fun calculateHoraroRawSetupTime(run: HoraroRun, previousRun: HoraroRun?): Duration? {
@@ -83,11 +85,8 @@ private fun calculateOffsetTime(previousRunTime: Instant?, setupTime: Duration?)
     return previousRunTime + setupTime
 }
 
-fun createRunner(runner: BaseRunner)
-= RunnerData(runner.name, runner.url, pronouns = runner.pronouns)
-
-fun createHeadset(headset: BaseHeadset)
-= HeadsetData(headset.name, headset.pronouns)
+fun createTalent(runner: BaseTalent)
+= TalentData(runner.name, runner.url, pronouns = runner.pronouns)
 
 suspend fun createRun(
     run: BaseRun,
@@ -114,9 +113,9 @@ suspend fun createRun(
         name = run.game,
         twitchName = run.twitchGame,
         console = run.console,
-        runners = run.runners.mapNotNull { db.runners.getByIdForce(it) }.map { createRunner(it.obj) },
-        commentators = run.commentators.mapNotNull { db.headsets.getByIdForce(it) }.map { createHeadset(it.obj) },
-        hosts = run.hosts.mapNotNull { db.headsets.getByIdForce(it) }.map { createHeadset(it.obj) },
+        runners = run.runners.mapNotNull { db.talent.getByIdForce(it) }.map { createTalent(it.obj) },
+        commentators = run.commentators.mapNotNull { db.talent.getByIdForce(it) }.map { createTalent(it.obj) },
+        hosts = run.hosts.mapNotNull { db.talent.getByIdForce(it) }.map { createTalent(it.obj) },
         description = run.description,
         coop = run.coop,
         category = run.category,
@@ -146,7 +145,7 @@ suspend fun createRun(
 fun createBid(bid: BaseBid, run: BaseRun): BidData {
     return BidData(
         id = bid.id,
-        children = bid.children.map { createBid(bid, run) },
+        children = bid.children.map { createBid(it, run) },
         name = bid.name,
         state = when {
             bid.open -> BidState.OPENED
@@ -164,16 +163,18 @@ fun createBid(bid: BaseBid, run: BaseRun): BidData {
     )
 }
 
-fun createEvent(organization: OrganizationConfig, event: BaseEvent): EventData {
+fun createEvent(organization: OrganizationConfig, event: BaseEvent, runs: List<RunData>?): EventData {
     return EventData(
         id = event.id,
         short = event.short,
         name = event.name,
         startTime = event.startsAt,
         timezone = null, // TODO
-        endTime = null, // TODO
+        endTime = runs?.lastOrNull()?.endTime,
         organization = organization,
         amount = event.donationAmount ?: 0.0,
         count = null, // TODO
+        charityName = null, // TODO??
+        currency = null,
     )
 }

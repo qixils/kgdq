@@ -22,6 +22,8 @@ data class EventData(
     val timezone: ZoneId?,
     val amount: Double,
     val count: Int?,
+    val charityName: String?,
+    val currency: String?,
 ) {
     val timeStatus: TimeStatus?
 

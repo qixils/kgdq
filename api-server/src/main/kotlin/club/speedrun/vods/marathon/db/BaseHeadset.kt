@@ -4,6 +4,7 @@ import dev.qixils.gdq.serializers.InstantAsString
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Deprecated(replaceWith = ReplaceWith("Talent", "club.speedrun.vods.marathon.db.BaseTalent"), message = "merged with BaseRunner", level = DeprecationLevel.ERROR)
 class BaseHeadset(
     override val id: String,
     val name: String = "Commentator",

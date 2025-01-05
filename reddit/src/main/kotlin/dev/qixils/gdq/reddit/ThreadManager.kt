@@ -1,12 +1,9 @@
 package dev.qixils.gdq.reddit
 
 import club.speedrun.vods.client.SvcClient
-import club.speedrun.vods.marathon.EventData
-import club.speedrun.vods.marathon.RunData
-import club.speedrun.vods.marathon.VOD
-import club.speedrun.vods.marathon.VODType
+import club.speedrun.vods.marathon.*
 import club.speedrun.vods.naturalJoinTo
-import dev.qixils.gdq.v2.models.Runner
+import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.dean.jraw.RateLimitException
@@ -72,7 +69,7 @@ class ThreadManager(
         body.append("## Links\n\n")
             .append("* **New:** [Watch and submit VODs on the VOD site](https://vods.speedrun.club/event/${config.org}/${event.short})\n")
             .append("* [Watch ${eventConfig.displayName}](https://twitch.tv/${eventConfig.twitch})\n")
-            .append("* [Donate to ${event.charityName}](${event.donationUrl})\n")
+            .append("* [Donate to ${event.charityName ?: "the charity"}](${event.donationUrl})\n")
             .append("* [Official Schedule](${event.scheduleUrl})\n")
             .append("* [${marathon.shortName} YouTube playlist](")
         if (eventConfig.playlist != null)
@@ -88,14 +85,14 @@ class ThreadManager(
     private fun generateRunRow(body: StringBuilder, run: RunData) {
         //// game name, category, SR.com link
         body.append(run.name)
-        if (run.category.isNotEmpty())
+        if (!run.category.isNullOrEmpty())
             body.append(" (").append(run.category).append(")")
         if (run.src != null)
             body.append("^[+](https://www.speedrun.com/").append(run.src).append(")")
         body.append(" | ")
 
         //// runners
-        naturalJoinTo(body, run.runners) { generateRunner(it) }
+        naturalJoinTo(body, run.runners) { generateTalent(it) }
         body.append(" | ")
 
         //// time, VODs
@@ -105,9 +102,9 @@ class ThreadManager(
         body.appendLine()
     }
 
-    private fun generateRunner(runner: Runner): String {
+    private fun generateTalent(talent: TalentData): String {
         // Return markdown-formatted name with link if available
-        return runner.url?.let { "[${runner.name}]($it)" } ?: runner.name
+        return talent.stream?.let { "[${talent.name}]($it)" } ?: talent.name
     }
 
     private fun appendMiscVODs(sb: StringBuilder, vods: List<VOD>, id: String) {
@@ -127,14 +124,14 @@ class ThreadManager(
         if (twitchVODs.isNotEmpty()) {
             twitchVODs.forEachIndexed { index, vod ->
                 if (index == 0)
-                    time.append('[').append(run.runTimeText)
+                    time.append('[').append(DurationAsStringSerializer.format(run.runTime))
                 else
                     time.append(" [\\[").append(index + 1).append("\\]")
                 time.append("](").append(vod.url).append(')')
             }
         } else {
             // otherwise, add run time with no link
-            time.append(run.runTimeText)
+            time.append(DurationAsStringSerializer.format(run.runTime))
         }
         // add YouTube VODs if available
         appendMiscVODs(time, ytVODs, "YT")

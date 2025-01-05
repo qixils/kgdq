@@ -5,10 +5,16 @@ import club.speedrun.vods.RedditUtils.getRedditVODs
 import club.speedrun.vods.createEvent
 import club.speedrun.vods.createRun
 import club.speedrun.vods.marathon.*
-import club.speedrun.vods.marathon.db.*
+import club.speedrun.vods.marathon.db.BaseBid
+import club.speedrun.vods.marathon.db.BaseEvent
+import club.speedrun.vods.marathon.db.BaseRun
+import club.speedrun.vods.marathon.db.BaseTalent
 import dev.qixils.gdq.BidState
 import dev.qixils.gdq.v2.DonationTracker
-import dev.qixils.gdq.v2.models.*
+import dev.qixils.gdq.v2.models.Bid
+import dev.qixils.gdq.v2.models.Event
+import dev.qixils.gdq.v2.models.Run
+import dev.qixils.gdq.v2.models.Talent
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -43,42 +49,27 @@ class DonationTrackerMarathon(
     }
 
     private fun put(event: Event): BaseEvent {
-        val baseEvent = BaseEvent(
+        return BaseEvent(
             event.id.toString(),
             event.short,
             event.name,
             event.datetime,
             cachedAt = Instant.now(),
-        )
-        cacheDb.events.put(baseEvent)
-        return baseEvent
+        ).also { cacheDb.events.put(it) }
     }
 
-    private fun put(runner: Runner): BaseRunner {
-        val baseRunner = BaseRunner(
-            runner.id.toString(),
-            runner.name,
-            runner.pronouns,
-            runner.url,
+    private fun put(talent: Talent): BaseTalent {
+        return BaseTalent(
+            talent.id.toString(),
+            talent.name,
+            talent.pronouns,
+            talent.url,
             Instant.now(),
-        )
-        cacheDb.runners.put(baseRunner)
-        return baseRunner
-    }
-
-    private fun put(headset: Headset): BaseHeadset {
-        val baseHeadset = BaseHeadset(
-            headset.id.toString(),
-            headset.name,
-            headset.pronouns,
-            Instant.now(),
-        )
-        cacheDb.headsets.put(baseHeadset)
-        return baseHeadset
+        ).also { cacheDb.talent.put(it) }
     }
 
     private fun put(run: Run, eventId: String?, bids: List<BaseBid>): BaseRun? {
-        run.runners.forEach(this::put)
+        run.talents.forEach(this::put)
         run.hosts.forEach(this::put)
         run.commentators.forEach(this::put)
         if (run.startTime == null) return null
@@ -92,7 +83,7 @@ class DonationTrackerMarathon(
             run.description,
             run.category,
             run.console,
-            run.runners.map { it.id.toString() },
+            run.talents.map { it.id.toString() },
             run.hosts.map { it.id.toString() },
             run.commentators.map { it.id.toString() },
             run.startTime!!,
@@ -103,7 +94,17 @@ class DonationTrackerMarathon(
             run.releaseYear,
             run.videoLinks.map { VOD.fromUrl(it.url) },
             cachedAt = Instant.now(),
-        )
+        ).also { cacheDb.runs.put(it) }
+    }
+
+    private fun putEmptyRun(event: BaseEvent): BaseRun? {
+        return BaseRun(
+            "543210${event.id}",
+            event.id,
+            game = "No runs known for this event",
+            startsAt = event.startsAt,
+            cachedAt = Instant.now(),
+        ).also { cacheDb.runs.put(it) }
     }
 
     private fun convRaw(parent: Bid, children: List<BaseBid>): BaseBid {
@@ -153,6 +154,7 @@ class DonationTrackerMarathon(
     }
 
     suspend fun getEventId(slug: String): String? {
+        if (slug.toIntOrNull() != null) return slug
         val _slug = slug.lowercase()
         if (_slug in eventIdCache) return eventIdCache[_slug]
         return getEvent(slug)?.id
@@ -175,18 +177,28 @@ class DonationTrackerMarathon(
                 .map { it.obj }
                 .filter { it.id !in ids }
                 .forEach(cacheDb.runs::remove)
-            // fetch bids
-            val bids = api.getEventBids(eventIdInt).fetchAll()
-            val idBids = bids.associateBy { it.id }
-            val parentBids = bids.groupBy { it.parentId }
-            val dbBids = parentBids.flatMap { (id, children) -> convert(idBids[id], children) }
-            // return
-            fetch.mapNotNull { put(it, eventId, dbBids) }
+            // empty?
+            if (fetch.isEmpty()) {
+                putEmptyRun(cachedEvent)
+                emptyList()
+            } else {
+                // fetch bids
+                val bids = api.getEventBids(eventIdInt).fetchAll()
+                val idBids = bids.associateBy { it.id }
+                val parentBids = bids.groupBy { it.parentId }
+                val dbBids = parentBids.flatMap { (id, children) -> convert(idBids[id], children) }
+                // return
+                fetch.mapNotNull { put(it, eventId, dbBids) }
+            }
         }
 
+        if (runs.isEmpty())
+            return@coroutineScope emptyList()
+
+        val loadVods = runs.first().startsAt.isBefore(Instant.now())
         val vodsFinalized = runs.last().run { this.startsAt + this.runTime }.isBefore(Instant.now().minus(7, ChronoUnit.DAYS))
         val vods =
-            if (!eventOverrides.redditMergedIn || !vodsFinalized)
+            if (loadVods && (!eventOverrides.redditMergedIn || !vodsFinalized))
                 async { getRedditVODs(cachedEvent.short) }
             else null
 
@@ -210,7 +222,7 @@ class DonationTrackerMarathon(
         }
 
         // update override
-        if (!eventOverrides.redditMergedIn && vodsFinalized) {
+        if (loadVods && !eventOverrides.redditMergedIn && vodsFinalized) {
             eventOverrides.redditMergedIn = true
             overrideDb.events.update(eventOverrides)
         }
@@ -219,11 +231,11 @@ class DonationTrackerMarathon(
     }
 
     override fun getDonationUrl(event: EventData): String {
-        TODO("Not yet implemented")
+        return "https://gamesdonequick.com/tracker/ui/donate/${event.id}"
     }
 
     override fun getScheduleUrl(event: EventData): String {
-        TODO("Not yet implemented")
+        return "https://gamesdonequick.com/schedule/${event.id}"
     }
 
     override val organizationData: OrganizationData
@@ -237,10 +249,11 @@ class DonationTrackerMarathon(
     override suspend fun getEventsData(skipLoad: Boolean): List<EventData> {
         if (!skipLoad && Duration.between(cacheDb.metadata.get().eventsCachedAt, Instant.now()) < cacheDb.events.cacheLength)
             api.getEvents().results.forEach(this::put)
-        return cacheDb.events.getAll().map { createEvent(this, it.obj) }
+
+        return cacheDb.events.getAll().map { createEvent(this, it.obj, getSchedule(it.obj.id)) }
     }
 
     override suspend fun getEventData(eventSlug: String): EventData? {
-        return getEvent(eventSlug)?.let { createEvent(this, it) }
+        return getEvent(eventSlug)?.let { createEvent(this, it, getSchedule(it.id)) }
     }
 }

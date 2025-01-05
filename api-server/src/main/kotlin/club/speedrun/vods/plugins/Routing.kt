@@ -82,6 +82,8 @@ fun Application.configureRouting() {
 
 
     routing {
+        get("/") { call.respond("hello") }
+
         route("/api") {
 //            route("/v1") {
 //                route("/gdq", gdq.route())
@@ -97,7 +99,7 @@ fun Application.configureRouting() {
                 }
 
                 route("/marathons") {
-                    get<Organization> { query ->
+                    get<Organization> { _ ->
                         val data = marathons.associate { it.id to it.organizationData }
                         call.respond(data)
                     }
@@ -107,19 +109,19 @@ fun Application.configureRouting() {
                         call.respond(marathon.organizationData)
                     }
 
-                    get<MarathonRoute.EventsRoute> { query ->
+                    get<EventsRoute> { query ->
                         val marathon = getMarathon(query)
                         call.respond(marathon.getEventsData(query.skipLoad))
                     }
 
-                    get<MarathonRoute.EventsRoute.EventRoute> { query ->
+                    get<EventRoute> { query ->
                         val marathon = getMarathon(query)
                         val event = marathon.getEventData(query.event)
                             ?: throw UserError("Unknown event", HttpStatusCode.NotFound)
                         call.respond(event)
                     }
 
-                    get<MarathonRoute.EventsRoute.EventRoute.RunList> { query ->
+                    get<RunList> { query ->
                         val marathon = getMarathon(query)
                         val runs = marathon.getSchedule(query.event)
                             ?: throw UserError("Unknown event", HttpStatusCode.NotFound)
@@ -155,7 +157,7 @@ fun Application.configureRouting() {
                         val marathon = marathons.firstOrNull { it.id.equals(body.organization, true) }
                             ?: throw UserError("Invalid organization; must be one of: ${marathons.joinToString { it.id }}")
                         // get run
-                        val run = marathon.cacheDb.runs.getByIdForce(body.id ?: throw UserError("Invalid run ID"))?.obj
+                        val run = marathon.cacheDb.runs.getByIdForce(body.id)?.obj
                             ?: throw UserError("Unknown run")
                         // get override
                         val override = marathon.overrideDb.getRunOverrides(body.id)
@@ -393,16 +395,13 @@ data class Organization(val stats: Boolean = true)
 interface IMarathonRoute { val marathon: String }
 
 @Location("/{marathon}")
-data class MarathonRoute(override val marathon: String) : IMarathonRoute {
-    @Location("/events")
-    data class EventsRoute(override val marathon: String, val skipLoad: Boolean = false) : IMarathonRoute {
-        @Location("/{event}")
-        data class EventRoute(override val marathon: String, val event: String, val skipLoad: Boolean = false) : IMarathonRoute {
-            @Location("/runs")
-            data class RunList(override val marathon: String, val event: String) : IMarathonRoute
-        }
-    }
-}
+data class MarathonRoute(override val marathon: String) : IMarathonRoute
+@Location("/{marathon}/events")
+data class EventsRoute(override val marathon: String, val skipLoad: Boolean = false) : IMarathonRoute
+@Location("/{marathon}/events/{event}")
+data class EventRoute(override val marathon: String, val event: String, val skipLoad: Boolean = false) : IMarathonRoute
+@Location("/{marathon}/events/{event}/runs")
+data class RunList(override val marathon: String, val event: String) : IMarathonRoute
 
 suspend inline fun <reified T> ApplicationCall.body(): T {
     try {

@@ -150,20 +150,20 @@ class DonationTracker(
 
     suspend fun getRunner(
         id: Int
-    ): Runner? {
+    ): Talent? {
         return get(url("runners/$id/"))
     }
 
     suspend fun getRunners(
         limit: Int? = null,
         offset: Int? = null,
-    ): Page<Runner> {
+    ): Page<Talent> {
         return getPage(url("runners/", params(limit, offset)))
     }
 
     suspend fun getEventRunners(
         event: Int,
-    ): Page<Runner> {
+    ): Page<Talent> {
         return getPage(url("events/$event/runners/"))
     }
 

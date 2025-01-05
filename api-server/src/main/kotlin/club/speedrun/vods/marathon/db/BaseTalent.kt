@@ -4,7 +4,7 @@ import dev.qixils.gdq.serializers.InstantAsString
 import kotlinx.serialization.Serializable
 
 @Serializable
-class BaseRunner(
+class BaseTalent(
     override val id: String,
     val name: String = "Runner",
     val pronouns: String? = null,

@@ -10,7 +10,7 @@ class Bid(
     override val type: String,
     override val id: Int,
     val name: String,
-    @SerialName("speedrun") val runId: Int,
+    @SerialName("speedrun") val runId: Int?,
     val state: BidState,
     @SerialName("parent") val parentId: Int? = null,
     val description: String = "",
@@ -28,6 +28,6 @@ class Bid(
     @SerialName("option_max_length") val optionMaxLength: Int? = null,
 ) : TypedModel() {
 
-    suspend fun fetchRun(): Run = api.getRun(runId)!!
+    suspend fun fetchRun(): Run? = runId?.let { api.getRun(it) }
     suspend fun fetchParent(): Bid? = parentId?.let { api.getBid(it) }
 }

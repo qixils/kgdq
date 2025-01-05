@@ -18,7 +18,9 @@ class Collection<T : Identified>(private val serializer: KSerializer<T>, vararg 
 
     companion object {
         private val logger = LoggerFactory.getLogger(Collection::class.java)
-        private val cbor = Cbor{}
+        private val cbor = Cbor {
+            ignoreUnknownKeys = true
+        }
         private val executor = Executors.newSingleThreadExecutor()
         private val sanitizer = Regex("[^a-zA-Z0-9_-]")
     }

@@ -8,7 +8,8 @@ import club.speedrun.vods.naturalJoinTo
 import dev.minn.jda.ktx.coroutines.await
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.InlineEmbed
-import dev.qixils.gdq.v2.models.BidState
+import dev.qixils.gdq.BidState
+import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory
 import java.text.NumberFormat
 import java.time.Duration
 import java.time.Instant
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.Executors
@@ -124,13 +126,13 @@ class ScheduleManager(
             }
 
             val sb = StringBuilder(run.name)
-            if (run.category.isNotEmpty())// && !"Any%".equals(run.category, true))
+            if (!run.category.isNullOrEmpty() && !"Any%".equals(run.category, true))
                 sb.append(" (").append(run.category).append(')')
             if (run.runners.isNotEmpty()) {
                 sb.append(" by ")
                 naturalJoinTo(sb, run.runners) { runner ->
                     // TODO: re-add emotes when Discord releases the React Native port for Android
-                    runner.url?.let { "[${runner.name}]($it)" } ?: runner.name
+                    runner.stream?.let { "[${runner.name}]($it)" } ?: runner.name
                 }
             }
             value = sb.toString()
@@ -246,10 +248,12 @@ class ScheduleManager(
 
         // Initialize misc utility vals
         val moneyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
-        try {
-            moneyFormatter.currency = Currency.getInstance(event.paypalCurrency)
-        } catch (e: IllegalArgumentException) {
-            logger.warn("Invalid currency code ${event.paypalCurrency} for event ${event.id}")
+        if (event.currency != null) {
+            try {
+                moneyFormatter.currency = Currency.getInstance(event.currency)
+            } catch (e: IllegalArgumentException) {
+                logger.warn("Invalid currency code ${event.currency} for event ${event.id}", e)
+            }
         }
 
         // Create list of messages
@@ -260,11 +264,10 @@ class ScheduleManager(
         messages.add(
             MessageTransformer(
                 "**${event.name}**\n" +
-                        "Date headers are in the ${event.timezone.id} timezone.\n" +
+                        "Date headers are in the ${(event.timezone ?: ZoneOffset.UTC).id} timezone.\n" +
                         "Join the ${event.count} donators who have raised " +
                         "${moneyFormatter.format(event.amount)} for ${event.charityName} " +
-                        "at <${event.canonicalUrl}>. " +
-                        "(Minimum Donation: ${moneyFormatter.format(event.minimumDonation)})",
+                        "at <${event.donationUrl}>.",
                 pin = true
             )
         )
@@ -291,22 +294,19 @@ class ScheduleManager(
 
             sb.append(run.name)
 
-            if (run.category.isNotEmpty())// && !"Any%".equals(run.category, true))
+            if (!run.category.isNullOrEmpty() && !"Any%".equals(run.category, true))
                 sb.append(" (").append(run.category).append(')')
 
             if (!run.coop && run.runners.size > 1)
                 sb.append(" race")
 
-            if (run.runners.isNotEmpty() || run.runnersAsString.isNotEmpty()) {
+            if (run.runners.isNotEmpty()) {
                 sb.append(" by ")
-                if (run.runners.isNotEmpty())
-                    naturalJoinTo(sb, run.runners) { it.name }
-                else
-                    sb.append(run.runnersAsString)
+                naturalJoinTo(sb, run.runners) { it.name }
             }
 
             if (run.runTime > Duration.ZERO)
-                sb.append(" in ").append(run.runTimeText)
+                sb.append(" in ").append(DurationAsStringSerializer.format(run.runTime))
 
             // Append bids
             run.bids.forEach { bid -> appendBidString(sb, bid, run, moneyFormatter) }
