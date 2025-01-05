@@ -1,11 +1,8 @@
 package dev.qixils.gdq
 
-import dev.qixils.gdq.models.Bid
-import dev.qixils.gdq.models.Event
-import dev.qixils.gdq.models.Headset
-import dev.qixils.gdq.models.Model
-import dev.qixils.gdq.models.Run
-import dev.qixils.gdq.models.Runner
+import dev.qixils.gdq.ModelType.Companion.BID
+import dev.qixils.gdq.ModelType.Companion.BID_TARGET
+import dev.qixils.gdq.models.*
 import kotlinx.serialization.KSerializer
 import java.time.Duration
 import kotlin.reflect.KClass
@@ -47,37 +44,37 @@ data class ModelType<M : Model>(
          * @see BID
          * @see BID_TARGET
          */
-        val ALL_BIDS = register(ModelType("allbids", Bid::class, Bid.serializer(), CacheType.BID))
+        val ALL_BIDS = register(ModelType("allbids", Bid::class, Bid.serializer(), CacheType.BID, aliases = listOf("tracker.bid")))
 
         /**
          * A donation incentive or the top-level parent of a bid war.
          */
-        val BID = register(ModelType("bid", Bid::class, Bid.serializer(), CacheType.BID))
+        val BID = register(ModelType("bid", Bid::class, Bid.serializer(), CacheType.BID, aliases = listOf("tracker.bid")))
 
         /**
          * An option in a bid war. May also include the top-level parent of user-submittable bid wars.
          */
-        val BID_TARGET = register(ModelType("bidtarget", Bid::class, Bid.serializer(), CacheType.BID))
+        val BID_TARGET = register(ModelType("bidtarget", Bid::class, Bid.serializer(), CacheType.BID, aliases = listOf("tracker.bid")))
 
         /**
          * An event.
          */
-        val EVENT = register(ModelType("event", Event::class, Event.serializer(), CacheType.EVENT))
+        val EVENT = register(ModelType("event", Event::class, Event.serializer(), CacheType.EVENT, aliases = listOf("tracker.event")))
 
         /**
          * A speedrun.
          */
-        val RUN = register(ModelType("run", Run::class, Run.serializer(), CacheType.BID, aliases = listOf("speedrun")))
+        val RUN = register(ModelType("run", Run::class, Run.serializer(), CacheType.BID, aliases = listOf("speedrun", "tracker.speedrun")))
 
         /**
          * A speedrunner.
          */
-        val RUNNER = register(ModelType("runner", Runner::class, Runner.serializer(), CacheType.RUNNER))
+        val RUNNER = register(ModelType("runner", Runner::class, Runner.serializer(), CacheType.RUNNER, aliases = listOf("tracker.talent")))
 
         /**
          * A person wearing a headset (i.e. commentators, hosts).
          */
-        val HEADSET = register(ModelType("headset", Headset::class, Headset.serializer(), CacheType.HEADSET))
+        val HEADSET = register(ModelType("headset", Headset::class, Headset.serializer(), CacheType.HEADSET, aliases = listOf("tracker.talent")))
 
         // TODO: https://github.com/GamesDoneQuick/donation-tracker/blob/master/tracker/search_filters.py _ModelMap
     }
