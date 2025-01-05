@@ -6,7 +6,7 @@ import club.speedrun.vods.marathon.RunData
 import club.speedrun.vods.marathon.VOD
 import club.speedrun.vods.marathon.VODType
 import club.speedrun.vods.naturalJoinTo
-import dev.qixils.gdq.v1.models.Runner
+import dev.qixils.gdq.v2.models.Runner
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.dean.jraw.RateLimitException

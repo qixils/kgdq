@@ -1,9 +1,11 @@
 package dev.qixils.gdq.v2.models
 
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 class VideoLink(
-    val id: Int,
+    override val id: Int,
     @SerialName("link_type") val linkType: String,
     val url: String,
-) : Model()
+) : IdentifiedModel()

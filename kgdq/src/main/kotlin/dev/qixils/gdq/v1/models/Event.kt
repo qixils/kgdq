@@ -8,6 +8,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
+@Deprecated(message = "Use v2 API")
 @Serializable
 data class Event(
     val short: String,

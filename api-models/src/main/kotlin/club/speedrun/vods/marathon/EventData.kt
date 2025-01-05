@@ -11,34 +11,18 @@ import java.time.ZoneId
 data class EventData(
     @Transient
     val organization: OrganizationConfig = EmptyOrganizationConfig,
-    val id: Int,
+    val id: String,
     val short: String,
     val name: String,
-    val hashtag: String,
-    val charityName: String,
-    val targetAmount: Double?,
-    val minimumDonation: Double?,
-    val paypalCurrency: String,
     @Serializable(with = InstantAsStringSerializer::class)
     val startTime: Instant?,
     @Serializable(with = InstantAsStringSerializer::class)
     val endTime: Instant?,
     @Serializable(with = ZoneIdSerializer::class)
-    val timezone: ZoneId,
-    val locked: Boolean,
-    val allowDonations: Boolean,
-    val canonicalUrl: String,
-    val public: String,
+    val timezone: ZoneId?,
     val amount: Double,
-    val count: Int,
-    val max: Double,
-    val avg: Double,
-    var horaroEvent: String? = null,
-    var horaroSchedule: String? = null,
+    val count: Int?,
 ) {
-    val horaroUrl: String?
-        = if (horaroEvent == null || horaroSchedule == null) null
-        else "https://horaro.org/$horaroEvent/$horaroSchedule"
     val timeStatus: TimeStatus?
 
     // TODO: does this work in api-client ??

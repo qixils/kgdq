@@ -56,22 +56,11 @@ object EmptyOrganizationConfig : OrganizationConfig {
 }
 
 @Serializable
-class OrganizationData {
-    val displayName: String
-    val shortName: String
-    val homepageUrl: String
-    val autoVODs: Boolean
-    @EncodeDefault(EncodeDefault.Mode.NEVER) var amountRaised: Double? = null
-    @EncodeDefault(EncodeDefault.Mode.NEVER) var donationCount: Int? = null
-
-    constructor(organization: OrganizationConfig, events: List<EventData>?) {
-        displayName = organization.displayName
-        shortName = organization.shortName
-        homepageUrl = organization.homepageUrl
-        autoVODs = organization.autoVODs
-        if (events != null) {
-            amountRaised = events.sumOf { it.amount }
-            donationCount = events.sumOf { it.count }
-        }
-    }
-}
+class OrganizationData (
+    val displayName: String,
+    val shortName: String,
+    val homepageUrl: String,
+    val autoVODs: Boolean,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) var amountRaised: Double? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) var donationCount: Int? = null,
+)

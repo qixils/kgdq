@@ -5,6 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
+@Deprecated(message = "Use v2 API")
 @Serializable
 data class Wrapper<T : Model>(
     @SerialName("model") val modelName: String,

@@ -25,6 +25,7 @@ class Bid(
     @SerialName("allowuseroptions") val allowsUserOptions: Boolean = false,
     @SerialName("revealedtime") val revealedTime: InstantAsString? = null,
     val level: Int = 0,
+    @SerialName("option_max_length") val optionMaxLength: Int? = null,
 ) : TypedModel() {
 
     suspend fun fetchRun(): Run = api.getRun(runId)!!

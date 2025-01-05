@@ -4,6 +4,7 @@ import dev.qixils.gdq.v1.GDQ
 import kotlinx.serialization.Transient
 import org.jetbrains.annotations.ApiStatus.Internal
 
+@Deprecated(message = "Use v2 API")
 interface Model {
 
     @Transient val api: GDQ

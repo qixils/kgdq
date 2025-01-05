@@ -9,16 +9,13 @@ import java.time.Instant
 
 @Serializable
 data class RunData(
-    // TODO: deprecate these IDs; export RunOverrides ID for maps/sets/etc
-    val gdqId: Int? = null,
-    val horaroId: String? = null,
-
+    val id: String? = null,
     val name: String,
     val displayName: String = name,
-    val twitchName: String = "",
-    val console: String = "",
+    val twitchName: String? = null,
+    val console: String? = null,
     val releaseYear: Int? = null,
-    val description: String = "",
+    val description: String? = null,
     @Serializable(with = InstantAsStringSerializer::class)
     val startTime: Instant,
     @Serializable(with = InstantAsStringSerializer::class)
@@ -28,12 +25,12 @@ data class RunData(
     @Serializable(with = DurationAsStringSerializer::class)
     val setupTime: Duration = Duration.ZERO,
     val coop: Boolean = false,
-    val category: String = "",
+    val category: String? = null,
     val runners: List<RunnerData> = listOf(),
     val commentators: List<HeadsetData> = listOf(),
     val hosts: List<HeadsetData> = listOf(),
     val bids: List<BidData> = listOf(),
-    val vods: List<VOD> = listOf(),
+    val vods: MutableList<VOD> = mutableListOf(),
     val src: String? = null,
 ) {
     /**

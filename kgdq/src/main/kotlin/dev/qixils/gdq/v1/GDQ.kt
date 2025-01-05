@@ -16,6 +16,7 @@ import java.time.Duration
  * The central class for performing requests to an instance of the GDQ donation tracker.
  */
 @Suppress("HttpUrlsUsage")
+@Deprecated(message = "Use v2 API")
 open class GDQ(
     /**
      * The base URL of the GDQ donation tracker API.

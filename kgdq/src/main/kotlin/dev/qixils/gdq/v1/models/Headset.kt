@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
  * Yes, this is GDQ's real name for this class.
  * No, the runner class does not directly extend it.
  */
+@Deprecated(message = "Use v2 API")
 @Serializable
 data class Headset(
     val name: String,

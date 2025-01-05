@@ -6,6 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.Instant
 
+@Deprecated(message = "Use v2 API")
 @Serializable
 data class Bid(
     @SerialName("event") val eventId: Int,

@@ -180,4 +180,12 @@ class DonationTracker(
         return getPage(url("bids/", params(limit, offset)))
     }
 
+    suspend fun getEventBids(
+        event: Int,
+        limit: Int? = null,
+        offset: Int? = null,
+    ): Page<Bid> {
+        return getPage(url("events/$event/bids/", params(limit, offset)))
+    }
+
 }

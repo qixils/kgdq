@@ -1,9 +1,12 @@
 package dev.qixils.gdq.v1
 
+import dev.qixils.gdq.v1.ModelType.Companion.BID
+import dev.qixils.gdq.v1.ModelType.Companion.BID_TARGET
 import dev.qixils.gdq.v1.models.*
 import kotlinx.serialization.KSerializer
 import kotlin.reflect.KClass
 
+@Deprecated(message = "Use v2 API")
 data class ModelType<M : Model>(
     val id: String,
     val kClass: KClass<M>,

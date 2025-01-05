@@ -4,6 +4,7 @@ package club.speedrun.vods.plugins
 
 import club.speedrun.vods.*
 import club.speedrun.vods.marathon.*
+import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.locations.*
@@ -35,6 +36,11 @@ private suspend fun getDiscordUser(call: ApplicationCall): DiscordUser? {
     }
 }
 
+private fun getMarathon(query: IMarathonRoute): IMarathon {
+    return marathons.find { it.id.equals(query.marathon, ignoreCase = true) }
+        ?: throw UserError("Unknown organization ${query.marathon}")
+}
+
 fun Application.configureRouting() {
 
     install(Locations) {
@@ -63,7 +69,7 @@ fun Application.configureRouting() {
             }
         }
         exception<UserError> { call, cause ->
-            call.respond(HttpStatusCode.BadRequest, mapOf("error" to cause.message))
+            call.respond(cause.statusCode, mapOf("error" to cause.message))
         }
         exception<Throwable> { call, cause ->
             logger.error("Internal server error on ${call.request.httpMethod} ${call.request.uri}", cause)
@@ -77,13 +83,13 @@ fun Application.configureRouting() {
 
     routing {
         route("/api") {
-            route("/v1") {
-                route("/gdq", gdq.route())
-                route("/esa", esa.route())
-                route("/hek", hek.route())
-                route("/rpglb", rpglb.route())
-                route("/bsg", bsg.route())
-            }
+//            route("/v1") {
+//                route("/gdq", gdq.route())
+//                route("/esa", esa.route())
+//                route("/hek", hek.route())
+//                route("/rpglb", rpglb.route())
+//                route("/bsg", bsg.route())
+//            }
 
             route("/v2") {
                 route("/auth") {
@@ -91,19 +97,39 @@ fun Application.configureRouting() {
                 }
 
                 route("/marathons") {
-                    get<Organization> {query ->
-                        val deferreds = marathons.associate { it.id to async { it.getOrganizationData(query) } }
-                        call.respond(deferreds.mapValues { it.value.await() })
+                    get<Organization> { query ->
+                        val data = marathons.associate { it.id to it.organizationData }
+                        call.respond(data)
                     }
 
-                    marathons.forEach {
-                        route("/${it.id}", it.route())
+                    get<MarathonRoute> { query ->
+                        val marathon = getMarathon(query)
+                        call.respond(marathon.organizationData)
                     }
 
-                    get("/events") {
-                        val deferreds = marathons.associate { it.id to async { it.getEventsData() } }
-                        call.respond(deferreds.mapValues { it.value.await() })
+                    get<MarathonRoute.EventsRoute> { query ->
+                        val marathon = getMarathon(query)
+                        call.respond(marathon.getEventsData(query.skipLoad))
                     }
+
+                    get<MarathonRoute.EventsRoute.EventRoute> { query ->
+                        val marathon = getMarathon(query)
+                        val event = marathon.getEventData(query.event)
+                            ?: throw UserError("Unknown event", HttpStatusCode.NotFound)
+                        call.respond(event)
+                    }
+
+                    get<MarathonRoute.EventsRoute.EventRoute.RunList> { query ->
+                        val marathon = getMarathon(query)
+                        val runs = marathon.getSchedule(query.event)
+                            ?: throw UserError("Unknown event", HttpStatusCode.NotFound)
+                        call.respond(runs)
+                    }
+                }
+
+                get("/events") {
+                    val deferreds = marathons.associate { it.id to async { it.getEventsData() } }
+                    call.respond(deferreds.mapValues { it.value.await() })
                 }
 
                 get<ProfileQuery> { query ->
@@ -128,33 +154,77 @@ fun Application.configureRouting() {
                         // get marathon
                         val marathon = marathons.firstOrNull { it.id.equals(body.organization, true) }
                             ?: throw UserError("Invalid organization; must be one of: ${marathons.joinToString { it.id }}")
+                        // get run
+                        val run = marathon.cacheDb.runs.getByIdForce(body.id ?: throw UserError("Invalid run ID"))?.obj
+                            ?: throw UserError("Unknown run")
                         // get override
-                        val run = marathon.db.getRunOverrides(gdqId = body.gdqId, horaroId = body.horaroId)
-                            ?: throw UserError("Invalid run ID")
-                        if (user.role < Role.APPROVED || vod.type == VODType.OTHER || run.vods.any { it.type == vod.type }) {
+                        val override = marathon.overrideDb.getRunOverrides(body.id)
+                            ?: throw UserError("Unknown run")
+                        val addDirect = user.role < Role.APPROVED || vod.type == VODType.OTHER || override.vods.any { it.type == vod.type }
+                        if (addDirect) {
                             // add suggestion if user isn't approved, if the VOD is non-standard, or if VOD might be a duplicate
-                            run.vodSuggestions.add(VodSuggestion(vod))
+                            marathon.overrideDb.vodSuggestions.insert(VodSuggestion(vod, marathon.id, override.id))
                         } else {
                             // add VOD
-                            run.vods.add(vod)
+                            override.vods.add(vod)
                         }
                         // update override
-                        marathon.db.runs.update(run)
+                        marathon.overrideDb.runs.update(override)
                         // respond
                         call.respond(HttpStatusCode.OK)
+                        // bonus jonas
+                        if (webhook.isNotEmpty()) {
+                            httpClient.post(webhook) {
+                                header("Content-Type", "application/json")
+                                setBody(mapOf(
+                                    "embeds" to listOf(mapOf(
+                                        "title" to "New Submission!",
+                                        "fields" to listOf(
+                                            mapOf(
+                                                "name" to "User",
+                                                "value" to "${user.discord?.user?.username ?: "Unknown"} (${user.id})",
+                                                "inline" to true,
+                                            ),
+                                            mapOf(
+                                                "name" to "Game",
+                                                "value" to "${run.displayGame} (${run.category})",
+                                                "inline" to true,
+                                            ),
+                                            mapOf(
+                                                "name" to "Event",
+                                                "value" to (marathon.getEventData(run.event)?.name ?: "Unknown"),
+                                                "inline" to true,
+                                            ),
+                                            mapOf(
+                                                "name" to "URL",
+                                                "value" to vod.url,
+                                                "inline" to true,
+                                            ),
+                                            mapOf(
+                                                "name" to "Auto-Accepted",
+                                                "value" to addDirect.toString(),
+                                                "inline" to true,
+                                            ),
+                                        ),
+                                        "color" to 0xdd22aa,
+                                        "url" to "https://vods.speedrun.club/admin",
+                                    )),
+                                ))
+                            }
+                        }
                     }
 
                     delete("/vod") { // ?url=<suggestion_url>
                         val user = getUser(call) ?: return@delete
 
                         // TODO: lookup by URL is OK, they are unique for a VOD, but is not straightforward when it is
-                        // not the primary key.
+                        //  not the primary key.
                         val url = call.parameters["url"] ?: throw UserError("Missing suggestion URL parameter")
-                        var marathon: Marathon? = null
+                        var marathon: IMarathon? = null
                         var vod: VOD? = null
                         var run: RunOverrides? = null
                         for (marathon_ in marathons) {
-                            for (run_ in marathon_.db.runs.getAll()) {
+                            for (run_ in marathon_.overrideDb.runs.getAll()) {
                                 for (vod_ in run_.vods) {
                                     if (vod_.url == url) {
                                         marathon = marathon_
@@ -174,15 +244,8 @@ fun Application.configureRouting() {
 
                         run.vods.remove(vod)
 
-                        // also remove suggestion, IF present
-                        val (_, suggestion, _) = (marathons.firstNotNullOfOrNull { marathon ->
-                            marathon.getVodSuggestionAndRun { it.vod.url == url }?.let { (s, r) -> Triple(marathon, s, r) }
-                        }) ?: Triple(null, null, null)
-
-                        run.vodSuggestions.remove(suggestion)
-
                         // update override
-                        marathon.db.runs.update(run)
+                        marathon.overrideDb.runs.update(run)
                         // respond
                         call.respond(HttpStatusCode.OK)
                     }
@@ -193,10 +256,9 @@ fun Application.configureRouting() {
                         val user = getUser(call) ?: return@get
                         if (user.role < Role.MODERATOR)
                             throw AuthorizationException()
-                        val suggestions: List<SuggestionWrapper> = marathons.flatMap { marathon ->
-                            marathon.db.runs.getAll().flatMap { run ->
-                                run.vodSuggestions.filter { it.state == VodSuggestionState.PENDING }.map { suggestion ->
-                                    SuggestionWrapper(suggestion, marathon.id, run.runId, run.horaroId) } } }
+
+                        val suggestions: List<SuggestionWrapper> = marathons
+                            .flatMap { marathon -> marathon.overrideDb.vodSuggestions.getAll().map { SuggestionWrapper(it, marathon.id) } }
                         call.respond(suggestions)
                     }
                 }
@@ -207,21 +269,18 @@ fun Application.configureRouting() {
                         if (user.role < Role.MODERATOR)
                             throw AuthorizationException()
                         val body: SetTimeBody = call.body()
-                        // validate body
-                        if (body.gdqId == null && body.horaroId == null)
-                            throw UserError("Must specify either GDQ ID or Horaro ID")
                         // parse duration from time
                         val duration = Duration.ofSeconds(body.time)
                         // get marathon
                         val marathon = marathons.firstOrNull { it.id.equals(body.organization, true) }
                             ?: throw UserError("Invalid organization; must be one of: ${marathons.joinToString { it.id }}")
                         // get override
-                        val run = marathon.db.getRunOverrides(gdqId = body.gdqId, horaroId = body.horaroId)
+                        val run = marathon.overrideDb.getRunOverrides(body.id)
                             ?: throw UserError("Invalid run ID")
                         // set time
                         run.runTime = duration
                         // update override
-                        marathon.db.runs.update(run)
+                        marathon.overrideDb.runs.update(run)
                         // respond
                         call.respond(HttpStatusCode.OK)
                     }
@@ -232,21 +291,23 @@ fun Application.configureRouting() {
                             throw AuthorizationException()
                         val body: ModifySuggestionBody = call.body()
 
-                        val (marathon, suggestion, run) = (marathons.firstNotNullOfOrNull { marathon ->
-                            marathon.getVodSuggestionAndRun { it.id == body.id }?.let { (s, r) -> Triple(marathon, s, r) }
-                        }) ?: throw UserError("Invalid suggestion ID")
+                        for (marathon in marathons) {
+                            val suggestion = marathon.overrideDb.vodSuggestions.get(body.id) ?: continue
+                            suggestion.state = body.action
+                            marathon.overrideDb.vodSuggestions.update(suggestion)
 
-                        suggestion.state = body.action
-                        if (body.action == VodSuggestionState.APPROVED) {
-                            run.vods.add(suggestion.vod)
+                            if (body.action == VodSuggestionState.APPROVED) {
+                                marathon.overrideDb.getRunOverrides(suggestion.runId)?.let {
+                                    it.vods.add(suggestion.vod)
+                                    marathon.overrideDb.runs.update(it)
+                                }
+                            }
+                            break
                         }
-                        // update override
-                        marathon.db.runs.update(run)
+
                         // respond
                         call.respond(HttpStatusCode.OK)
                     }
-
-
 
                     put("/role") {
                         val user = getUser(call) ?: return@put
@@ -278,40 +339,35 @@ class AuthenticationException(val redirect: Boolean) : RuntimeException()
 /**
  * Thrown when a user enters some invalid input.
  */
-class UserError(message: String) : RuntimeException(message)
+class UserError(message: String, val statusCode: HttpStatusCode = HttpStatusCode.BadRequest) : RuntimeException(message)
 
 interface RunBasedBody {
     val organization: String
-    val gdqId: Int?
-    val horaroId: String?
+    val id: String
 }
 
 @Serializable
 class VodSuggestionBody(
     val url: String,
     override val organization: String,
-    override val gdqId: Int? = null,
-    override val horaroId: String? = null,
+    override val id: String,
 ) : RunBasedBody
 
 @Serializable
 class SetTimeBody(
     val time: Long,
     override val organization: String,
-    override val gdqId: Int? = null,
-    override val horaroId: String? = null,
+    override val id: String,
 ) : RunBasedBody
 
 @Serializable
 class SuggestionWrapper(
     val vod: VOD,
-    val id: String,
+    override val id: String,
     override val organization: String,
-    override val gdqId: Int?,
-    override val horaroId: String?,
 ) : RunBasedBody {
-    constructor(suggestion: VodSuggestion, organization: String, gdqId: Int?, horaroId: String?)
-            : this(suggestion.vod, suggestion.id, organization, gdqId, horaroId)
+    constructor(suggestion: VodSuggestion, organization: String)
+            : this(suggestion.vod, suggestion.id, organization)
 }
 
 @Serializable
@@ -330,6 +386,23 @@ class ModifyRoleBody(
 data class ProfileQuery(
     val id: String? = null,
 )
+
+@Location("")
+data class Organization(val stats: Boolean = true)
+
+interface IMarathonRoute { val marathon: String }
+
+@Location("/{marathon}")
+data class MarathonRoute(override val marathon: String) : IMarathonRoute {
+    @Location("/events")
+    data class EventsRoute(override val marathon: String, val skipLoad: Boolean = false) : IMarathonRoute {
+        @Location("/{event}")
+        data class EventRoute(override val marathon: String, val event: String, val skipLoad: Boolean = false) : IMarathonRoute {
+            @Location("/runs")
+            data class RunList(override val marathon: String, val event: String) : IMarathonRoute
+        }
+    }
+}
 
 suspend inline fun <reified T> ApplicationCall.body(): T {
     try {

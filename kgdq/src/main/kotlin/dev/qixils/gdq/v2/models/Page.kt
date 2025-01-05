@@ -49,4 +49,17 @@ data class Page<M : Model>(
      * Fetches the previous page of results.
      */
     suspend fun fetchPrevious() = fetch(previous)
+
+    /**
+     * Fetches all available results.
+     */
+    suspend fun fetchAll(): List<M> {
+        val results = this.results.toMutableList()
+        var current: Page<M>? = this
+        while (current?.next != null) {
+            current = fetchNext()
+            current?.let { results.addAll(current.results) }
+        }
+        return results
+    }
 }

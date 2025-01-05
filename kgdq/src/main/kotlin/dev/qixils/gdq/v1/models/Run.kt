@@ -11,6 +11,7 @@ import kotlinx.serialization.json.contentOrNull
 import java.time.Duration
 import java.time.Instant
 
+@Deprecated(message = "Use v2 API")
 @Serializable
 data class Run(
     @SerialName("event") val eventId: Int,

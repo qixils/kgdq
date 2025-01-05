@@ -3,6 +3,7 @@ package dev.qixils.gdq.v1.models
 import dev.qixils.gdq.v1.GDQ
 import kotlinx.serialization.Transient
 
+@Deprecated(message = "Use v2 API")
 abstract class AbstractModel : Model {
     @Transient
     private var _api: GDQ? = null

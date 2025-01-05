@@ -3,6 +3,7 @@ package dev.qixils.gdq.v1.models
 import dev.qixils.gdq.computeStreamUrl
 import kotlinx.serialization.Serializable
 
+@Deprecated(message = "Use v2 API")
 @Serializable
 data class Runner(
     val name: String,

@@ -124,7 +124,7 @@ class DeliverHandler(
             // Updating start time of run
             val runStart = sceneChanged.time.instant
             logger.info("Updating start time of run ${status.currentRun} to ${sceneChanged.time.iso}")
-            val overrides = db.getOrCreateRunOverrides(null, status.currentRun)
+            val overrides = db.getOrCreateRunOverrides(status.currentRun!!)
             if (overrides.startTime == null)
                 overrides.startTime = runStart
             // Fetching stream's video (should always be the latest video)
