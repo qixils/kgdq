@@ -14,6 +14,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import java.time.Duration
@@ -101,6 +103,15 @@ fun Application.configureRouting() {
                 route("/marathons") {
                     get<Organization> { _ ->
                         val data = marathons.associate { it.id to it.organizationData }
+                        call.respond(data)
+                    }
+
+                    get<OrganizationEvents> { query ->
+                        val data = mutableMapOf<String, List<EventData>>()
+                        coroutineScope { for (marathon in marathons) { launch {
+                            val eventData = marathon.getEventsData(query.skipLoad)
+                            data[marathon.id] = eventData
+                        } } }
                         call.respond(data)
                     }
 
@@ -391,6 +402,9 @@ data class ProfileQuery(
 
 @Location("")
 data class Organization(val stats: Boolean = true)
+
+@Location("/events")
+data class OrganizationEvents(val skipLoad: Boolean = true)
 
 interface IMarathonRoute { val marathon: String }
 

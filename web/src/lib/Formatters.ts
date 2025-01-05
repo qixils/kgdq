@@ -8,24 +8,28 @@ export class Formatters {
     private money_format: Intl.NumberFormat;
 
     constructor(money_currency: string) {
-        this.money_format = new Intl.NumberFormat(undefined, { style: 'currency', currency: money_currency,
+        this.money_format = new Intl.NumberFormat(undefined, { style: 'currency', currency: money_currency || 'USD',
             maximumFractionDigits: 0,
             minimumFractionDigits: 0,  });
     }
 
     static date_header(dt: string) {
+        if (!dt) return "N/A"
         return date_header_format.format(new Date(dt));
     }
 
     static date_hero(dt: string) {
+        if (!dt) return "N/A"
         return date_hero_format.format(new Date(dt));
     }
 
     static date_weekday_date(dt: string) {
+        if (!dt) return "N/A"
         return date_weekday_date_format.format(new Date(dt));
     }
 
     static time(dt: string) {
+        if (!dt) return "N/A"
         return time_format.format(new Date(dt));
     }
 
