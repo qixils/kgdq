@@ -13,7 +13,7 @@ open class CacheManager<O : IObject>(
     val cacheLength: Duration,
 ) {
     protected open fun isValid(obj: O): Boolean {
-        if (Instant.now().minus(cacheLength).isAfter(obj.cachedAt))
+        if (Instant.now().minus(cacheLength).isBefore(obj.cachedAt))
             return true
 
 //        collection.delete(obj)

@@ -294,7 +294,7 @@ export class SvcClient {
      * @returns A Promise that resolves to an array of Event objects representing the events.
      */
     async getEvents(organization: string): Promise<MarathonEvent[]> {
-        let json = await this.get<any[]>(`marathons/${organization}/events`);
+        let json = await this.get<Omit<MarathonEvent, 'organization'>[]>(`marathons/${organization}/events`);
         return json.map(event => ({ organization, ...event}));
     }
 
@@ -304,8 +304,8 @@ export class SvcClient {
      * @returns A Promise that resolves to the Event object representing the event.
      */
     async getEvent(organization: string, event: string, skipLoad: boolean = false): Promise<MarathonEvent> {
-        let json = await this.get<any[]>(`marathons/${organization}/events?id=${event}&skipLoad=${skipLoad}`);
-        return { organization, ...json[0] };
+        let json = await this.get<Omit<MarathonEvent, 'organization'>>(`marathons/${organization}/events/${event}?skipLoad=${skipLoad}`);
+        return { organization, ...json };
     }
 
     /** Retrieves the runs for a specific organization, event, and runner.
@@ -315,8 +315,8 @@ export class SvcClient {
      * @returns A Promise that resolves to an array of Run objects representing the runs.
      */
     getRuns(organization: string, event?: string, runner?: number): Promise<Run[]> {
-        const url = new URL(`marathons/${organization}/runs`, this.baseUrl + '/');
-        if (event) url.searchParams.append('event', event);
+        let url = new URL(`marathons/${organization}/runs`, this.baseUrl + '/');
+        if (event) url = new URL(`marathons/${organization}/events/${event}/runs`, this.baseUrl + '/');
         if (runner) url.searchParams.append('runner', runner.toString());
         return this.get(url);
     }
@@ -327,7 +327,7 @@ export class SvcClient {
      * @returns A Promise that resolves to the Run object representing the run.
      */
     async getRun(organization: string, id: string): Promise<Run> {
-        return (await this.get<Run[]>(`marathons/${organization}/runs?id=${id}`))[0];
+        return (await this.get<Run[]>(`marathons/${organization}/runs/${id}`))[0];
     }
 
     /** Creates an instance of MarathonClient associated with a specific organization.

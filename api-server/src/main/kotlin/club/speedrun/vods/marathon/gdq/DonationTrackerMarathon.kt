@@ -167,6 +167,7 @@ class DonationTrackerMarathon(
         val eventOverrides = overrideDb.getOrCreateEventOverrides(eventId)
 
         val cachedRuns = cacheDb.runs.getBy { it.event == eventId }
+        logger.info("cached runs: {} / {} / {}", cachedRuns.isNotEmpty(), cachedRuns.all { it.isValid }, cachedRuns)
         val runs = if (cachedRuns.isNotEmpty() && cachedRuns.all { it.isValid }) cachedRuns.map { it.obj }
         else {
             val fetch = api.getEventRuns(eventIdInt).fetchAll()

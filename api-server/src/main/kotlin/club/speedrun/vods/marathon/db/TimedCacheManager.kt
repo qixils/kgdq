@@ -19,8 +19,8 @@ class TimedCacheManager<O : TimedObject>(
         if (Instant.now().minus(cacheCutoff).isAfter(obj.startsAt))
             return true
 
-        if (!super.isValid(obj))
-            return false
+        if (super.isValid(obj))
+            return true
 
 //        collection.delete(obj)
         return false
