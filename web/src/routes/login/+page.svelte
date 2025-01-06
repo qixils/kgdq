@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {BASE_URL} from "$lib/kgdq.ts";
+    import {BASE_URL} from "$lib/kgdq";
     import {page} from "$app/stores";
 </script>
 

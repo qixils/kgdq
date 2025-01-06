@@ -25,7 +25,7 @@ export type TimeStatus = 'UPCOMING' | 'IN_PROGRESS' | 'FINISHED';
 export interface MarathonEvent {
 
     // The positive integer ID of the event.
-    id: number;
+    id: string;
 
     // The event slug or short name.
     short: string;
@@ -69,7 +69,7 @@ export interface MarathonEvent {
 export interface Run {
 
     // The ID of the run.
-    id: number | null;
+    id: string | null;
 
     // The name of the run.
     // This is usually the name of the game being run, though is often prefixed with extra text like `"BONUS GAME"`.

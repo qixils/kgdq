@@ -50,8 +50,7 @@ export declare class VodLink {
 export declare class VODSuggestion {
     vod: VodLink;
     organization: string;
-    gdqId: number | null;
-    horaroId: string | null;
+    runId: string;
     id: string;
 }
 

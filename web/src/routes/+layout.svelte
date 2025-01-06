@@ -32,7 +32,7 @@
   <meta property="og:description" content="{ $meta.description }" />
 
   <meta property="og:url" content="{ $meta.url ?? $page.url }" />
-  <link rel="canonical" href="{ $meta.url ?? $page.url }">
+  <link rel="canonical" href="{ $meta.url ?? $page.url.toString() }">
 
   {#if $meta.noindex}
     <meta name="robots" content="noindex">

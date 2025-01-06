@@ -37,6 +37,8 @@
     async function submit_suggestion(e: Event) {
         e.preventDefault();
         let btn = document.getElementById(`suggest-${run_index}-btn`);
+        if (!btn) return;
+
         btn.setAttribute("disabled", "");
         btn.blur();
 
@@ -71,8 +73,7 @@
                 body: JSON.stringify({
                     url: url,
                     organization: $page.params.org.toLowerCase(),
-                    gdqId: run.gdqId,
-                    horaroId: run.horaroId
+                    id: run.id,
                 })
             });
 
@@ -108,7 +109,7 @@
     <div class="schedule-bar-bit" ></div>
     <div class="run-schedule-time">{ Formatters.time(run.startTime) }</div>
     <div class="run-content">
-        {#if $user && (current_status === "FINISHED" || current_status === "IN_PROGRESS") && (run.gdqId !== null || run.horaroId !== null) }
+        {#if $user && (current_status === "FINISHED" || current_status === "IN_PROGRESS") && (run.id !== null) }
             <dialog id="suggest-{run_index}" class="suggest-dialog">
                 <button class="close-btn material-symbols-rounded" on:click={ () => suggest_dialog().close() }>close</button>
                 <h1>Suggest a VOD</h1>

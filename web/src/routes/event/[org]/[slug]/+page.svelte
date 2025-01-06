@@ -91,8 +91,8 @@
         {/if}
         <div id="event-controls">
             <div>
-                <input type="checkbox" on:change={evt => saveHideBids(evt.currentTarget.checked)} checked={hideBids}>
-                <label>Hide bids</label>
+                <input id="event-bids" type="checkbox" on:change={evt => saveHideBids(evt.currentTarget.checked)} checked={hideBids}>
+                <label for="event-bids">Hide bids</label>
             </div>
         </div>
     </div>

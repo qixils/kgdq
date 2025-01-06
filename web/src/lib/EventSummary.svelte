@@ -7,7 +7,7 @@
 
     export let event: MarathonEvent = undefined as MarathonEvent;
 
-    let formatter = new Formatters(event.paypalCurrency);
+    let formatter = new Formatters(event.currency);
 
     const {streamName, streamUrl} = guessStreamNameAndUrl(org, event.short);
 </script>
