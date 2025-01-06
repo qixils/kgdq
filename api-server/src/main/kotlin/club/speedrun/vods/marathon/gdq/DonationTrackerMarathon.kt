@@ -186,11 +186,17 @@ class DonationTrackerMarathon(
                 emptyList()
             } else {
                 // fetch bids
-                val bids = api.getEventBids(eventIdInt).fetchAll().filter { it.runId != null }
-                val idBids = bids.associateBy { it.id }
-                val parentBids = bids.groupBy { it.parentId }
+                val bids = api.getEventBids(eventIdInt).fetchAll().filter { it.runId != null } // get bids and filter out those with unknown runs
+                val idBids = bids.associateBy { it.id } // map bids by their id to fetch parent from
+                val parentBids = bids.groupBy { it.parentId }.toMutableMap() // map bids by their parent
+
+                // de-duplicate bid wars
+                val standaloneBids = parentBids[null]
+                if (standaloneBids != null) parentBids[null] = standaloneBids.filter { !parentBids.containsKey(it.id) }
+
                 val dbBids = parentBids.flatMap { (id, children) -> convert(idBids[id], children) }
-                val runBids = dbBids.groupBy { it.runId!! }
+                val runBids = dbBids.groupBy { it.runId!! } // organize bids by run (null ids were filtered out earlier)
+
                 // return
                 fetch.mapNotNull { put(it, eventId, runBids.getOrElse(it.id.toString()) { emptyList() }) }
             }
