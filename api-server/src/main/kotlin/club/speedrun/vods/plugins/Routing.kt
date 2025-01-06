@@ -378,9 +378,11 @@ class SuggestionWrapper(
     val vod: VOD,
     override val id: String,
     override val organization: String,
+    val runId: String,
+    val marathonId: String,
 ) : RunBasedBody {
     constructor(suggestion: VodSuggestion, organization: String)
-            : this(suggestion.vod, suggestion.id, organization)
+            : this(suggestion.vod, suggestion.id, organization, suggestion.runId, suggestion.marathonId)
 }
 
 @Serializable

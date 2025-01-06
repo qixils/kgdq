@@ -52,6 +52,7 @@ export declare class VODSuggestion {
     organization: string;
     runId: string;
     id: string;
+    marathonId: string;
 }
 
 export type Role = 'ADMIN' | 'MODERATOR' | 'APPROVED' | 'USER' | 'BANNED';
