@@ -95,7 +95,6 @@ class DonationTrackerMarathon(
             run.videoLinks.map { VOD.fromUrl(it.url) },
             cachedAt = Instant.now(),
         ).also {
-            logger.info("{} -> {}", run.runners, it.runners)
             cacheDb.runs.put(it)
         }
     }
