@@ -25,12 +25,11 @@ class SvcClient(private val baseUrl: String = "https://vods.speedrun.club/api/v2
     suspend fun getMarathon(id: String, stats: Boolean = true) = client.get("$baseUrl/marathons/$id?stats=$stats").body<OrganizationData>()
     suspend fun getAllEvents() = client.get("$baseUrl/marathons/events").body<Map<String, List<EventData>>>()
     suspend fun getEvents(organization: String) = client.get("$baseUrl/marathons/$organization/events").body<List<EventData>>()
-    suspend fun getEvent(organization: String, event: String) = client.get("$baseUrl/marathons/$organization/events?id=$event").body<List<EventData>>().firstOrNull()
-    suspend fun getRuns(organization: String, event: String? = null, runner: Int? = null) = client.get("$baseUrl/marathons/$organization/runs") {
-        if (event != null) parameter("event", event)
+    suspend fun getEvent(organization: String, event: String) = client.get("$baseUrl/marathons/$organization/events/$event").body<EventData>()
+    suspend fun getRuns(organization: String, event: String, runner: Int? = null) = client.get("$baseUrl/marathons/$organization/events/$event/runs") {
         if (runner != null) parameter("runner", runner)
     }.body<List<RunData>>()
-    suspend fun getRun(organization: String, id: String) = client.get("$baseUrl/marathons/$organization/runs?id=$id").body<List<RunData>>().firstOrNull()
+    suspend fun getRun(organization: String, id: String) = client.get("$baseUrl/marathons/$organization/runs/$id").body<List<RunData>>().firstOrNull()
 
     fun getMarathonClient(id: String) = MarathonClient(this, id)
 }
