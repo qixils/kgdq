@@ -27,6 +27,7 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+kotlin-compiler-*
 
 ### NetBeans ###
 /nbproject/private/

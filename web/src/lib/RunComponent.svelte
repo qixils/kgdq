@@ -127,11 +127,8 @@
                     <label for="suggest-{run_index}-organization">Organization</label>
                     <input type="text" id="suggest-{run_index}-organization" name="organization" value="{ $page.params.org.toLowerCase() }" disabled>
 
-                    <label for="suggest-{run_index}-gdqId" >GDQ ID</label>
-                    <input type="text" id="suggest-{run_index}-gdqId" name="gdqId" value="{ run.gdqId }" disabled>
-
-                    <label for="suggest-{run_index}-horaroId" >Horaro ID</label>
-                    <input type="text" id="suggest-{run_index}-horaroId" name="horaroId" value="{ run.horaroId }" disabled>
+                    <label for="suggest-{run_index}-id" >Run ID</label>
+                    <input type="text" id="suggest-{run_index}-id" name="id" value="{ run.id }" disabled>
 
                     <!-- UI only shown to admins for now (technically api allows users also to replace their own suggestions)-->
                     <!-- in pseudo-code for adding non-admins: run.vods.filter(is_admin || is_same_contributor)  -->
