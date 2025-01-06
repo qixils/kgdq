@@ -9,7 +9,7 @@ okhttp = "5.0.0-alpha.12"
 [libraries]
 logback = { module = "ch.qos.logback:logback-classic", version = "1.5.12" }
 amqp-client = { module = "com.rabbitmq:amqp-client", version = "5.24.0" }
-twitch4j-helix = { module = "com.github.twitch4j:twitch4j-helix", version = "1.21.0" }
+twitch4j-helix = { module = "com.github.twitch4j:twitch4j-helix", version = "1.23.0" }
 ktor-server-core-jvm = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
 ktor-server-auth-jvm = { module = "io.ktor:ktor-server-auth-jvm", version.ref = "ktor" }
 ktor-server-locations-jvm = { module = "io.ktor:ktor-server-locations-jvm", version.ref = "ktor" }
