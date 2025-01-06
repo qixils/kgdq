@@ -12,7 +12,9 @@
 
 	onMount(async () => {
 		try {
-			events = (await new SvcClient(BASE_URL, fetch).getAllEvents())
+			const allEvents = await new SvcClient(BASE_URL, fetch).getAllEvents()
+			console.log("events:", allEvents)
+			events = allEvents
 					.filter(event => event.timeStatus === "IN_PROGRESS")
 					// From order by ascending start time, top of list might end soonest
 					.sort(compareEventStartTime);

@@ -1,5 +1,6 @@
 package club.speedrun.vods.marathon
 
+import club.speedrun.vods.db.Identified
 import club.speedrun.vods.db.ULID
 import dev.qixils.gdq.serializers.DurationAsStringSerializer
 import kotlinx.serialization.Serializable
@@ -101,9 +102,11 @@ enum class VODType {
 @Serializable
 data class VodSuggestion(
     val vod: VOD,
-    val id: String = ULID.random(),
+    val marathonId: String,
+    val runId: String,
+    override val id: String = ULID.random(),
     var state: VodSuggestionState = VodSuggestionState.PENDING,
-)
+) : Identified
 
 @Serializable
 enum class VodSuggestionState {

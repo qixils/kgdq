@@ -1,6 +1,7 @@
 package dev.qixils.gdq.serializers
 
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -19,3 +20,5 @@ class ZoneIdSerializer : KSerializer<ZoneId> {
         encoder.encodeString(value.id)
     }
 }
+
+typealias ZoneIdAsString = @Serializable(with = ZoneIdSerializer::class) ZoneId

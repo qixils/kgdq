@@ -4,6 +4,7 @@ kotlin = "2.0.21"
 configurate = "4.1.2"
 coroutines = "1.9.0"
 serialization = "1.7.3"
+okhttp = "5.0.0-alpha.12"
 
 [libraries]
 logback = { module = "ch.qos.logback:logback-classic", version = "1.5.12" }
@@ -41,7 +42,8 @@ jda-ktx = { module = "club.minnced:jda-ktx", version = "0.12.0" }
 configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate" }
 configurate-extra-kotlin = { module = "org.spongepowered:configurate-extra-kotlin", version.ref = "configurate" }
 jraw = { module = "com.github.dukestreet.JRAW:lib", version = "8e2305db29" }
-okhttp = { module = "com.squareup.okhttp3:okhttp", version = "4.12.0" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+okhttp-coroutines = { module = "com.squareup.okhttp3:okhttp-coroutines", version.ref = "okhttp" }
 
 [bundles]
 ktor-server = ["ktor-server-core-jvm", "ktor-server-auth-jvm", "ktor-server-locations-jvm", "ktor-server-sessions-jvm", "ktor-server-host-common-jvm", "ktor-server-status-pages-jvm", "ktor-server-compression-jvm", "ktor-server-content-negotiation-jvm", "ktor-server-cors-jvm", "ktor-server-default-headers-jvm", "ktor-server-call-logging-jvm", "ktor-server-conditional-headers-jvm", "ktor-server-netty-jvm", "ktor-serialization-kotlinx-json-jvm"]

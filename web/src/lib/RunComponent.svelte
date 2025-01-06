@@ -189,8 +189,8 @@
                         {#if index > 0}
                             ,
                         {/if}
-                        {#if runner.url !== null && runner.url !== undefined}
-                            <a href={runner.url} target="_blank" rel="noopener noreferrer">{runner.name}</a>
+                        {#if !!runner.stream}
+                            <a href={runner.stream} target="_blank" rel="noopener noreferrer">{runner.name}</a>
                         {:else}
                             {runner.name}
                         {/if}

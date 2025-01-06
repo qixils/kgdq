@@ -3,7 +3,7 @@ import type {MarathonEvent} from "vods.speedrun.club-client";
 import { dev } from "$app/environment";
 export let WEBSITE_BASE = 'https://vods.speedrun.club';
 if (dev) {
-    WEBSITE_BASE = 'http://localhost:5173'
+    WEBSITE_BASE = 'http://localhost:4010'
 }
 export const BASE_URL = WEBSITE_BASE + '/api/v2';
 

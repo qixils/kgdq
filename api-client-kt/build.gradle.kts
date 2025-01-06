@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     api(project(":api-models"))
+    api(project(":kgdq")) // TODO: remove?
     api(libs.slf4j)
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.serialization.json)

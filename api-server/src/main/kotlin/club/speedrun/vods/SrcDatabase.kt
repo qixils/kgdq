@@ -14,8 +14,9 @@ import java.util.*
 class SrcDatabase : Database("api", "src") {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val games = getCollection(SrcGame.serializer(), SrcGame.COLLECTION_NAME)
-    private val cacheFor = Duration.ofDays(365)
+    private val cacheFor = Duration.ofDays(180)
     private val pendingCache = mutableListOf<SrcGame>()
+    private val skipCache = mutableSetOf("", "the checkpoint", "the red bull daily recap", "finale", "event recap", "unknown game", "no runs known for this event")
 
     init {
         @OptIn(DelicateCoroutinesApi::class)
@@ -34,7 +35,7 @@ class SrcDatabase : Database("api", "src") {
     }
 
     private fun cache(game: SrcGame) {
-        if (pendingCache.none { it.name == game.name })
+        if (!skipCache.contains(game.name.lowercase()) && pendingCache.none { it.name == game.name })
             pendingCache.add(game)
     }
 

@@ -14,7 +14,7 @@
 
     export let data: { event: MarathonEvent } = undefined as never;
     let SVC = new SvcClient(BASE_URL, fetch);
-    let formatter = new Formatters(data.event.paypalCurrency);
+    let formatter = new Formatters(data.event.currency);
     let runs: Run[];
     let run_error: Error;
 

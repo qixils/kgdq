@@ -1,6 +1,7 @@
 package dev.qixils.gdq.serializers
 
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -43,3 +44,7 @@ class InstantAsMillisSerializer : KSerializer<Instant> {
         encoder.encodeLong(value.toEpochMilli())
     }
 }
+
+typealias InstantAsString = @Serializable(with = InstantAsStringSerializer::class) Instant
+typealias InstantAsSeconds = @Serializable(with = InstantAsSecondsSerializer::class) Instant
+typealias InstantAsMillis = @Serializable(with = InstantAsMillisSerializer::class) Instant

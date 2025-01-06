@@ -16,6 +16,8 @@ repositories {
 
 dependencies {
     implementation(project(":api-models"))
+    implementation(project(":kgdq"))
+    implementation(project(":horaro"))
     implementation(project(":srcom"))
     implementation(project(":db"))
     implementation(libs.logback)

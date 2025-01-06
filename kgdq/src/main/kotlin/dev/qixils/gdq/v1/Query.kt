@@ -1,7 +1,8 @@
-package dev.qixils.gdq
+package dev.qixils.gdq.v1
 
-import dev.qixils.gdq.models.Model
+import dev.qixils.gdq.v1.models.Model
 
+@Deprecated(message = "Use v2 API")
 data class Query<M : Model> (
     val type: ModelType<M>,
     val id: Int? = null,

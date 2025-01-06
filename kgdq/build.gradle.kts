@@ -10,6 +10,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.coroutines)
 }
 
 description = "Kotlin library for the GDQ Donation Tracker API"

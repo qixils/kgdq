@@ -7,11 +7,13 @@ export interface Organization {
     shortName: string;
     homepageUrl: string;
 
-    // Indicates whether this organization supports automatic VOD (Video on Demand) link generation.
+    /**
+     * Indicates whether this organization supports automatic VOD (Video on Demand) link generation.
+     */
     autoVODs: boolean;
 }
 
-export interface OrganizationWithStats  extends  Organization {
+export interface OrganizationWithStats extends Organization {
     amountRaised: number;
     donationCount: number;
 }
@@ -31,55 +33,28 @@ export interface MarathonEvent {
     // The full name of the event.
     name: string;
 
-    // The hashtag used for promoting the event on social media.
-    hashtag: string;
-
-    //The name of the charity being supported.
-    charityName: string;
-
-    //The donation target amount in `paypalCurrency`.
-    targetAmount: number;
-
-    // The minimum amount required to donate in `paypalCurrency`.
-    minimumDonation: number;
-
-    // The currency used for donations.
-    paypalCurrency: string;
-
     // The start time in ISO 8601 format. Can be null if the event has no specified start time.
     startTime: string | null;
 
     // The end time in ISO 8601 format. Can be null if the event has no specified end time.
     endTime: string | null;
 
-    // Can be null if the status is not available.
-    timeStatus: TimeStatus | null;
-
-    timezone: string;
-
-    // Indicates whether editing is locked.
-    locked: boolean;
-
-    // Indicates whether donations are allowed.
-    allowDonations: boolean;
-
-    // The canonical link to the event on the donation tracker.
-    canonicalUrl: string;
-
-    // The public display name of the event.
-    public: string;
+    timezone: string | null;
 
     // The total amount raised.
     amount: number;
 
     // The total number of donations received.
-    count: number;
+    count: number | null;
 
-    // The largest donation received.
-    max: number;
+    //The name of the charity being supported.
+    charityName: string;
 
-    // The average donation received.
-    avg: number;
+    // The currency used for donations.
+    currency: string;
+
+    // Can be null if the status is not available.
+    timeStatus: TimeStatus | null;
 
     // The URL to donate.
     donationUrl: string;
@@ -93,16 +68,8 @@ export interface MarathonEvent {
 
 export interface Run {
 
-    // The ID of the run on the GDQ donation tracker.
-    // May be null if the run comes from a Horaro schedule and has no corresponding run on the donation tracker.
-    gdqId: number | null;
-
-    // The ID of the run on the Horaro schedule.
-    // May be null if the event does not have a Horaro schedule.
-    horaroId: string | null;
-
-    // The ID of the event that this run is associated with.
-    event: number;
+    // The ID of the run.
+    id: number | null;
 
     // The name of the run.
     // This is usually the name of the game being run, though is often prefixed with extra text like `"BONUS GAME"`.
@@ -119,13 +86,11 @@ export interface Run {
     // The console or platform the game is played on.
     console: string;
 
-    // The commentators for the run.
-    commentators: Headset[];
+    // The year the game was released. Can be null if the release year is not available.
+    releaseYear: number | null;
 
-    // The hosts (i.e. donation readers) for the run.
-    hosts: Headset[];
-
-    // The description of the run. Rarely used.
+    // The description of the run. Increasingly used for meta-"runs" like the opening ceremony.
+    // Uses markdown.
     description: string;
 
     // The start time of the run in ISO 8601 format.
@@ -134,17 +99,11 @@ export interface Run {
     // The end time of the run in ISO 8601 format.
     endTime: string;
 
-    // Whether the run is upcoming, in progress, or finished.
-    timeStatus: TimeStatus;
-
     // The length (or estimated length) of the run in h:mm:ss format.
     runTime: string;
 
     // The setup time of the run in h:mm:ss format.
     setupTime: string;
-
-    // The order of the run in the schedule.
-    order: number;
 
     // Indicates whether a multiplayer run is a co-op run (true) or a race (false).
     coop: boolean;
@@ -152,14 +111,14 @@ export interface Run {
     // The speedrun category being run.
     category: string;
 
-    // The year the game was released. Can be null if the release year is not available.
-    releaseYear: number | null;
-
     // The runners performing this run.
-    runners: Runner[];
+    runners: Talent[];
 
-    // The runners performing this run as a pre-formatted string.
-    runnersAsString: string;
+    // The commentators for the run.
+    commentators: Talent[];
+
+    // The hosts (i.e. donation readers) for the run.
+    hosts: Talent[];
 
     // The bids (bid war parents and donation incentives) for this run.
     bids: Bid[];
@@ -169,11 +128,14 @@ export interface Run {
 
     // The speedrun.com slug for the game being run. Can be null if the slug is not available.
     src: string | null;
+
+    // Whether the run is upcoming, in progress, or finished.
+    timeStatus: TimeStatus;
 }
 
 
 // Represents a runner of a speedrun.
-export interface Runner {
+export interface Talent {
 
     // The name of the runner.
     name: string;
@@ -197,21 +159,13 @@ export interface Runner {
     url: string;
 }
 
-// A person with a headset (i.e. a commentator or a host).
-export interface Headset {
-
-    // The name of the person.
-    name: string;
-
-    // The pronouns of the person.
-    pronouns: string;
-}
-
 // Represents the state of a bid.
 export type BidState = 'OPENED' | 'CLOSED';
 
 // A bid on a run.
 export interface Bid {
+
+    id: string;
 
     // The child bid options for this bid (if this is a bid war).
     children: Bid[];
@@ -241,18 +195,11 @@ export interface Bid {
     // Can be null if there is no maximum length specified.
     optionMaxLength: number | null;
 
-    // The time the bid was revealed in ISO 8601 format.
-    // Can be null if the reveal time is not available.
-    revealedAt: string | null;
-
     // The total amount raised for this bid.
     donationTotal: number;
 
     // The number of donations for this bid.
     donationCount: number;
-
-    // Indicates whether this bid is pinned to the stream overlay.
-    pinned: boolean;
 }
 
 // Represents the type of VOD.
@@ -272,6 +219,9 @@ export interface VOD {
 
     // The full URL of the VOD.
     url: string;
+
+    // ID of the SVC user who submitted this VOD.
+    contributorId: string | null;
 }
 
 
@@ -299,15 +249,14 @@ export class SvcClient {
      * @param url The URL to fetch data from.
      * @returns A Promise that resolves to the response data.
      */
-    private get<T>(url: string | URL): Promise<T> {
+    private async get<T>(url: string | URL): Promise<T> {
         // prepend the base URL if the URL is relative (i.e. a string)
         const calculatedUrl = typeof url === 'string' ? `${this.baseUrl}/${url}` : url;
-        return this.fetchFunction(calculatedUrl).then(res => {
-            if (res.status >= 400) {
-                throw new Error(`Request failed with status code ${res.status}`);
-            }
-            return res.json();
-        });
+        const res = await this.fetchFunction(calculatedUrl);
+        if (res.status >= 400) {
+            throw new Error(`Request failed with status code ${res.status}`);
+        }
+        return await res.json();
     }
 
     /** Retrieves all known marathon organizations, optionally with statistics.
@@ -345,7 +294,7 @@ export class SvcClient {
      * @returns A Promise that resolves to an array of Event objects representing the events.
      */
     async getEvents(organization: string): Promise<MarathonEvent[]> {
-        let json = await this.get<any[]>(`marathons/${organization}/events`);
+        let json = await this.get<Omit<MarathonEvent, 'organization'>[]>(`marathons/${organization}/events`);
         return json.map(event => ({ organization, ...event}));
     }
 
@@ -355,8 +304,8 @@ export class SvcClient {
      * @returns A Promise that resolves to the Event object representing the event.
      */
     async getEvent(organization: string, event: string, skipLoad: boolean = false): Promise<MarathonEvent> {
-        let json = await this.get<any[]>(`marathons/${organization}/events?id=${event}&skipLoad=${skipLoad}`);
-        return { organization, ...json[0] };
+        let json = await this.get<Omit<MarathonEvent, 'organization'>>(`marathons/${organization}/events/${event}?skipLoad=${skipLoad}`);
+        return { organization, ...json };
     }
 
     /** Retrieves the runs for a specific organization, event, and runner.
@@ -366,8 +315,8 @@ export class SvcClient {
      * @returns A Promise that resolves to an array of Run objects representing the runs.
      */
     getRuns(organization: string, event?: string, runner?: number): Promise<Run[]> {
-        const url = new URL(`marathons/${organization}/runs`, this.baseUrl + '/');
-        if (event) url.searchParams.append('event', event);
+        let url = new URL(`marathons/${organization}/runs`, this.baseUrl + '/');
+        if (event) url = new URL(`marathons/${organization}/events/${event}/runs`, this.baseUrl + '/');
         if (runner) url.searchParams.append('runner', runner.toString());
         return this.get(url);
     }
@@ -378,7 +327,7 @@ export class SvcClient {
      * @returns A Promise that resolves to the Run object representing the run.
      */
     async getRun(organization: string, id: string): Promise<Run> {
-        return (await this.get<any[]>(`marathons/${organization}/runs?id=${id}`))[0];
+        return (await this.get<Run[]>(`marathons/${organization}/runs/${id}`))[0];
     }
 
     /** Creates an instance of MarathonClient associated with a specific organization.

@@ -1,6 +1,7 @@
 package dev.qixils.gdq.serializers
 
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -75,3 +76,7 @@ class DurationAsMillisSerializer : KSerializer<Duration> {
         encoder.encodeLong(value.toMillis())
     }
 }
+
+typealias DurationAsString = @Serializable(with = DurationAsStringSerializer::class) Duration
+typealias DurationAsSeconds = @Serializable(with = DurationAsSecondsSerializer::class) Duration
+typealias DurationAsMillis = @Serializable(with = DurationAsMillisSerializer::class) Duration

@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    api(project(":kgdq"))
-    api(project(":horaro"))
+    api(project(":serializers"))
     api(project(":db"))
 }
