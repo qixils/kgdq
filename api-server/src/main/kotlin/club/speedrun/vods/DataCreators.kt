@@ -121,7 +121,7 @@ suspend fun createRun(
         category = run.category,
         releaseYear = run.releaseYear,
         bids = run.bids.map { createBid(it, run) },
-        vods = overrides.vods,
+        vods = overrides.vods.toMutableList(),
         startTime = startTime,
         endTime = endTime,
         runTime = runTime,

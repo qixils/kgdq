@@ -17,7 +17,7 @@ class Run(
     val category: String = "",
     val console: String = "",
     @SerialName("release_year") val releaseYear: Int = 1970,
-    val talents: List<Talent> = listOf(),
+    val runners: List<Talent> = listOf(),
     val hosts: List<Talent> = listOf(),
     val commentators: List<Talent> = listOf(),
     @SerialName("starttime") val startTime: InstantAsString? = null,

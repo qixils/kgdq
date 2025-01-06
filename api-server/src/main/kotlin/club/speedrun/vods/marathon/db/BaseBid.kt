@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class BaseBid(
     val id: String,
+    val runId: String? = null,
     val name: String,
     val description: String,
     val shortDescription: String = description,

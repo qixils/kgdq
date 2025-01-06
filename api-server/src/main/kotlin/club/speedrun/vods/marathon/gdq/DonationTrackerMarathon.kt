@@ -69,7 +69,7 @@ class DonationTrackerMarathon(
     }
 
     private fun put(run: Run, eventId: String?, bids: List<BaseBid>): BaseRun? {
-        run.talents.forEach(this::put)
+        run.runners.forEach(this::put)
         run.hosts.forEach(this::put)
         run.commentators.forEach(this::put)
         if (run.startTime == null) return null
@@ -83,7 +83,7 @@ class DonationTrackerMarathon(
             run.description,
             run.category,
             run.console,
-            run.talents.map { it.id.toString() },
+            run.runners.map { it.id.toString() },
             run.hosts.map { it.id.toString() },
             run.commentators.map { it.id.toString() },
             run.startTime!!,
@@ -94,7 +94,10 @@ class DonationTrackerMarathon(
             run.releaseYear,
             run.videoLinks.map { VOD.fromUrl(it.url) },
             cachedAt = Instant.now(),
-        ).also { cacheDb.runs.put(it) }
+        ).also {
+            logger.info("{} -> {}", run.runners, it.runners)
+            cacheDb.runs.put(it)
+        }
     }
 
     private fun putEmptyRun(event: BaseEvent): BaseRun? {
@@ -110,6 +113,7 @@ class DonationTrackerMarathon(
     private fun convRaw(parent: Bid, children: List<BaseBid>): BaseBid {
         return BaseBid(
             parent.id.toString(),
+            parent.runId?.toString(),
             parent.name,
             parent.description,
             parent.shortDescription,
@@ -167,7 +171,6 @@ class DonationTrackerMarathon(
         val eventOverrides = overrideDb.getOrCreateEventOverrides(eventId)
 
         val cachedRuns = cacheDb.runs.getBy { it.event == eventId }
-        logger.info("cached runs: {} / {} / {}", cachedRuns.isNotEmpty(), cachedRuns.all { it.isValid }, cachedRuns)
         val runs = if (cachedRuns.isNotEmpty() && cachedRuns.all { it.isValid }) cachedRuns.map { it.obj }
         else {
             val fetch = api.getEventRuns(eventIdInt).fetchAll()
@@ -184,12 +187,13 @@ class DonationTrackerMarathon(
                 emptyList()
             } else {
                 // fetch bids
-                val bids = api.getEventBids(eventIdInt).fetchAll()
+                val bids = api.getEventBids(eventIdInt).fetchAll().filter { it.runId != null }
                 val idBids = bids.associateBy { it.id }
                 val parentBids = bids.groupBy { it.parentId }
                 val dbBids = parentBids.flatMap { (id, children) -> convert(idBids[id], children) }
+                val runBids = dbBids.groupBy { it.runId!! }
                 // return
-                fetch.mapNotNull { put(it, eventId, dbBids) }
+                fetch.mapNotNull { put(it, eventId, runBids.getOrElse(it.id.toString()) { emptyList() }) }
             }
         }
 
