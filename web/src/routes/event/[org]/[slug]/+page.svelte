@@ -37,6 +37,11 @@
                 if (current_run !== undefined) {
                     current_run_index = runs.indexOf(current_run);
                 }
+
+                const { hash } = $page.url
+                if (hash?.match(/^#run-\d+$/)) {
+                    document.querySelector(hash)?.scrollIntoView()
+                }
             }
         } catch (e) {
             run_error = e;
