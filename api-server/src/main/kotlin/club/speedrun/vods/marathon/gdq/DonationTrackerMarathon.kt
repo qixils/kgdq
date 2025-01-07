@@ -123,7 +123,7 @@ class DonationTrackerMarathon(
             parent.isTarget,
             parent.allowsUserOptions,
             parent.optionMaxLength,
-            children,
+            children.sortedByDescending { it.donationTotal },
         )
     }
 
@@ -194,11 +194,17 @@ class DonationTrackerMarathon(
                 val standaloneBids = parentBids[null]
                 if (standaloneBids != null) parentBids[null] = standaloneBids.filter { !parentBids.containsKey(it.id) }
 
-                val dbBids = parentBids.flatMap { (id, children) -> convert(idBids[id], children) }
+                val dbBids = parentBids
+                    .flatMap { (id, children) -> convert(idBids[id], children) } // children are sorted inside
+                    .sortedBy { it.goal ?: 0.0 }
                 val runBids = dbBids.groupBy { it.runId!! } // organize bids by run (null ids were filtered out earlier)
 
                 // return
-                fetch.mapNotNull { put(it, eventId, runBids.getOrElse(it.id.toString()) { emptyList() }) }
+                fetch.mapNotNull { put(
+                    it,
+                    eventId,
+                    runBids.getOrElse(it.id.toString()) { emptyList() },
+                ) }
             }
         }).sortedBy { it.startsAt }
 
