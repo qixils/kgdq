@@ -275,7 +275,7 @@ class ScheduleManager(
         // Add message for each run
         runs.await().forEachIndexed { index, run ->
             val sb = StringBuilder()
-            val tz = event.timezone
+            val tz = event.timezone ?: ZoneOffset.UTC
             if (index == 0 || runs.await()[index-1].startTime.atZone(tz).dayOfWeek != run.startTime.atZone(tz).dayOfWeek)
                 sb.append(dateHeaderFormat.format(run.startTime.atZone(tz)))
 
