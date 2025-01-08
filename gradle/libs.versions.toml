@@ -39,6 +39,7 @@ kotlinx-serialization-cbor = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 slf4j = { module = "org.slf4j:slf4j-api", version = "2.0.16" }
 jda = { module = "net.dv8tion:JDA", version = "5.2.2" }
 jda-ktx = { module = "club.minnced:jda-ktx", version = "0.12.0" }
+jda-websocket = { module = "club.minnced:discord-webhooks", version = "0.8.4" }
 configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate" }
 configurate-extra-kotlin = { module = "org.spongepowered:configurate-extra-kotlin", version.ref = "configurate" }
 jraw = { module = "com.github.dukestreet.JRAW:lib", version = "8e2305db29" }

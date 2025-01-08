@@ -26,6 +26,7 @@ dependencies {
     implementation(libs.bundles.ktor.server)
     implementation(libs.bundles.ktor.client)
     implementation(libs.kotlinx.serialization.cbor)
+    implementation(libs.jda.websocket)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.ktor.server.tests.jvm)
     implementation("org.neo4j.driver:neo4j-java-driver:5.27.0")

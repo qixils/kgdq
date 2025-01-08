@@ -2,9 +2,10 @@
 
 package club.speedrun.vods.plugins
 
+import club.minnced.discord.webhook.send.WebhookEmbed
+import club.minnced.discord.webhook.send.WebhookEmbedBuilder
 import club.speedrun.vods.*
 import club.speedrun.vods.marathon.*
-import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.locations.*
@@ -186,45 +187,31 @@ fun Application.configureRouting() {
                         // respond
                         call.respond(HttpStatusCode.OK)
                         // bonus jonas
-                        if (webhook.isNotEmpty()) {
-                            httpClient.post(webhook) {
-                                header("Content-Type", "application/json")
-                                setBody(mapOf(
-                                    "embeds" to listOf(mapOf(
-                                        "title" to "New Submission!",
-                                        "fields" to listOf(
-                                            mapOf(
-                                                "name" to "User",
-                                                "value" to "${user.discord?.user?.username ?: "Unknown"} (${user.id})",
-                                                "inline" to true,
-                                            ),
-                                            mapOf(
-                                                "name" to "Game",
-                                                "value" to "${run.displayGame} (${run.category})",
-                                                "inline" to true,
-                                            ),
-                                            mapOf(
-                                                "name" to "Event",
-                                                "value" to (marathon.getEventData(run.event)?.name ?: "Unknown"),
-                                                "inline" to true,
-                                            ),
-                                            mapOf(
-                                                "name" to "URL",
-                                                "value" to vod.url,
-                                                "inline" to true,
-                                            ),
-                                            mapOf(
-                                                "name" to "Auto-Accepted",
-                                                "value" to addDirect.toString(),
-                                                "inline" to true,
-                                            ),
-                                        ),
-                                        "color" to 0xdd22aa,
-                                        "url" to "https://vods.speedrun.club/admin",
-                                    )),
-                                ))
-                            }
-                        }
+                        webhookClient?.send(listOf(with(WebhookEmbedBuilder()) {
+                            setTitle(WebhookEmbed.EmbedTitle("New Submission!", "https://vods.speedrun.club/admin"))
+                            addField(WebhookEmbed.EmbedField(
+                                true,
+                                "User",
+                                "${user.discord?.user?.username ?: "Unknown"} (${user.id})",
+                            ))
+                            addField(WebhookEmbed.EmbedField(
+                                true,
+                                "Event",
+                                (marathon.getEventData(run.event)?.name ?: "Unknown"),
+                            ))
+                            addField(WebhookEmbed.EmbedField(
+                                true,
+                                "URL",
+                                vod.url,
+                            ))
+                            addField(WebhookEmbed.EmbedField(
+                                true,
+                                "Auto-Accepted",
+                                addDirect.toString(),
+                            ))
+                            setColor(0xdd22aa)
+                            build()
+                        }))
                     }
 
                     delete("/vod") { // ?url=<suggestion_url>
@@ -271,7 +258,12 @@ fun Application.configureRouting() {
                             throw AuthorizationException()
 
                         val suggestions: List<SuggestionWrapper> = marathons
-                            .flatMap { marathon -> marathon.overrideDb.vodSuggestions.getAll().map { SuggestionWrapper(it, marathon.id) } }
+                            .flatMap { marathon ->
+                                marathon.overrideDb.vodSuggestions
+                                    .getAll()
+                                    .filter { it.state == VodSuggestionState.PENDING }
+                                    .map { SuggestionWrapper(it, marathon.id) }
+                            }
                         call.respond(suggestions)
                     }
                 }

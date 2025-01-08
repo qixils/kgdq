@@ -1,6 +1,7 @@
 package club.speedrun.vods
 
-import club.speedrun.vods.marathon.*
+import club.minnced.discord.webhook.WebhookClient
+import club.speedrun.vods.marathon.GdqDatabase
 import club.speedrun.vods.marathon.gdq.DonationTrackerMarathon
 import club.speedrun.vods.plugins.configureHTTP
 import club.speedrun.vods.plugins.configureMonitoring
@@ -19,7 +20,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val logger: Logger = LoggerFactory.getLogger("SVC")
-val webhook = System.getenv("DISCORD_WEBHOOK") ?: ""
+val webhookUrl = System.getenv("DISCORD_WEBHOOK") ?: ""
+val webhookClient = if (webhookUrl.isEmpty()) null else WebhookClient.withUrl(webhookUrl)
 const val root = "https://vods.speedrun.club"
 val json = Json {
     isLenient = true
