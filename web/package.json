@@ -13,7 +13,7 @@
   "devDependencies": {
     "@playwright/test": "^1.49.1",
     "@sveltejs/adapter-node": "^5.2.11",
-    "@sveltejs/kit": "^2.15.1",
+    "@sveltejs/kit": "^2.15.2",
     "@types/cookie": "^0.6.0",
     "@typescript-eslint/eslint-plugin": "^8.19.0",
     "svelte": "^5.16.2",
