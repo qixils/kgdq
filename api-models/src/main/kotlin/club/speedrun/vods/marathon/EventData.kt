@@ -3,14 +3,11 @@ package club.speedrun.vods.marathon
 import dev.qixils.gdq.serializers.InstantAsStringSerializer
 import dev.qixils.gdq.serializers.ZoneIdSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import java.time.Instant
 import java.time.ZoneId
 
 @Serializable
 data class EventData(
-    @Transient
-    val organization: OrganizationConfig = EmptyOrganizationConfig,
     val id: String,
     val short: String,
     val name: String,
@@ -24,12 +21,10 @@ data class EventData(
     val count: Int?,
     val charityName: String?,
     val currency: String?,
+    val donationUrl: String?,
+    val scheduleUrl: String?,
 ) {
     val timeStatus: TimeStatus?
-
-    // TODO: does this work in api-client ??
-    val donationUrl: String = organization.getDonationUrl(this)
-    val scheduleUrl: String = organization.getScheduleUrl(this)
 
     init {
         val now = Instant.now()

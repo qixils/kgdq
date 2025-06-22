@@ -169,12 +169,13 @@ fun createEvent(organization: OrganizationConfig, event: BaseEvent, runs: List<R
         short = event.short,
         name = event.name,
         startTime = event.startsAt,
-        timezone = null, // TODO
+        timezone = event.timezone,
         endTime = runs?.lastOrNull()?.endTime,
-        organization = organization,
         amount = event.donationAmount ?: 0.0,
-        count = null, // TODO
-        charityName = null, // TODO??
-        currency = null,
+        count = event.donationCount,
+        charityName = event.charityName,
+        currency = event.currency,
+        donationUrl = organization.getDonationUrl(event),
+        scheduleUrl = organization.getScheduleUrl(event),
     )
 }

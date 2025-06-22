@@ -54,6 +54,9 @@ class DonationTrackerMarathon(
             event.short,
             event.name,
             event.datetime,
+            event.timezone,
+            event.amount,
+            event.donationCount,
             cachedAt = Instant.now(),
         ).also { cacheDb.events.put(it) }
     }
@@ -246,11 +249,11 @@ class DonationTrackerMarathon(
         return@coroutineScope runData
     }
 
-    override fun getDonationUrl(event: EventData): String {
+    override fun getDonationUrl(event: BaseEvent): String {
         return "https://gamesdonequick.com/tracker/ui/donate/${event.id}"
     }
 
-    override fun getScheduleUrl(event: EventData): String {
+    override fun getScheduleUrl(event: BaseEvent): String {
         return "https://gamesdonequick.com/schedule/${event.id}"
     }
 

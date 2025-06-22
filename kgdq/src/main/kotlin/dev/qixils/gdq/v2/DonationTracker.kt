@@ -120,13 +120,13 @@ class DonationTracker(
     }
 
     suspend fun getEvents(): Page<Event> {
-        return getPage(url("events/"))
+        return getPage(url("events/", buildSearchParams { add("totals") }))
     }
 
     suspend fun getEvent(
         id: Int,
     ): Event? {
-        return get(url("events/${id}/"))
+        return get(url("events/${id}/", buildSearchParams { add("totals") }))
     }
 
     suspend fun getRun(
