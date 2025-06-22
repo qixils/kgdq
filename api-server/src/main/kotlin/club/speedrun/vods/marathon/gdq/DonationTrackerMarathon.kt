@@ -57,6 +57,9 @@ class DonationTrackerMarathon(
             event.timezone,
             event.amount,
             event.donationCount,
+            event.receiverName,
+            event.receiverShort,
+            event.paypalCurrency,
             cachedAt = Instant.now(),
         ).also { cacheDb.events.put(it) }
     }
