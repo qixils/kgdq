@@ -51,7 +51,7 @@
 
         submit_status = "SUBMITTING";
 
-        if (replace_url !== null && replace_url !== "") {
+        if (replace_url) {
             let delete_response = await fetch(`${BASE_URL}/suggest/vod?url=${encodeURIComponent(replace_url)}`, {
                 credentials: "include",
                 method: "DELETE"
@@ -116,7 +116,7 @@
                 <p>
                     <b class="run-name">{run.name}</b>
 
-                    {#if run.category !== ""}
+                    {#if run.category}
                         <span class="run-category">{run.category}</span>
                     {/if}
                 </p>
@@ -165,11 +165,11 @@
         <p>
             <b class="run-name">{run.name}</b>
 
-            {#if run.category !== ""}
+            {#if run.category}
                 <span class="run-category">{run.category}</span>
             {/if}
 
-            {#if run.src !== null && run.src !== undefined}
+            {#if run.src}
                 <a class="run-src" href="https://speedrun.com/{run.src}" target="_blank" rel="noopener noreferrer">↗</a>
             {/if}
         </p>
@@ -178,7 +178,7 @@
 
         <div class="run-details">
             <div class="run-time">{ run.runTime }</div>
-            {#if run.console !== "" }
+            {#if run.console}
                 <div class="run-console">{ run.console }</div>
             {/if}
             <div class="run-runners {run.runners.length === 1 ? 'single' : 'multiple'}">

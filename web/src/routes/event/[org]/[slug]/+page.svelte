@@ -69,7 +69,7 @@
                 ran from {Formatters.date_hero(data.event.startTime)} to {Formatters.date_hero(data.event.endTime)} and raised {formatter.money(data.event.amount)}
             {/if}
             for
-            {#if data.event.charityName !== ""}
+            {#if data.event.charityName}
                 {data.event.charityName}.
             {:else}
                 charity.
