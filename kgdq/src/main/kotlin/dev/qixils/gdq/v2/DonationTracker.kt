@@ -58,7 +58,7 @@ class DonationTracker(
         logger.info("Querying $url")
 
         // perform request
-        val request = Request.Builder().url(url).get().build()
+        val request = Request.Builder().url(url).get().header("Accept", "application/json").build()
         val body = client.newCall(request).executeAsync().readBodyString() ?: run {
             logger.warn("Got null body on ${request.url}")
             return null
