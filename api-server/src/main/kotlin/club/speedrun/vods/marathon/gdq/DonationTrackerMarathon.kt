@@ -179,18 +179,23 @@ class DonationTrackerMarathon(
         val runs = (if (cachedRuns.isNotEmpty() && cachedRuns.all { it.isValid }) cachedRuns.map { it.obj }
         else {
             val fetch = api.getEventRuns(eventIdInt).fetchAll()
-            val ids = fetch.map { it.id.toString() }.toSet()
-            // remove orphaned runs
-            cachedRuns
-                .filter { !it.isValid }
-                .map { it.obj }
-                .filter { it.id !in ids }
-                .forEach(cacheDb.runs::remove)
             // empty?
             if (fetch.isEmpty()) {
-                putEmptyRun(cachedEvent)
-                emptyList()
+                if (cachedRuns.isNotEmpty()) cachedRuns.map { it.obj }
+                else {
+                    // todo: how does this even work lol, does this produce a cache hit for the next one or smth
+                    putEmptyRun(cachedEvent)
+                    emptyList()
+                }
             } else {
+                val ids = fetch.map { it.id.toString() }.toSet()
+                // remove orphaned runs
+                cachedRuns
+                    .filter { !it.isValid }
+                    .map { it.obj }
+                    .filter { it.id !in ids }
+                    .forEach(cacheDb.runs::remove)
+
                 // fetch bids
                 val bids = api.getEventBids(eventIdInt).fetchAll().filter { it.runId != null } // get bids and filter out those with unknown runs
                 val idBids = bids.associateBy { it.id } // map bids by their id to fetch parent from
