@@ -9,13 +9,13 @@ class DonationTrackerDatabase(organization: String) : Database("cache", "orgs", 
     override val events = TimedCacheManager(
         getCollection(BaseEvent.serializer(), "events"),
         Duration.ofMinutes(5),
-        Duration.ofDays(1),
+        Duration.ofDays(7),
     )
 
     override val runs = TimedCacheManager(
         getCollection(BaseRun.serializer(), "runs"),
         Duration.ofMinutes(5),
-        Duration.ofHours(12),
+        Duration.ofDays(2),
     )
 
     override val talent = CacheManager(
