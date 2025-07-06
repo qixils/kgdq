@@ -156,7 +156,7 @@ class DonationTrackerMarathon(
         }
 
         if (event == null)
-            return null
+            return cacheDb.events.getByIdForce(realId)?.obj // get cached obj
 
         eventIdCache[_id] = event.id
         return event
