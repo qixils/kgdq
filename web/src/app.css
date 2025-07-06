@@ -719,7 +719,8 @@ form button[type="submit"] {
 
 #event-controls {
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row;
+    align-items: center;
 }
 
 .event-runs.hide-bids .bid {

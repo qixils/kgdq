@@ -75,27 +75,28 @@
                 charity.
             {/if}
         </p>
-        {#if current_run_index !== null}
-            <p><a href="#run-{current_run_index}">Jump to current run</a></p>
-            {#if data.event.timeStatus === "IN_PROGRESS" && streamUsername}
-                <!-- TODO: `allow: autoplay;` search param -->
-                <iframe src="https://player.twitch.tv/?channel={streamUsername}&parent={$page.url.hostname}"
-                        title="Stream"
-                        allow="fullscreen"
-                        style="
-                         margin: 0 auto;
-                         display: block;
-                         width: calc(100% - 4px - 10px);
-                         aspect-ratio: 16/9;
-                         border: 2px solid #9146ff;
-                         border-radius: 5px;
-                         margin: 0 5px;
-                        ">
-                </iframe>
-            {/if}
+        
+        {#if data.event.timeStatus === "IN_PROGRESS" && streamUsername}
+            <!-- TODO: `allow: autoplay;` search param -->
+            <iframe src="https://player.twitch.tv/?channel={streamUsername}&parent={$page.url.hostname}"
+                    title="Stream"
+                    allow="fullscreen"
+                    style="
+                        display: block;
+                        width: calc(100% - 4px - 10px);
+                        aspect-ratio: 16/9;
+                        border: 2px solid #9146ff;
+                        border-radius: 5px;
+                        margin: 0 5px;
+                        margin-bottom: 15px;
+                    ">
+            </iframe>
         {/if}
         <div id="event-controls">
-            <div>
+            {#if current_run_index !== null}
+                <a href="#run-{current_run_index}">Jump to current run</a>
+            {/if}
+            <div style="margin-left: auto">
                 <input id="event-bids" type="checkbox" on:change={evt => saveHideBids(evt.currentTarget.checked)} checked={hideBids}>
                 <label for="event-bids">Hide bids</label>
             </div>
