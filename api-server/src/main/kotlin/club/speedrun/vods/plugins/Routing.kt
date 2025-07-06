@@ -4,6 +4,7 @@ package club.speedrun.vods.plugins
 
 import club.minnced.discord.webhook.send.WebhookEmbed
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder
+import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import club.speedrun.vods.*
 import club.speedrun.vods.marathon.*
 import io.ktor.http.*
@@ -174,8 +175,8 @@ fun Application.configureRouting() {
                         // get override
                         val override = marathon.overrideDb.getRunOverrides(body.id)
                             ?: throw UserError("Unknown run")
-                        val addDirect = user.role < Role.APPROVED || vod.type == VODType.OTHER || override.vods.any { it.type == vod.type }
-                        if (addDirect) {
+                        val isSuggestion = user.role < Role.APPROVED || vod.type == VODType.OTHER || override.vods.any { it.type == vod.type }
+                        if (isSuggestion) {
                             // add suggestion if user isn't approved, if the VOD is non-standard, or if VOD might be a duplicate
                             marathon.overrideDb.vodSuggestions.insert(VodSuggestion(vod, marathon.id, override.id))
                         } else {
@@ -187,31 +188,37 @@ fun Application.configureRouting() {
                         // respond
                         call.respond(HttpStatusCode.OK)
                         // bonus jonas
-                        webhookClient?.send(listOf(with(WebhookEmbedBuilder()) {
-                            setTitle(WebhookEmbed.EmbedTitle("New Submission!", "https://vods.speedrun.club/admin"))
-                            addField(WebhookEmbed.EmbedField(
-                                true,
-                                "User",
-                                "${user.discord?.user?.username ?: "Unknown"} (${user.id})",
-                            ))
-                            addField(WebhookEmbed.EmbedField(
-                                true,
-                                "Event",
-                                (marathon.getEventData(run.event)?.name ?: "Unknown"),
-                            ))
-                            addField(WebhookEmbed.EmbedField(
-                                true,
-                                "URL",
-                                vod.url,
-                            ))
-                            addField(WebhookEmbed.EmbedField(
-                                true,
-                                "Auto-Accepted",
-                                addDirect.toString(),
-                            ))
-                            setColor(0xdd22aa)
+                        webhookClient?.send(with(WebhookMessageBuilder()) {
+                            if (isSuggestion) {
+                                setContent("<@&1391268698840633364>")
+                            }
+                            addEmbeds(with(WebhookEmbedBuilder()) {
+                                setTitle(WebhookEmbed.EmbedTitle("New Submission!", "https://vods.speedrun.club/admin"))
+                                addField(WebhookEmbed.EmbedField(
+                                    false,
+                                    "User",
+                                    "${user.discord?.user?.username ?: "Unknown"} (${user.id})",
+                                ))
+                                addField(WebhookEmbed.EmbedField(
+                                    false,
+                                    "Event",
+                                    (marathon.getEventData(run.event)?.name ?: "Unknown"),
+                                ))
+                                addField(WebhookEmbed.EmbedField(
+                                    false,
+                                    "URL",
+                                    vod.url,
+                                ))
+                                addField(WebhookEmbed.EmbedField(
+                                    false,
+                                    "Auto-Accepted",
+                                    (!isSuggestion).toString(),
+                                ))
+                                setColor(0xdd22aa)
+                                build()
+                            })
                             build()
-                        }))
+                        })
                     }
 
                     delete("/vod") { // ?url=<suggestion_url>
