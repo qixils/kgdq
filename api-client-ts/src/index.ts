@@ -134,7 +134,13 @@ export interface Run {
 
     // IDs for images from IGDB
     igdb?: {
+
+        // Image ID suitable for horizontal backgrounds
+        // i.e. https://images.igdb.com/igdb/image/upload/t_screenshot_med_2x/${background}.jpg
         background?: string;
+
+        // Image ID suitable for vertical covers
+        // i.e. https://images.igdb.com/igdb/image/upload/t_cover_small_2x/${cover}.jpg
         cover?: string;
     };
 }
