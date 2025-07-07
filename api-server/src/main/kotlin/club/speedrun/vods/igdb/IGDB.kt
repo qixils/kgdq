@@ -59,9 +59,9 @@ object IGDB {
             header("Client-ID", clientId)
             header("Authorization", token().authorization)
             setBody(buildString {
-                append("fields artworks.image_id, artworks.artwork_type, cover.image_id;")
+                append("fields artworks.image_id, artworks.artwork_type, artworks.alpha_channel, artworks.animated, cover.image_id;")
                 append("search \"$gameName\";") // todo: url encode or something?
-                append("where version_parent = null & game_type = 0 & themes != (42);")
+                append("where version_parent = null & game_type = (0,1,2,4,6,8,9) & themes != (42);")
                 append("limit 1;")
             })
         }

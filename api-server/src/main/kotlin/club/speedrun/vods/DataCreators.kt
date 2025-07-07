@@ -117,7 +117,17 @@ suspend fun createRun(
     val isGame = excludedGameTitles.none { gameName.contains(it, true) }
 
     val igdb = if (isGame) IGDB.getCached(gameName)?.result?.let { res -> IGDBData(
-        background = (res.artworks.find { art -> art.artworkType == 2 } ?: res.artworks.firstOrNull())?.imageId,
+        background = res.artworks.sortedWith { a, b ->
+            if (a.artworkType != b.artworkType) {
+                if (a.artworkType == 2) return@sortedWith -1
+                if (b.artworkType == 2) return@sortedWith 1
+                if (a.artworkType == 1) return@sortedWith -1
+                if (b.artworkType == 1) return@sortedWith 1
+            }
+            if (a.animated != b.animated) return@sortedWith if (a.animated) 1 else -1
+            if (a.alphaChannel != b.alphaChannel) return@sortedWith if (a.alphaChannel) 1 else -1
+            return@sortedWith 0
+        }.firstOrNull()?.imageId,
         cover = res.cover?.imageId,
     ) }
     else null
