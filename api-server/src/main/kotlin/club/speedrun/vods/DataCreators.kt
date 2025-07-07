@@ -1,5 +1,6 @@
 package club.speedrun.vods
 
+import club.speedrun.vods.igdb.IGDB
 import club.speedrun.vods.marathon.*
 import club.speedrun.vods.marathon.db.BaseBid
 import club.speedrun.vods.marathon.db.BaseEvent
@@ -108,6 +109,19 @@ suspend fun createRun(
     val runTime = overrides.runTime ?: run.runTime
     val endTime = startTime + runTime
 
+    val gameName = when {
+        !run.twitchGame.isNullOrEmpty() -> run.twitchGame
+        !run.displayGame.isNullOrEmpty() -> run.displayGame
+        else -> run.game
+    }
+    val isGame = excludedGameTitles.none { gameName.contains(it, true) }
+
+    val igdb = if (isGame) IGDB.getCached(gameName)?.result?.let { res -> IGDBData(
+        background = (res.artworks.find { art -> art.artworkType == 2 } ?: res.artworks.firstOrNull())?.imageId,
+        cover = res.cover?.imageId,
+    ) }
+    else null
+
     return RunData(
         id = run.id,
         name = run.game,
@@ -129,16 +143,10 @@ suspend fun createRun(
         src = when {
             overrides.src == "" -> null
             overrides.src != null -> overrides.src
-            else -> run {
-                val gameName = when {
-                    !run.twitchGame.isNullOrEmpty() -> run.twitchGame
-                    !run.displayGame.isNullOrEmpty() -> run.displayGame
-                    else -> run.game
-                }
-                excludedGameTitles.forEach { if (gameName.contains(it, true)) return@run null }
-                return@run srcDb.getGame(gameName).abbreviation
-            }
-        }
+            isGame -> srcDb.getGame(gameName).abbreviation
+            else -> null
+        },
+        igdb = igdb,
     )
 }
 

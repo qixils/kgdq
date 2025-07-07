@@ -34,18 +34,18 @@ export interface MarathonEvent {
     name: string;
 
     // The start time in ISO 8601 format. Can be null if the event has no specified start time.
-    startTime: string | null;
+    startTime?: string;
 
     // The end time in ISO 8601 format. Can be null if the event has no specified end time.
-    endTime: string | null;
+    endTime?: string;
 
-    timezone: string | null;
+    timezone?: string;
 
     // The total amount raised.
     amount: number;
 
     // The total number of donations received.
-    count: number | null;
+    count?: number;
 
     //The name of the charity being supported.
     charityName: string;
@@ -54,7 +54,7 @@ export interface MarathonEvent {
     currency: string;
 
     // Can be null if the status is not available.
-    timeStatus: TimeStatus | null;
+    timeStatus?: TimeStatus;
 
     // The URL to donate.
     donationUrl: string;
@@ -69,7 +69,7 @@ export interface MarathonEvent {
 export interface Run {
 
     // The ID of the run.
-    id: string | null;
+    id: string;
 
     // The name of the run.
     // This is usually the name of the game being run, though is often prefixed with extra text like `"BONUS GAME"`.
@@ -87,7 +87,7 @@ export interface Run {
     console: string;
 
     // The year the game was released. Can be null if the release year is not available.
-    releaseYear: number | null;
+    releaseYear?: number;
 
     // The description of the run. Increasingly used for meta-"runs" like the opening ceremony.
     // Uses markdown.
@@ -127,10 +127,16 @@ export interface Run {
     vods: VOD[];
 
     // The speedrun.com slug for the game being run. Can be null if the slug is not available.
-    src: string | null;
+    src?: string;
 
     // Whether the run is upcoming, in progress, or finished.
     timeStatus: TimeStatus;
+
+    // IDs for images from IGDB
+    igdb?: {
+        background?: string;
+        cover?: string;
+    };
 }
 
 
@@ -183,7 +189,7 @@ export interface Bid {
     shortDescription: string;
 
     // The goal amount for the bid. Can be null if no goal amount is specified (i.e. for non-donation incentives).
-    goal: number | null;
+    goal?: number;
 
     // Indicates whether this bid is a donation incentive.
     isTarget: boolean;
@@ -193,7 +199,7 @@ export interface Bid {
 
     // The maximum length of a user-submitted string for this bid war.
     // Can be null if there is no maximum length specified.
-    optionMaxLength: number | null;
+    optionMaxLength?: number;
 
     // The total amount raised for this bid.
     donationTotal: number;
@@ -212,16 +218,16 @@ export interface VOD {
     type: VODType;
 
     // The ID of the VOD video. Can be null if the ID is not available.
-    videoId: string | null;
+    videoId?: string;
 
     // The timestamp of the VOD. Can be null if the timestamp is not available.
-    timestamp: string | null;
+    timestamp?: string;
 
     // The full URL of the VOD.
     url: string;
 
     // ID of the SVC user who submitted this VOD.
-    contributorId: string | null;
+    contributorId?: string;
 }
 
 

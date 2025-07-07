@@ -7,14 +7,32 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.util.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
+import java.time.Duration
 import java.time.Instant
+import kotlin.time.toKotlinDuration
 
 // TODO: suspend
 
 object IGDB {
+    private val queue = mutableSetOf<String>()
+    private val executor = newSingleThreadContext("IgdbCacheUpdater")
     private val clientId = System.getenv("TWITCH_CLIENT_ID")!!
     private val clientSecret = System.getenv("TWITCH_CLIENT_SECRET")!!
     private var _token: TwitchToken? = null
+    private var sleepUntil: Instant = Instant.EPOCH
+    private val ratelimit: Duration = Duration.ofMillis(250)
+
+    suspend fun ratelimit() {
+        val duration = Duration.between(Instant.now(), sleepUntil)
+        sleepUntil = maxOf(Instant.now(), sleepUntil) + ratelimit
+        if (duration.isPositive) {
+            delay(duration.toKotlinDuration())
+        }
+    }
 
     suspend fun token(): TwitchToken {
         if (_token != null && !_token!!.isExpired) return _token!!
@@ -36,6 +54,7 @@ object IGDB {
         val cache = IGDBDatabase.games.getById(cacheId)
         if (cache != null) return cache
 
+        ratelimit()
         val response = httpClient.post("https://api.igdb.com/v4/games") {
             header("Client-ID", clientId)
             header("Authorization", token().authorization)
@@ -61,5 +80,20 @@ object IGDB {
         )
         IGDBDatabase.games.put(result)
         return result
+    }
+
+    fun getCached(gameName: String): IGDBGameSearch? {
+        val cacheId = gameName.lowercase().md5()
+        val cache = IGDBDatabase.games.getById(cacheId)
+        if (cache != null) return cache
+
+        if (!queue.add(cacheId)) return null
+
+        GlobalScope.launch(executor) {
+            search(gameName)
+            queue.remove(cacheId)
+        }
+
+        return null
     }
 }
