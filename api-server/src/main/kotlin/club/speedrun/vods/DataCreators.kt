@@ -15,7 +15,6 @@ import dev.qixils.horaro.models.Run as HoraroRun
 
 private val MARKDOWN_LINK: Pattern = Pattern.compile("\\[([^]]+)]\\(([^)]+)\\)")
 private val MAX_RAW_SETUP_TIME = Duration.ofMinutes(30)
-val excludedGameTitles = listOf("bonus game", "daily recap", "tasbot plays")
 
 fun calculateHoraroName(run: HoraroRun): String {
     val rawName = run.getValue("Game")?.trim() ?: return "[Unknown Game]"
@@ -114,7 +113,7 @@ suspend fun createRun(
         !run.displayGame.isNullOrEmpty() -> run.displayGame
         else -> run.game
     }
-    val isGame = excludedGameTitles.none { gameName.contains(it, true) }
+    val isGame = srcDb.skipCache.none { it.containsMatchIn(gameName) }
 
     val igdb = if (isGame) IGDB.getCached(gameName)?.result?.let { res -> IGDBData(
         background = res.artworks.sortedWith { a, b ->
