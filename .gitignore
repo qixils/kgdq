@@ -1,6 +1,8 @@
 /run/
 ngrok.exe
 
+twitch.env
+
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar

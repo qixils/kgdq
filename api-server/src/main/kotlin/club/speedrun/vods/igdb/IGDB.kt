@@ -20,7 +20,7 @@ import kotlin.time.toKotlinDuration
 object IGDB {
     private val queue = mutableSetOf<String>()
     private val executor = newSingleThreadContext("IgdbCacheUpdater")
-    private val clientId = System.getenv("TWITCH_CLIENT_ID")!!
+    private val clientId = System.getenv("TWITCH_CLIENT_ID") ?: throw RuntimeException("need twitch credentials")
     private val clientSecret = System.getenv("TWITCH_CLIENT_SECRET")!!
     private var _token: TwitchToken? = null
     private var sleepUntil: Instant = Instant.EPOCH
@@ -65,12 +65,14 @@ object IGDB {
                 append("limit 1;")
             })
         }
-        val game = try {
-            response.body<List<IGDBGame>>()
-        } catch (e: Exception) {
-            logger.warn("Failed to decode games response", e)
-            null
-        }
+//        val game = try {
+//            response.body<List<IGDBGame>>()
+//        } catch (e: Exception) {
+//            logger.warn("Failed to decode games response", e)
+//            null
+//        }
+
+        val game =  response.body<List<IGDBGame>>()
 
         val result = IGDBGameSearch(
             cacheId,
