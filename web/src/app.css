@@ -155,7 +155,6 @@ footer {
     /*noinspection CssNoGenericFontName*/
     font-family: "Material Symbols Rounded";
     font-size: 14pt;
-    max-width: 1ch;
 }
 
 .loading {
@@ -725,4 +724,15 @@ form button[type="submit"] {
 
 .event-runs.hide-bids .bid {
     display: none;
+}
+
+.collapse-btn {
+    display: flex;
+    gap: 5px;
+    color: var(--text);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: inherit;
+    padding: 0;
 }
