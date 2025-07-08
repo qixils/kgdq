@@ -27,6 +27,9 @@ html {
     --youtube-rgb: 255, 0, 0;
     --twitch-rgb: 100, 65, 165;
 
+    
+    --keyart-opacity: 4%;
+
     color: var(--text);
     background-color: var(--bg-bg);
 }
@@ -42,6 +45,8 @@ html {
         --link-visited: hsl(271, 75%, 55%);
         --link-hover: #97e;
         --dialog-shadow: #0006;
+
+        --keyart-opacity: 12%;
     }
 
     .vod::before {
@@ -191,7 +196,7 @@ footer {
 .run.has-art {
     background-image:
         /* "lower opacity" of bg image */
-        linear-gradient(0deg, color-mix(in srgb, var(--raise-bg) 90%, transparent) 0 100%), 
+        linear-gradient(0deg, color-mix(in srgb, transparent var(--keyart-opacity), var(--raise-bg)) 0 100%), 
         var(--keyart)
         ;
     background-size: cover;
@@ -761,19 +766,19 @@ form button[type="submit"] {
 
 .collapse-btn {
     display: flex;
-    gap: 5px;
+    gap: 12px;
     color: var(--text);
     background: none;
     border: none;
     cursor: pointer;
     font-size: inherit;
     padding: 0;
+    margin-left: -15px;
 }
 
 .run-cover {
     float: right;
     height: 100%;
-    /* width: 50px; */
     padding-right: 10px;
     display: flex;
     align-items: center;
@@ -782,7 +787,7 @@ form button[type="submit"] {
         /* margin-left: -10px; */
         max-width: 35px;
         border-radius: 3px;
-        box-shadow: #0008 0 0 15px;
+        box-shadow:  #0004 0 0 15px;
         transform: scale(1.6);
     }
 }
