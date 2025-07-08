@@ -10,12 +10,16 @@ import club.speedrun.vods.plugins.configureRouting
 import dev.qixils.gdq.v2.DonationTracker
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
+import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import okhttp3.internal.wait
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -47,7 +51,8 @@ val httpClient = HttpClient(OkHttp) {
 //    null
 //}
 
-fun main() {
+suspend fun main() {
+    gdq.getEventsData(false) // hit cache early
     embeddedServer(Netty, port = 4010, host = "0.0.0.0", module = Application::kgdqApiModule).start(wait = true)
 }
 

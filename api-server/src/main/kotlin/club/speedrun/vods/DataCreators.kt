@@ -163,14 +163,14 @@ fun createBid(bid: BaseBid, run: BaseRun): BidData {
     )
 }
 
-fun createEvent(organization: OrganizationConfig, event: BaseEvent, runs: List<RunData>?): EventData {
+fun createEvent(organization: OrganizationConfig, event: BaseEvent, endTime: Instant?): EventData {
     return EventData(
         id = event.id,
         short = event.short,
         name = event.name,
         startTime = event.startsAt,
         timezone = event.timezone,
-        endTime = runs?.lastOrNull()?.endTime,
+        endTime = endTime,
         amount = event.donationAmount ?: 0.0,
         count = event.donationCount,
         charityName = event.charityName,

@@ -12,7 +12,7 @@
 
 	onMount(async () => {
 		try {
-			const allEvents = await new SvcClient(BASE_URL, fetch).getAllEvents()
+			const allEvents = await new SvcClient(BASE_URL, fetch).getAllEvents(true)
 			console.log("events:", allEvents)
 			events = allEvents
 					.filter(event => event.timeStatus === "IN_PROGRESS")

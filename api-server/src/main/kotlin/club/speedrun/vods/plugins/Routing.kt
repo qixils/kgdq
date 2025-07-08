@@ -21,6 +21,8 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import java.time.Duration
+import kotlin.time.measureTime
+import kotlin.time.measureTimedValue
 
 private suspend fun getUser(call: ApplicationCall): User? {
     return try {
@@ -116,6 +118,15 @@ fun Application.configureRouting() {
                         } } }
                         call.respond(data)
                     }
+
+                    get("events-no-schedules") {
+                        val data = mutableMapOf<String, List<EventData>>()
+                        for (marathon in marathons) {
+
+                        }
+                        call.respond(data)
+                    }
+
 
                     get<MarathonRoute> { query ->
                         val marathon = getMarathon(query)

@@ -37,6 +37,40 @@ class DonationTrackerMarathon(
     private val logger = LoggerFactory.getLogger("Marathon")
     private val eventIdCache = mutableMapOf<String, String>()
 
+    private val endTimeCache = mutableMapOf<String, Pair<Instant, Instant>>() // eventSlug: (expiry, endTime)
+
+    private suspend fun getEventEndTime(eventSlug: String): Instant? {
+
+        val cached = endTimeCache[eventSlug]
+
+        return if (cached == null || cached.first < Instant.now()) {
+            val runs = getSchedule(eventSlug)
+            val endTime = runs?.lastOrNull()?.endTime ?: return null
+            // TODO: null end time on old event?
+
+            val id = getEventId(eventSlug) ?: return null
+            val event = getEvent(id) ?: return null
+            val isOld = // don't check endTime again
+                event.startsAt + Duration.ofDays(30) < Instant.now() // one month old OR
+                        || cached?.let { // was already cached,
+                            it.second + Duration.ofDays(1) < Instant.now() // ended a day ago
+                                    && endTime == it.second // and hasn't changed
+                        } ?: false
+
+            val expiry = if (isOld) { Instant.MAX } else {
+                maxOf( // valid until near event ends, then refresh every 5 minutes
+                    Instant.now() + Duration.ofMinutes(5),
+                    endTime - Duration.ofHours(1)
+                )
+            }
+            endTimeCache.put(eventSlug, Pair(expiry, endTime))
+
+            endTime
+        } else {
+            cached.second
+        }
+    }
+
     override suspend fun isWorking(): Boolean {
         val events = try {
             api.getEvents()
@@ -277,10 +311,10 @@ class DonationTrackerMarathon(
         if (!skipLoad && Duration.between(cacheDb.metadata.get().eventsCachedAt, Instant.now()) < cacheDb.events.cacheLength)
             api.getEvents().results.forEach(this::put)
 
-        return cacheDb.events.getAll().map { createEvent(this, it.obj, getSchedule(it.obj.id)) }
+        return cacheDb.events.getAll().map { createEvent(this, it.obj, getEventEndTime(it.obj.id)) }
     }
 
     override suspend fun getEventData(eventSlug: String): EventData? {
-        return getEvent(eventSlug)?.let { createEvent(this, it, getSchedule(it.id)) }
+        return getEvent(eventSlug)?.let { createEvent(this, it, getEventEndTime(it.id)) }
     }
 }

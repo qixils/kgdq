@@ -284,8 +284,8 @@ export class SvcClient {
     /** Retrieves every event for every organization.
      * @returns A Promise that resolves to a Map object where the keys are organization IDs and the values are arrays of Event objects.
      */
-    async getAllEvents(): Promise<MarathonEvent[]> {
-        let json = await this.get<object>('marathons/events');
+    async getAllEvents(useCache: boolean = false): Promise<MarathonEvent[]> {
+        let json = await this.get<object>(`marathons/events?skipLoad=${useCache}`);
         return Object.entries(json).map(([organization, events]) => (events as any[]).map(event => ({ organization, ...event }))).flat();
     }
 
