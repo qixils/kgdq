@@ -9,7 +9,7 @@ data class IGDBArtwork(
     @SerialName("image_id")
     val imageId: String,
     @SerialName("artwork_type")
-    val artworkType: Int,
+    val artworkType: Int? = null,
     @SerialName("alpha_channel")
     val alphaChannel: Boolean = false,
     @SerialName("animated")

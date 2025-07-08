@@ -5,12 +5,15 @@ import club.speedrun.vods.logger
 import club.speedrun.vods.utils.md5
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.server.util.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
+import okhttp3.internal.wait
 import java.time.Duration
 import java.time.Instant
 import kotlin.time.toKotlinDuration
@@ -25,6 +28,31 @@ object IGDB {
     private var _token: TwitchToken? = null
     private var sleepUntil: Instant = Instant.EPOCH
     private val ratelimit: Duration = Duration.ofMillis(250)
+
+    private val gamesQueue = kotlinx.coroutines.channels.Channel<Pair<String, String>>(
+        capacity = kotlinx.coroutines.channels.Channel.Factory.UNLIMITED,
+    )
+
+    init {
+        GlobalScope.launch(executor) {
+            while (true) {
+                val (cacheId, gameName) = gamesQueue.receive()
+                if (IGDBDatabase.games.getById(cacheId) != null) {
+                    continue
+                }
+                println("Fetching art for game: $gameName")
+                try {
+                    val result = search(gameName)
+                    println("Got cover: ${result.result?.cover?.imageId}")
+                } catch (e: Exception) {
+                    println("Failed to decode games response: $e")
+                    throw e;
+                }
+                delay(Duration.ofMillis(250).toKotlinDuration())
+            }
+        }
+    }
+
 
     suspend fun ratelimit() {
         val duration = Duration.between(Instant.now(), sleepUntil)
@@ -72,7 +100,14 @@ object IGDB {
 //            null
 //        }
 
-        val game =  response.body<List<IGDBGame>>()
+        val game =
+            try {
+                response.body<List<IGDBGame>>()
+            } catch (e: Exception) {
+                logger.warn("Failed to decode games response", e)
+                println(response.bodyAsText())
+                throw e;
+            }
 
         val result = IGDBGameSearch(
             cacheId,
@@ -89,12 +124,10 @@ object IGDB {
         val cache = IGDBDatabase.games.getById(cacheId)
         if (cache != null) return cache
 
-        if (!queue.add(cacheId)) return null
+//        if (!queue.add(gameName)) return null
 
-        GlobalScope.launch(executor) {
-            search(gameName)
-            queue.remove(cacheId)
-        }
+        gamesQueue.trySendBlocking(cacheId to gameName)
+
 
         return null
     }
