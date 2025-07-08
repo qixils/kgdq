@@ -217,6 +217,7 @@ fun Application.configureRouting() {
                                 setColor(0xdd22aa)
                                 build()
                             })
+                            // TODO: can link buttons be added to auto approve / reject ?
                             build()
                         })
                     }

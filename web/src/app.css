@@ -54,6 +54,10 @@ html, body, .page-container {
     min-height: 100vh;
 }
 
+/* p, h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+} */
+
 .page-container {
     max-width: 64em;
     margin: 0 auto;
@@ -198,6 +202,17 @@ footer {
 
 .run-content {
     margin-left: 1em;
+    margin-right: 0.5em;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.run-content > * {
+    margin: 0;
+}
+
+.run-content > *:not(:last-child) {
+    margin-bottom: 0.75em;
 }
 
 .run-category {
@@ -329,7 +344,7 @@ sup {
     vertical-align: middle;
     box-sizing: content-box;
     background-color: var(--bg-bg);
-    margin: 0.5em;
+    margin: 0 0.5em;
 }
 
 .radial-progress::before,
@@ -375,12 +390,7 @@ sup {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    margin: 0.5em 0.5em 0.5em 0;
     gap: 1em;
-}
-
-.run-details> div:first-child::before {
-    margin-left: 0;
 }
 
 .run-details > div {
@@ -389,15 +399,20 @@ sup {
     align-items: center;
 }
 
+.run-details > div:not(:last-child) {
+    margin-right: .3125em;
+}
+
 .run-details > div > * {
     vertical-align: middle;
 }
 
-.run-details > div:before {
+.run-details > div::before {
     /*noinspection CssNoGenericFontName*/
     font-family: 'Material Symbols Rounded';
     font-size: 150%;
-    margin: .3125em;
+    margin-left: -.1em;
+    margin-right: .3125em;
     color: var(--text-quiet);
     width: 1ch;
 }
@@ -445,7 +460,7 @@ sup {
 .vod {
     display: flex;
     align-items: center;
-    min-width: min(11em, 100%);
+    /* min-width: min(11em, 100%); */
 }
 
 .vods-list {
@@ -456,7 +471,6 @@ sup {
     gap: 1em 2em;
     list-style: none;
     padding: 0;
-    margin: 0.5em;
 }
 
 .vod::before {
@@ -464,7 +478,10 @@ sup {
     font-family: 'Material Symbols Rounded';
     content: 'play_circle';
     font-size: 150%;
-    margin: .3125em;
+    margin-top: -0.15em;
+    margin-bottom: -0.15em;
+    margin-left: -.05em;
+    margin-right: .3125em;
     width: 1ch;
     text-shadow:
             rgba(var(--whatever-rgb), 1.0) -2px 0 0,
@@ -495,7 +512,7 @@ sup {
     display: inline-flex;
     flex-direction: column;
     gap: .1875em;
-    margin: 0.5em;
+    margin: 0 0.5em;
     width: 4.375em;
     border-right: 2px solid var(--text-quiet);
 }
@@ -506,7 +523,7 @@ sup {
 }
 
 .bid-war-legend {
-    margin: 0.25em;
+    margin: 0 0.25em;
     display: block;
     width: min-content;
     font-size: 85%;
@@ -720,6 +737,7 @@ form button[type="submit"] {
 #event-controls {
     display: flex;
     flex-direction: row-reverse;
+    gap: 1em;
 }
 
 .event-runs.hide-bids .bid {
