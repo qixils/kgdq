@@ -166,7 +166,6 @@ footer {
 }
 
 .event-runs {
-    border-top: 2px solid #669;
     padding: 0;
 }
 
@@ -720,6 +719,11 @@ form button[type="submit"] {
     display: flex;
     flex-direction: row;
     align-items: center;
+    top: 0;
+    border-bottom: 2px solid #669;
+    padding-bottom: 4px;
+    background-color: var(--bg-bg);
+    z-index: 2;
 }
 
 .event-runs.hide-bids .bid {

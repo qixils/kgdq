@@ -81,95 +81,95 @@
     }
 </script>
 
-<section>
-    <div class="event-description">
-        <h1>{data.event.name}</h1>
-        <p>
-            {niceShortName(data.event)}
+<div class="event-description">
+    <h1>{data.event.name}</h1>
+    <p>
+        {niceShortName(data.event)}
 
-            {#if data.event.timeStatus === "UPCOMING"}
-                will run from {Formatters.date_hero(data.event.startTime)} to {Formatters.date_hero(data.event.endTime)} and raise money
-            {:else if data.event.timeStatus === "IN_PROGRESS"}
-                is running from {Formatters.date_hero(data.event.startTime)} to {Formatters.date_hero(data.event.endTime)} and has raised {formatter.money(data.event.amount)}
-            {:else}
-                ran from {Formatters.date_hero(data.event.startTime)} to {Formatters.date_hero(data.event.endTime)} and raised {formatter.money(data.event.amount)}
-            {/if}
-            for
-            {#if data.event.charityName}
-                {data.event.charityName}.
-            {:else}
-                charity.
-            {/if}
-        </p>
-        
-        {#if data.event.timeStatus === "IN_PROGRESS" && streamUsername}
-            <!-- TODO: `allow: autoplay;` search param -->
-            <iframe src="https://player.twitch.tv/?channel={streamUsername}&parent={$page.url.hostname}"
-                    title="Stream"
-                    allow="fullscreen"
-                    style="
-                        display: block;
-                        width: calc(100% - 4px - 10px);
-                        aspect-ratio: 16/9;
-                        border: 2px solid #9146ff;
-                        border-radius: 5px;
-                        margin: 0 5px;
-                        margin-bottom: 15px;
-                    ">
-            </iframe>
+        {#if data.event.timeStatus === "UPCOMING"}
+            will run from {Formatters.date_hero(data.event.startTime)} to {Formatters.date_hero(data.event.endTime)} and raise money
+        {:else if data.event.timeStatus === "IN_PROGRESS"}
+            is running from {Formatters.date_hero(data.event.startTime)} to {Formatters.date_hero(data.event.endTime)} and has raised {formatter.money(data.event.amount)}
+        {:else}
+            ran from {Formatters.date_hero(data.event.startTime)} to {Formatters.date_hero(data.event.endTime)} and raised {formatter.money(data.event.amount)}
         {/if}
-        <div id="event-controls">
-            {#if current_run_index !== null}
-                <a href="#run-{current_run_index}">Jump to current run</a>
-            {/if}
-            {#if there_are_bids}
-                <div style="margin-left: auto">
-                    <input id="event-bids" type="checkbox" on:change={evt => saveHideBids(evt.currentTarget.checked)} checked={hideBids}>
-                    <label for="event-bids">Hide bids</label>
-                </div>
-            {/if}
-        </div>
-    </div>
-
-    {#if runs === undefined && run_error === undefined}
-        <LoadingButton />
-    {:else if runs !== undefined}
-        <ul class="event-runs" class:hide-bids={hideBids}>
-
-            {#each runs_ui_spans as span, span_index}
-                {@const prog = span.day_progess_class }
-                {@const next_prog = runs_ui_spans[span_index+1]?.day_progess_class }
-                <li class='event-day {prog == 'finished' && next_prog == '' && span.hide ? 'in-progress' : prog}'>
-                        <div class="schedule-bar-bit"></div>
-                    <h2>
-                        <button class="collapse-btn" on:click={ evt => {
-                            span.hide = !span.hide;
-                        } } >
-                             <span class="material-symbols-rounded" style="font-size: 20pt; color: var(--text-quiet)" >
-                                {span.hide ? 'expand_all' : 'collapse_all'}
-                            </span>
-                            { span.day_text }
-                        </button>
-                    </h2>
-                    
-                    </li>
-                {#if !span.hide }
-                    {#each span.run_indices as run_index}
-                        <RunComponent {runs} {run_index} {formatter} />
-                    {/each}
-                {/if}
-            {:else}
-                <p>
-                    {#if data.event.timeStatus === "UPCOMING"}
-                        No runs have been scheduled for this event yet.
-                    {:else}
-                        No runs were found for this event.
-                    {/if}
-                </p>
-            {/each}
-        </ul>
-    {:else}
-        <ErrorReport
-            message="Failed to load runs: {run_error.message}" />
+        for
+        {#if data.event.charityName}
+            {data.event.charityName}.
+        {:else}
+            charity.
+        {/if}
+    </p>
+    
+    {#if data.event.timeStatus === "IN_PROGRESS" && streamUsername}
+        <!-- TODO: `allow: autoplay;` search param -->
+        <iframe src="https://player.twitch.tv/?channel={streamUsername}&parent={$page.url.hostname}"
+                title="Stream"
+                allow="fullscreen"
+                style="
+                    display: block;
+                    width: calc(100% - 4px - 10px);
+                    aspect-ratio: 16/9;
+                    border: 2px solid #9146ff;
+                    border-radius: 5px;
+                    margin: 0 5px;
+                    margin-bottom: 15px;
+                ">
+        </iframe>
     {/if}
-</section>
+    
+</div>
+
+<div id="event-controls" style="position: {current_run_index !== null || there_are_bids ? 'sticky' : 'intial'}">
+    {#if current_run_index !== null}
+        <a href="#run-{current_run_index}">Jump to current run</a>
+    {/if}
+    {#if there_are_bids}
+        <div style="margin-left: auto">
+            <input id="event-bids" type="checkbox" on:change={evt => saveHideBids(evt.currentTarget.checked)} checked={hideBids}>
+            <label for="event-bids">Hide bids</label>
+        </div>
+    {/if}
+</div>
+
+{#if runs === undefined && run_error === undefined}
+    <LoadingButton />
+{:else if runs !== undefined}
+    <ul class="event-runs" class:hide-bids={hideBids}>
+
+        {#each runs_ui_spans as span, span_index}
+            {@const prog = span.day_progess_class }
+            {@const next_prog = runs_ui_spans[span_index+1]?.day_progess_class }
+            <li class='event-day {prog == 'finished' && next_prog == '' && span.hide ? 'in-progress' : prog}'>
+                    <div class="schedule-bar-bit"></div>
+                <h2>
+                    <button class="collapse-btn" on:click={ evt => {
+                        span.hide = !span.hide;
+                    } } >
+                            <span class="material-symbols-rounded" style="font-size: 20pt; color: var(--text-quiet)" >
+                            {span.hide ? 'expand_all' : 'collapse_all'}
+                        </span>
+                        { span.day_text }
+                    </button>
+                </h2>
+                
+                </li>
+            {#if !span.hide }
+                {#each span.run_indices as run_index}
+                    <RunComponent {runs} {run_index} {formatter} />
+                {/each}
+            {/if}
+        {:else}
+            <p>
+                {#if data.event.timeStatus === "UPCOMING"}
+                    No runs have been scheduled for this event yet.
+                {:else}
+                    No runs were found for this event.
+                {/if}
+            </p>
+        {/each}
+    </ul>
+{:else}
+    <ErrorReport
+        message="Failed to load runs: {run_error.message}" />
+{/if}
