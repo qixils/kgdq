@@ -1,5 +1,5 @@
 html {
-    font-family: Verdana, sans-serif;
+    font-family: "Verdana", sans-serif;
 
     --bg-bg: #001;
     --raise-bg: #20252e;
@@ -178,7 +178,7 @@ footer {
 .event-runs > li {
     display: grid;
     --bar-width: 5em;
-    grid-template-columns: var(--bar-width) calc(1.2 * 5ch) 1fr;
+    grid-template-columns: var(--bar-width) 10ch 1fr;
     margin: .3125em;
 }
 
@@ -201,10 +201,10 @@ footer {
 }
 
 .run-content {
-    margin-left: 1em;
-    margin-right: 0.5em;
-    margin-top: 1em;
-    margin-bottom: 1em;
+    padding-left: 1em;
+    padding-right: 0.5em;
+    padding-top: 1em;
+    padding-bottom: 1em;
 }
 
 .run-content > * {
