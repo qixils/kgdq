@@ -56,7 +56,7 @@
                     cancelAnimationFrame(raf)
                 })
             }
-            }
+            
             let runs_ui_span_index = 0;
             for (let run_index = 0; run_index < runs.length; ++run_index) {
                 let run = runs[run_index];
@@ -144,7 +144,7 @@
         </div>
     {/if}
     {#if there_are_bids}
-        <div style="margin-left: auto">
+        <div style="margin-left: 0">
             <input id="event-bids" type="checkbox" on:change={evt => saveHideBids(evt.currentTarget.checked)} checked={hideBids}>
             <label for="event-bids">Hide bids</label>
         </div>

@@ -8,11 +8,20 @@
     import {user} from "../stores";
     import {page} from "$app/stores";
 
-    export let runs: Run[] = undefined as Run[];
-    export let run_index: number = undefined as number;
-    export let formatter: Formatters = undefined as Formatters;
+    export let runs: Run[] = undefined as unknown as Run[];
+    export let run_index: number = undefined as unknown as number;
+    export let formatter: Formatters = undefined as unknown as Formatters;
 
     let run = runs[run_index];
+
+    let cover_url = run.igdb?.cover
+        ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${run.igdb?.cover}.jpg`
+        : '';
+    let keyart_url = 
+        run.igdb?.background ? `https://images.igdb.com/igdb/image/upload/t_screenshot_med/${run.igdb?.background}.jpg`
+        : cover_url;
+
+    console.log(`run # ${run_index}: ${run.igdb?.cover} / ${run.igdb?.background}`)
 
     let previous_status = run_index === 0 ? null : runs[run_index - 1].timeStatus;
     let current_status = run.timeStatus;
@@ -102,13 +111,23 @@
     current_status === "IN_PROGRESS" ? "in-progress" :
     current_status === "FINISHED" ? "finished" :
     current_status === "UPCOMING" && previous_status === "FINISHED" ? "next-up" :
-    "" }'
+    "" }
+    {run.igdb?.background || run.igdb?.cover ? "has-art": ""}
+    '
     id="run-{ run_index }"
-    style="--schedule-color: { step_color }">
+    style="--schedule-color: { step_color }; --keyart: url('{ keyart_url}')"
+    >
      <!-- later upcoming runs have no extra class -->
     <div class="schedule-bar-bit" ></div>
     <div class="run-schedule-time">{ Formatters.time(run.startTime) }</div>
-    <div class="run-content">
+    
+    <div class="run-content" 
+        >
+        <div class="run-cover">
+            {#if run.igdb?.cover != null}
+                <img src="{cover_url}">
+            {/if}
+        </div>
         {#if $user && (current_status === "FINISHED" || current_status === "IN_PROGRESS") && (run.id !== null) }
             <dialog id="suggest-{run_index}" class="suggest-dialog">
                 <button class="close-btn material-symbols-rounded" on:click={ () => suggest_dialog().close() }>close</button>

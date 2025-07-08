@@ -184,6 +184,19 @@ footer {
     background-color: var(--raise-bg);
     box-shadow: inset var(--raise-outline) 0 0 2px;
     border-radius: 2px;
+
+    
+}
+
+.run.has-art {
+    background-image:
+        /* "lower opacity" of bg image */
+        linear-gradient(0deg, color-mix(in srgb, var(--raise-bg) 90%, transparent) 0 100%), 
+        var(--keyart)
+        ;
+    background-size: cover;
+    background-position-y: 60%;
+    background-position-x: 50%;
 }
 
 .run.in-progress {
@@ -738,6 +751,8 @@ form button[type="submit"] {
     padding-bottom: 4px;
     background-color: var(--bg-bg);
     z-index: 2;
+    gap: 1em;
+    height: 2em;
 }
 
 .event-runs.hide-bids .bid {
@@ -753,4 +768,21 @@ form button[type="submit"] {
     cursor: pointer;
     font-size: inherit;
     padding: 0;
+}
+
+.run-cover {
+    float: right;
+    height: 100%;
+    /* width: 50px; */
+    padding-right: 10px;
+    display: flex;
+    align-items: center;
+
+    & img {
+        /* margin-left: -10px; */
+        max-width: 35px;
+        border-radius: 3px;
+        box-shadow: #0008 0 0 15px;
+        transform: scale(1.6);
+    }
 }
