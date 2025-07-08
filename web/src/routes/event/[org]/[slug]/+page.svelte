@@ -11,6 +11,7 @@
     import LoadingButton from "$lib/LoadingButton.svelte";
     import ErrorReport from "$lib/ErrorReport.svelte";
     import {meta} from "../../../../stores";
+    import { afterNavigate } from '$app/navigation';
 
     export let data: { event: MarathonEvent } = undefined as never;
     let SVC = new SvcClient(BASE_URL, fetch);
@@ -37,11 +38,14 @@
 
     let runs_ui_spans: { index: number; day_progess_class: string; day_text: string; run_indices: number[]; hide: boolean }[] = [];
 
-    onMount(async () => {
+    let fetchRuns = async () => {
+        let spans = [];
+        current_run_index = null;
         hideBids = JSON.parse(localStorage.getItem("hideBids") || "false");
         hidePlayer = JSON.parse(localStorage.getItem("hidePlayer") || "false");
         try {
             runs = await SVC.getRuns($page.params.org.toLowerCase(), $page.params.slug);
+            console.log(`fetched ${runs.length} runs`);
             if (runs.length > 0) {
                 let current_run: Run | undefined = runs.find(run => run.timeStatus === "IN_PROGRESS" || run.timeStatus === "UPCOMING");
                 if (current_run !== undefined) {
@@ -72,7 +76,7 @@
                     //  fill line for day if the next displayed run is at least next up:
                     let day_progess_class = (this_run_status !== "UPCOMING" || last_run_status === "FINISHED") ? "finished" : "";
                     let day_text = Formatters.date_weekday_date(run.startTime);
-                    runs_ui_spans.push({
+                    spans.push({
                         index: runs_ui_span_index,
                         day_progess_class,
                         day_text,
@@ -81,13 +85,17 @@
                     })
                     ++runs_ui_span_index;
                 }
-                runs_ui_spans[runs_ui_spans.length-1].run_indices.push(run_index);
+                spans[spans.length-1].run_indices.push(run_index);
             }
-            
+            console.log(`made ${spans.length} spans!`);
+            runs_ui_spans = spans;
         } catch (e) {
             run_error = e;
         }
-    });
+    }
+
+    onMount(fetchRuns);
+    afterNavigate(fetchRuns);
 
     $meta = {
         title: data.event.name,
@@ -153,7 +161,7 @@
 
 {#if runs === undefined && run_error === undefined}
     <LoadingButton />
-{:else if runs !== undefined}
+{:else if runs !== undefined && run_error === undefined}
     <ul class="event-runs" class:hide-bids={hideBids}>
 
         {#each runs_ui_spans as span, span_index}
@@ -174,9 +182,11 @@
                 
                 </li>
             {#if !span.hide }
-                {#each span.run_indices as run_index}
-                    <RunComponent {runs} {run_index} {formatter} />
-                {/each}
+            {#each span.run_indices as run_index}
+                    {#key $page.url}
+                        <RunComponent run={runs[run_index]} {runs} {run_index} {formatter} />
+                    {/key}
+            {/each}
             {/if}
         {:else}
             <p>

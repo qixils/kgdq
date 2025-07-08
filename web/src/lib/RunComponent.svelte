@@ -8,24 +8,23 @@
     import {user} from "../stores";
     import {page} from "$app/stores";
 
+    export let run: Run = undefined as unknown as Run;
     export let runs: Run[] = undefined as unknown as Run[];
     export let run_index: number = undefined as unknown as number;
     export let formatter: Formatters = undefined as unknown as Formatters;
 
-    let run = runs[run_index];
-
-    let cover_url = run.igdb?.cover
+    $: cover_url = run.igdb?.cover
         ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${run.igdb?.cover}.jpg`
         : '';
-    let keyart_url = 
+    $: keyart_url = 
         run.igdb?.background ? `https://images.igdb.com/igdb/image/upload/t_screenshot_med/${run.igdb?.background}.jpg`
         : cover_url;
 
-    console.log(`run # ${run_index}: ${run.igdb?.cover} / ${run.igdb?.background}`)
+    // console.log(`run # ${run_index}: ${run.igdb?.cover} / ${run.igdb?.background}`)
 
-    let previous_status = run_index === 0 ? null : runs[run_index - 1].timeStatus;
-    let current_status = run.timeStatus;
-    let next_status = run_index === runs.length - 1 ? null : runs[run_index + 1].timeStatus;
+    $: previous_status = run_index === 0 ? null : runs[run_index - 1].timeStatus;
+    $: current_status = run.timeStatus;
+    $: next_status = run_index === runs.length - 1 ? null : runs[run_index + 1].timeStatus;
 
     if (previous_status === "IN_PROGRESS" && current_status === "IN_PROGRESS") {
         previous_status = "FINISHED";
