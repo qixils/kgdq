@@ -27,6 +27,7 @@
         localStorage.setItem("hideBids", JSON.stringify(x));
         hideBids = x;
     };
+    let there_are_bids = false;
 
     let runs_ui_spans: { index: number; day_progess_class: string; day_text: string; run_indices: number[]; hide: boolean }[] = [];
 
@@ -44,6 +45,11 @@
             let runs_ui_span_index = 0;
             for (let run_index = 0; run_index < runs.length; ++run_index) {
                 let run = runs[run_index];
+
+                if (run.bids.length > 0) {
+                    there_are_bids = true;
+                }
+
                 let last_run = runs[run_index - 1];
                 let last_run_status = last_run?.timeStatus;
                 let this_run_status = run.timeStatus;
@@ -116,10 +122,12 @@
             {#if current_run_index !== null}
                 <a href="#run-{current_run_index}">Jump to current run</a>
             {/if}
-            <div style="margin-left: auto">
-                <input id="event-bids" type="checkbox" on:change={evt => saveHideBids(evt.currentTarget.checked)} checked={hideBids}>
-                <label for="event-bids">Hide bids</label>
-            </div>
+            {#if there_are_bids}
+                <div style="margin-left: auto">
+                    <input id="event-bids" type="checkbox" on:change={evt => saveHideBids(evt.currentTarget.checked)} checked={hideBids}>
+                    <label for="event-bids">Hide bids</label>
+                </div>
+            {/if}
         </div>
     </div>
 
