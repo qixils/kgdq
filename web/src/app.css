@@ -201,18 +201,14 @@ footer {
 }
 
 .run-content {
-    position: relative;
-    padding-left: 1em;
-    padding-right: 0.5em;
-    padding-top: 1em;
-    padding-bottom: 1em;
+    padding: 1em;
 }
 
-.run-content > * {
+.run-content > *:not(dialog) {
     margin: 0;
 }
 
-.run-content > *:not(:last-child) {
+.run-content > *:not(dialog):not(:last-child) {
     margin-bottom: 0.75em;
 }
 
@@ -610,16 +606,11 @@ form button[type="submit"] {
     cursor: pointer;
 }
 
-.suggest-btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-}
-
 /* bottom right of div, and also dont make any taller*/
 .suggest-btn,
 .suggest-dialog button[type="submit"] {
     margin: 0.5em;
+    float: right;
 }
 
 .schedule-btn {
