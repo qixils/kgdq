@@ -45,10 +45,13 @@
                     current_run_index = runs.indexOf(current_run);
                 }
 
-                const { hash } = $page.url
-                if (hash?.match(/^#run-\d+$/)) {
-                    document.querySelector(hash)?.scrollIntoView()
-                }
+                const raf = requestAnimationFrame(() => {
+                    const { hash } = $page.url
+                    const elSearch = (hash?.match(/^#run-\d+$/) && hash) || (current_run_index && `#run-${current_run_index}`)
+                    const el = (elSearch && document.querySelector(elSearch)) || null
+                    el?.scrollIntoView()
+                    cancelAnimationFrame(raf)
+                })
             }
         } catch (e) {
             run_error = e;
