@@ -4,10 +4,10 @@
 
     export let bid: Bid;
     export let formatter: Formatters;
-    let goal = bid.goal || 1;
+    $: goal = bid.goal || 1;
 
-    let percent = Math.round((bid.donationTotal / (bid.goal || goal)) * 100);
-    let color = `var(--bid-${percent >= 100 ? "full" : (bid.state === "OPENED" ? "open" : "closed")})`;
+    $: percent = Math.round((bid.donationTotal / (bid.goal || goal)) * 100);
+    $: color = `var(--bid-${percent >= 100 ? "full" : (bid.state === "OPENED" ? "open" : "closed")})`;
 
 </script>
 

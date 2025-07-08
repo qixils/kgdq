@@ -36,9 +36,9 @@
     }
 
     // TODO: step_color style var
-    let step_color = run.timeStatus === "UPCOMING" ? "" : (current_status === "IN_PROGRESS" ? "#fff" : "#d2a");
+    $: step_color = run.timeStatus === "UPCOMING" ? "" : (current_status === "IN_PROGRESS" ? "#fff" : "#d2a");
 
-    let suggest_dialog = () => (document.getElementById(`suggest-${run_index}`) as HTMLDialogElement );
+    $: suggest_dialog = () => (document.getElementById(`suggest-${run_index}`) as HTMLDialogElement );
 
     let submit_status: "SUBMITTING" | "OK" | "ERROR" | null = null;
 
@@ -111,7 +111,7 @@
     current_status === "FINISHED" ? "finished" :
     current_status === "UPCOMING" && previous_status === "FINISHED" ? "next-up" :
     "" }
-    {run.igdb?.background || run.igdb?.cover ? "has-art": ""}
+    {cover_url != '' ? "has-art": ""}
     '
     id="run-{ run_index }"
     style="--schedule-color: { step_color }; --keyart: url('{ keyart_url}')"
