@@ -13,22 +13,22 @@ export class Formatters {
             minimumFractionDigits: 0,  });
     }
 
-    static date_header(dt: string) {
+    static date_header(dt?: string) {
         if (!dt) return "N/A"
         return date_header_format.format(new Date(dt));
     }
 
-    static date_hero(dt: string) {
+    static date_hero(dt?: string) {
         if (!dt) return "N/A"
         return date_hero_format.format(new Date(dt));
     }
 
-    static date_weekday_date(dt: string) {
+    static date_weekday_date(dt?: string) {
         if (!dt) return "N/A"
         return date_weekday_date_format.format(new Date(dt));
     }
 
-    static time(dt: string) {
+    static time(dt?: string) {
         if (!dt) return "N/A"
         return time_format.format(new Date(dt));
     }

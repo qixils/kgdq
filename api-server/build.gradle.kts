@@ -31,3 +31,7 @@ dependencies {
     testImplementation(libs.ktor.server.tests.jvm)
     implementation("org.neo4j.driver:neo4j-java-driver:5.27.0")
 }
+
+kotlin {
+    jvmToolchain(21)
+}

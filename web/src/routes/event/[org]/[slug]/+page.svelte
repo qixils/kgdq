@@ -27,12 +27,19 @@
         localStorage.setItem("hideBids", JSON.stringify(x));
         hideBids = x;
     };
+
+    let hidePlayer = false;
+    let saveHidePlayer = (x: boolean) => {
+        localStorage.setItem("hidePlayer", JSON.stringify(x));
+        hidePlayer = x;
+    }
     let there_are_bids = false;
 
     let runs_ui_spans: { index: number; day_progess_class: string; day_text: string; run_indices: number[]; hide: boolean }[] = [];
 
     onMount(async () => {
         hideBids = JSON.parse(localStorage.getItem("hideBids") || "false");
+        hidePlayer = JSON.parse(localStorage.getItem("hidePlayer") || "false");
         try {
             runs = await SVC.getRuns($page.params.org.toLowerCase(), $page.params.slug);
             if (runs.length > 0) {
@@ -41,6 +48,14 @@
                     current_run_index = runs.indexOf(current_run);
                 }
 
+                const raf = requestAnimationFrame(() => {
+                    const { hash } = $page.url
+                    const elSearch = (hash?.match(/^#run-\d+$/) && hash) || (current_run_index && `#run-${current_run_index}`)
+                    const el = (elSearch && document.querySelector(elSearch)) || null
+                    el?.scrollIntoView()
+                    cancelAnimationFrame(raf)
+                })
+            }
             }
             let runs_ui_span_index = 0;
             for (let run_index = 0; run_index < runs.length; ++run_index) {
@@ -101,7 +116,7 @@
         {/if}
     </p>
     
-    {#if data.event.timeStatus === "IN_PROGRESS" && streamUsername}
+    {#if data.event.timeStatus === "IN_PROGRESS" && streamUsername && !hidePlayer}
         <!-- TODO: `allow: autoplay;` search param -->
         <iframe src="https://player.twitch.tv/?channel={streamUsername}&parent={$page.url.hostname}"
                 title="Stream"
@@ -123,6 +138,10 @@
 <div id="event-controls" style="position: {current_run_index !== null || there_are_bids ? 'sticky' : 'intial'}">
     {#if current_run_index !== null}
         <a href="#run-{current_run_index}">Jump to current run</a>
+        <div>
+            <input id="event-player" type="checkbox" on:change={evt => saveHidePlayer(evt.currentTarget.checked)} checked={hidePlayer}>
+            <label for="event-player">Hide player</label>
+        </div>
     {/if}
     {#if there_are_bids}
         <div style="margin-left: auto">

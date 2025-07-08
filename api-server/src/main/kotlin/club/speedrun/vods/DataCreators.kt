@@ -1,5 +1,6 @@
 package club.speedrun.vods
 
+import club.speedrun.vods.igdb.IGDB
 import club.speedrun.vods.marathon.*
 import club.speedrun.vods.marathon.db.BaseBid
 import club.speedrun.vods.marathon.db.BaseEvent
@@ -14,7 +15,6 @@ import dev.qixils.horaro.models.Run as HoraroRun
 
 private val MARKDOWN_LINK: Pattern = Pattern.compile("\\[([^]]+)]\\(([^)]+)\\)")
 private val MAX_RAW_SETUP_TIME = Duration.ofMinutes(30)
-val excludedGameTitles = listOf("bonus game", "daily recap", "tasbot plays")
 
 fun calculateHoraroName(run: HoraroRun): String {
     val rawName = run.getValue("Game")?.trim() ?: return "[Unknown Game]"
@@ -108,6 +108,29 @@ suspend fun createRun(
     val runTime = overrides.runTime ?: run.runTime
     val endTime = startTime + runTime
 
+    val gameName = when {
+        !run.twitchGame.isNullOrEmpty() -> run.twitchGame
+        !run.displayGame.isNullOrEmpty() -> run.displayGame
+        else -> run.game
+    }
+    val isGame = srcDb.skipCache.none { it.containsMatchIn(gameName) }
+
+    val igdb = if (isGame) IGDB.getCached(gameName)?.result?.let { res -> IGDBData(
+        background = res.artworks.sortedWith { a, b ->
+            if (a.artworkType != b.artworkType) {
+                if (a.artworkType == 2) return@sortedWith -1
+                if (b.artworkType == 2) return@sortedWith 1
+                if (a.artworkType == 1) return@sortedWith -1
+                if (b.artworkType == 1) return@sortedWith 1
+            }
+            if (a.animated != b.animated) return@sortedWith if (a.animated) 1 else -1
+            if (a.alphaChannel != b.alphaChannel) return@sortedWith if (a.alphaChannel) 1 else -1
+            return@sortedWith 0
+        }.firstOrNull()?.imageId,
+        cover = res.cover?.imageId,
+    ) }
+    else null
+
     return RunData(
         id = run.id,
         name = run.game,
@@ -129,16 +152,10 @@ suspend fun createRun(
         src = when {
             overrides.src == "" -> null
             overrides.src != null -> overrides.src
-            else -> run {
-                val gameName = when {
-                    !run.twitchGame.isNullOrEmpty() -> run.twitchGame
-                    !run.displayGame.isNullOrEmpty() -> run.displayGame
-                    else -> run.game
-                }
-                excludedGameTitles.forEach { if (gameName.contains(it, true)) return@run null }
-                return@run srcDb.getGame(gameName).abbreviation
-            }
-        }
+            isGame -> srcDb.getGame(gameName).abbreviation
+            else -> null
+        },
+        igdb = igdb,
     )
 }
 

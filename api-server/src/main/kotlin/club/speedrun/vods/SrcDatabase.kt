@@ -16,7 +16,17 @@ class SrcDatabase : Database("api", "src") {
     private val games = getCollection(SrcGame.serializer(), SrcGame.COLLECTION_NAME)
     private val cacheFor = Duration.ofDays(180)
     private val pendingCache = mutableListOf<SrcGame>()
-    private val skipCache = mutableSetOf("", "the checkpoint", "the red bull daily recap", "finale", "event recap", "unknown game", "no runs known for this event")
+    val skipCache = mutableSetOf(
+        Regex("^$"),
+        Regex("the checkpoint", setOf(RegexOption.IGNORE_CASE)),
+        Regex("(?:\\s|^)recap(?:\\s|$)", setOf(RegexOption.IGNORE_CASE)),
+        Regex("(?:\\s|^)finale$", setOf(RegexOption.IGNORE_CASE)),
+        Regex("unknown game", setOf(RegexOption.IGNORE_CASE)),
+        Regex("no runs known for this event", setOf(RegexOption.IGNORE_CASE)),
+        Regex("bonus game", setOf(RegexOption.IGNORE_CASE)),
+        Regex("tasbot", setOf(RegexOption.IGNORE_CASE)),
+        Regex("the checkpoint", setOf(RegexOption.IGNORE_CASE)),
+    )
 
     init {
         @OptIn(DelicateCoroutinesApi::class)
@@ -35,7 +45,7 @@ class SrcDatabase : Database("api", "src") {
     }
 
     private fun cache(game: SrcGame) {
-        if (!skipCache.contains(game.name.lowercase()) && pendingCache.none { it.name == game.name })
+        if (skipCache.none { it.containsMatchIn(game.name) } && pendingCache.none { it.name == game.name })
             pendingCache.add(game)
     }
 

@@ -32,6 +32,7 @@ data class RunData(
     val bids: List<BidData> = listOf(),
     val vods: MutableList<VOD> = mutableListOf(),
     val src: String? = null,
+    val igdb: IGDBData? = null,
 ) {
     /**
      * The current status of the run in the schedule.
