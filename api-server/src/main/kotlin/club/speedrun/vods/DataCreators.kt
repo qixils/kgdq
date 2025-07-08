@@ -113,9 +113,8 @@ suspend fun createRun(
         !run.displayGame.isNullOrEmpty() -> run.displayGame
         else -> run.game
     }
-    val isGame = srcDb.skipCache.none { it.containsMatchIn(gameName) }
 
-    val igdb = if (isGame) IGDB.getCached(gameName)?.result?.let { res -> IGDBData(
+    val igdb = IGDB.getCached(gameName)?.result?.let { res -> IGDBData(
         background = res.artworks.sortedWith { a, b ->
             if (a.artworkType != b.artworkType) {
                 if (a.artworkType == 2) return@sortedWith -1
@@ -129,7 +128,6 @@ suspend fun createRun(
         }.firstOrNull()?.imageId,
         cover = res.cover?.imageId,
     ) }
-    else null
 
     return RunData(
         id = run.id,
@@ -152,8 +150,7 @@ suspend fun createRun(
         src = when {
             overrides.src == "" -> null
             overrides.src != null -> overrides.src
-            isGame -> srcDb.getGame(gameName).abbreviation
-            else -> null
+            else -> srcDb.getGame(gameName).abbreviation
         },
         igdb = igdb,
     )

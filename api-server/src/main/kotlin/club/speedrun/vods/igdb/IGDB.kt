@@ -2,67 +2,53 @@ package club.speedrun.vods.igdb
 
 import club.speedrun.vods.httpClient
 import club.speedrun.vods.logger
+import club.speedrun.vods.utils.isSkipGame
 import club.speedrun.vods.utils.md5
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.util.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.trySendBlocking
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
-import okhttp3.internal.wait
-import java.time.Duration
 import java.time.Instant
-import kotlin.time.toKotlinDuration
-
-// TODO: suspend
+import kotlin.time.Duration.Companion.milliseconds
 
 object IGDB {
-    private val queue = mutableSetOf<String>()
     private val executor = newSingleThreadContext("IgdbCacheUpdater")
     private val clientId = System.getenv("TWITCH_CLIENT_ID") ?: throw RuntimeException("need twitch credentials")
     private val clientSecret = System.getenv("TWITCH_CLIENT_SECRET")!!
     private var _token: TwitchToken? = null
-    private var sleepUntil: Instant = Instant.EPOCH
-    private val ratelimit: Duration = Duration.ofMillis(250)
-
-    private val gamesQueue = kotlinx.coroutines.channels.Channel<Pair<String, String>>(
-        capacity = kotlinx.coroutines.channels.Channel.Factory.UNLIMITED,
+    private val gamesQueue = Channel<Pair<String, String>>(
+        capacity = Channel.Factory.UNLIMITED,
     )
 
     init {
         GlobalScope.launch(executor) {
             while (true) {
                 val (cacheId, gameName) = gamesQueue.receive()
+                // Ensure the game hasn't already been cached earlier in the channel
                 if (IGDBDatabase.games.getById(cacheId) != null) {
                     continue
                 }
-                println("Fetching art for game: $gameName")
+                logger.info("Fetching art for game: $gameName")
                 try {
                     val result = search(gameName)
-                    println("Got cover: ${result.result?.cover?.imageId}")
+                    logger.info("Got cover: ${result.result?.cover?.imageId}")
                 } catch (e: Exception) {
-                    println("Failed to decode games response: $e")
-                    throw e;
+                    logger.error("Failed to decode games response: $e")
+//                    throw e;
                 }
-                delay(Duration.ofMillis(250).toKotlinDuration())
+                // Avoid API ratelimits (4req/s)
+                delay(250.milliseconds)
             }
         }
     }
 
-
-    suspend fun ratelimit() {
-        val duration = Duration.between(Instant.now(), sleepUntil)
-        sleepUntil = maxOf(Instant.now(), sleepUntil) + ratelimit
-        if (duration.isPositive) {
-            delay(duration.toKotlinDuration())
-        }
-    }
-
-    suspend fun token(): TwitchToken {
+    private suspend fun token(): TwitchToken {
         if (_token != null && !_token!!.isExpired) return _token!!
         val url = url {
             takeFrom("https://id.twitch.tv/oauth2/token")
@@ -77,12 +63,11 @@ object IGDB {
         return _token!!
     }
 
-    suspend fun search(gameName: String): IGDBGameSearch {
+    private suspend fun search(gameName: String): IGDBGameSearch {
         val cacheId = gameName.lowercase().md5()
         val cache = IGDBDatabase.games.getById(cacheId)
         if (cache != null) return cache
 
-        ratelimit()
         val response = httpClient.post("https://api.igdb.com/v4/games") {
             header("Client-ID", clientId)
             header("Authorization", token().authorization)
@@ -112,7 +97,7 @@ object IGDB {
         val result = IGDBGameSearch(
             cacheId,
             gameName,
-            game?.firstOrNull(),
+            game.firstOrNull(),
             Instant.now(),
         )
         IGDBDatabase.games.put(result)
@@ -120,14 +105,13 @@ object IGDB {
     }
 
     fun getCached(gameName: String): IGDBGameSearch? {
+        if (isSkipGame(gameName)) return null
+
         val cacheId = gameName.lowercase().md5()
         val cache = IGDBDatabase.games.getById(cacheId)
         if (cache != null) return cache
 
-//        if (!queue.add(gameName)) return null
-
-        gamesQueue.trySendBlocking(cacheId to gameName)
-
+        gamesQueue.trySend(cacheId to gameName)
 
         return null
     }
