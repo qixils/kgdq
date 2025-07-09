@@ -119,14 +119,14 @@
      <!-- later upcoming runs have no extra class -->
     <div class="schedule-bar-bit" ></div>
     <div class="run-schedule-time">{ Formatters.time(run.startTime) }</div>
-    
-    <div class="run-content" 
-        >
-        <div class="run-cover">
+    <div class="run-cover {$user && (current_status === "FINISHED" || current_status === "IN_PROGRESS") && (run.id !== null) ? 'evade' : ''}">
             {#if run.igdb?.cover != null}
                 <img src="{cover_url}">
             {/if}
         </div>
+    <div class="run-content" 
+        >
+        
         {#if $user && (current_status === "FINISHED" || current_status === "IN_PROGRESS") && (run.id !== null) }
             <dialog id="suggest-{run_index}" class="suggest-dialog">
                 <button class="close-btn material-symbols-rounded" on:click={ () => suggest_dialog().close() }>close</button>
@@ -180,6 +180,7 @@
                 Suggest VOD
             </button>
         {/if}
+        
         <p>
             <b class="run-name">{run.name}</b>
 
