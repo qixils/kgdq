@@ -151,13 +151,13 @@
 <div id="event-controls" style="position: {current_run_index !== null || there_are_bids ? 'sticky' : 'intial'}">
     {#if current_run_index !== null}
         <a href="#run-current" on:click="{() => jumpTo('#run-current')}">Jump to current run</a>
-        <div>
+        <div  style="margin-left: auto">
             <input id="event-player" type="checkbox" on:change={evt => saveHidePlayer(evt.currentTarget.checked)} checked={hidePlayer}>
             <label for="event-player">Hide player</label>
         </div>
     {/if}
     {#if there_are_bids}
-        <div style="margin-left: 0">
+        <div>
             <input id="event-bids" type="checkbox" on:change={evt => saveHideBids(evt.currentTarget.checked)} checked={hideBids}>
             <label for="event-bids">Hide bids</label>
         </div>
