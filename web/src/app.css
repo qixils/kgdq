@@ -1,5 +1,5 @@
 html {
-    font-family: "Verdana", sans-serif;
+    font-family: "Funnel Sans", sans-serif;
 
     --bg-bg: #001;
     --raise-bg: #20252e;
@@ -57,6 +57,10 @@ html {
 html, body, .page-container {
     margin: 0;
     min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Outfit", sans-serif;
 }
 
 /* p, h1, h2, h3, h4, h5, h6 {
@@ -174,8 +178,10 @@ footer {
     content: "Loading...";
 }
 
+/* css reset */
 .event-runs {
     padding: 0;
+    margin: 0;
 }
 
 .event-runs > li {
@@ -183,6 +189,10 @@ footer {
     --bar-width: 5em;
     grid-template-columns: var(--bar-width) 10ch 1fr;
     margin: .3125em;
+}
+
+.event-runs > li:first-child {
+    margin-top: 0;
 }
 
 .run {
@@ -754,6 +764,7 @@ form button[type="submit"] {
     top: 0;
     border-bottom: 2px solid #669;
     padding-bottom: 4px;
+    margin-bottom: 0.5em;
     background-color: var(--bg-bg);
     z-index: 2;
     gap: 1em;
@@ -772,8 +783,11 @@ form button[type="submit"] {
     border: none;
     cursor: pointer;
     font-size: inherit;
+    font-family: inherit;
+    font-weight: inherit;
     padding: 0;
     margin-left: -15px;
+    align-items: center;
 }
 
 .run-cover {

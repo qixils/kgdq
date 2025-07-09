@@ -50,7 +50,7 @@
         {#if $user}
           <li>Logged in as <b>{ $user.name }</b></li>
         {:else}
-          <li><a href="/login">Log In to submit VODs</a></li>
+          <li><a href="/login">Log in to submit VODs</a></li>
         {/if}
     </ul>
   </nav>
@@ -61,7 +61,7 @@
 </main>
 
 <footer>
-  <p>Copyright &copy; 2023 <a href="https://github.com/qixils">Lexi</a> and <a href="https://github.com/dunkyl">Dunkyl 🔣🔣</a></p>
+  <p>Copyright &copy; 2025 <a href="https://github.com/qixils">Lexi</a> and <a href="https://github.com/dunkyl">Dunkyl 🔣🔣</a></p>
   <p>This project is open source. Check it out <a href="https://github.com/qixils/kgdq">on GitHub</a>!</p>
   <p>Data generously provided by <a href="/organizations">the organizations that run the events</a>.</p>
 </footer>

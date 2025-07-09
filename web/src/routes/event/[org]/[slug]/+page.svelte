@@ -8,7 +8,7 @@
     import {Formatters} from "$lib/Formatters";
     import {WEBSITE_BASE, BASE_URL, guessStreamNameAndUrl, niceShortName} from "$lib/kgdq";
     import {onMount} from "svelte";
-    import LoadingButton from "$lib/LoadingButton.svelte";
+    import LoadingSkeleton from "$lib/LoadingSkeleton.svelte";
     import ErrorReport from "$lib/ErrorReport.svelte";
     import {meta} from "../../../../stores";
     import { afterNavigate } from '$app/navigation';
@@ -165,7 +165,7 @@
 </div>
 
 {#if runs === undefined && run_error === undefined}
-    <LoadingButton />
+    <LoadingSkeleton />
 {:else if runs !== undefined && run_error === undefined}
     <ul class="event-runs" class:hide-bids={hideBids}>
 
