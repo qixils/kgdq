@@ -38,6 +38,12 @@
 
     let runs_ui_spans: { index: number; day_progess_class: string; day_text: string; run_indices: number[]; hide: boolean }[] = [];
 
+    const jumpTo = (hash: string) => {
+        if (hash === '#run-current' && current_run_index) hash = `#run-${current_run_index}`;
+        const el = (hash && document.querySelector(hash)) || null
+        el?.scrollIntoView({ block: 'center' })
+    }
+
     let fetchRuns = async () => {
         let spans = [];
         current_run_index = null;
@@ -54,9 +60,8 @@
 
                 const raf = requestAnimationFrame(() => {
                     const { hash } = $page.url
-                    const elSearch = (hash?.match(/^#run-\d+$/) && hash) || (current_run_index && `#run-${current_run_index}`)
-                    const el = (elSearch && document.querySelector(elSearch)) || null
-                    el?.scrollIntoView()
+                    let elSearch = hash?.match(/^#run-(\d|current)+$/) && hash
+                    if (elSearch) jumpTo(elSearch)
                     cancelAnimationFrame(raf)
                 })
             }
@@ -145,7 +150,7 @@
 
 <div id="event-controls" style="position: {current_run_index !== null || there_are_bids ? 'sticky' : 'intial'}">
     {#if current_run_index !== null}
-        <a href="#run-{current_run_index}">Jump to current run</a>
+        <a href="#run-current" on:click="{() => jumpTo('#run-current')}">Jump to current run</a>
         <div>
             <input id="event-player" type="checkbox" on:change={evt => saveHidePlayer(evt.currentTarget.checked)} checked={hidePlayer}>
             <label for="event-player">Hide player</label>
