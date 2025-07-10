@@ -72,39 +72,41 @@ object IGDB {
             header("Client-ID", clientId)
             header("Authorization", token().authorization)
             setBody(buildString {
-                append("fields artworks.image_id, artworks.artwork_type, artworks.alpha_channel, artworks.animated, cover.image_id;")
+                append("fields artworks.image_id, artworks.artwork_type, artworks.alpha_channel, artworks.animated, cover.image_id, first_release_date, name;")
                 append("search \"$gameName\";") // todo: url encode or something?
-                append("where version_parent = null & game_type = (0,1,2,4,6,8,9,10) & themes != (42);")
-                append("limit 1;")
+                append("where version_parent = null & game_type = (0,1,2,4,6,8,9,10,12) & themes != (42) & (cover != null | artworks != null);")
+                append("limit 10;")
             })
         }
-//        val game = try {
-//            response.body<List<IGDBGame>>()
-//        } catch (e: Exception) {
-//            logger.warn("Failed to decode games response", e)
-//            null
-//        }
 
-        val game =
+        val games =
             try {
                 response.body<List<IGDBGame>>()
             } catch (e: Exception) {
                 logger.warn("Failed to decode games response", e)
                 println(response.bodyAsText())
                 throw e;
+
             }
+
+        // IGDB's relevancy search sucks a little bit, let's pick the game with exactly matching title, if none then oldest release
+        val game = games.find { gameName.equals(it.name, ignoreCase = true) }
+            ?: games.minByOrNull { it.firstReleaseDate }
 
         val result = IGDBGameSearch(
             cacheId,
             gameName,
-            game.firstOrNull(),
+            game,
             Instant.now(),
         )
         IGDBDatabase.games.put(result)
         return result
     }
 
-    fun getCached(gameName: String): IGDBGameSearch? {
+    fun getCached(game: String): IGDBGameSearch? {
+        // fix old gdq runs with newlines in their names
+        val gameName = game.replace(Regex("\\s", RegexOption.MULTILINE), " ")
+
         if (isSkipGame(gameName)) return null
 
         val cacheId = gameName.lowercase().md5()
