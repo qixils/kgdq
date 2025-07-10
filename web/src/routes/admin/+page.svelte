@@ -70,7 +70,7 @@
     }
 
     async function resetIgdb() {
-        const res = await fetch(`${BASE_URL}/resetigdb`, { method: "PUT", credentials: "include" })
+        const res = await fetch(`${BASE_URL}/resetigdb`, { method: "PUT", credentials: "include", headers: { "Content-Type": "application/json" } })
         alert(`${res.status} ${res.statusText}`)
     }
 </script>
