@@ -69,9 +69,15 @@
 
     }
 
+    async function resetIgdb() {
+        const res = await fetch(`${BASE_URL}/resetigdb`, { method: "PUT", credentials: "include" })
+        alert(`${res.status} ${res.statusText}`)
+    }
 </script>
 
 <p>SECRET ADMIN VOD APPROVAL PAGE</p>
+
+<button on:click={() => resetIgdb()}>Clear IGDB empty cached results</button>
 
 {#if !suggests_populated}
     <LoadingSkeleton />

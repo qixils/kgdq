@@ -6,6 +6,7 @@ import club.minnced.discord.webhook.send.WebhookEmbed
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder
 import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import club.speedrun.vods.*
+import club.speedrun.vods.igdb.IGDB
 import club.speedrun.vods.marathon.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -343,6 +344,14 @@ fun Application.configureRouting() {
                         rootDb.users.update(target)
                         call.respond(HttpStatusCode.OK)
                     }
+                }
+
+                post("/resetigdb") {
+                    val user = getUser(call) ?: return@post
+                    if (user.role < Role.ADMIN)
+                        throw AuthorizationException()
+                    IGDB.clearEmptyCached()
+                    call.respond(HttpStatusCode.OK)
                 }
             }
         }

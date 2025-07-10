@@ -74,7 +74,7 @@ object IGDB {
             setBody(buildString {
                 append("fields artworks.image_id, artworks.artwork_type, artworks.alpha_channel, artworks.animated, cover.image_id;")
                 append("search \"$gameName\";") // todo: url encode or something?
-                append("where version_parent = null & game_type = (0,1,2,4,6,8,9) & themes != (42);")
+                append("where version_parent = null & game_type = (0,1,2,4,6,8,9,10) & themes != (42);")
                 append("limit 1;")
             })
         }
@@ -114,5 +114,11 @@ object IGDB {
         gamesQueue.trySend(cacheId to gameName)
 
         return null
+    }
+
+    fun clearEmptyCached() {
+        IGDBDatabase.games.getAll()
+            .filter { res -> res.isValid && res.obj.result == null }
+            .forEach { res -> IGDBDatabase.games.remove(res.obj) }
     }
 }
