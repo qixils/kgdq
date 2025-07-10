@@ -13,8 +13,11 @@
     export let run_index: number = undefined as unknown as number;
     export let formatter: Formatters = undefined as unknown as Formatters;
 
+    // opt for a higher resolution cover if there is no keyart (since it will be reused), else lower
     $: cover_url = run.igdb?.cover
-        ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${run.igdb?.cover}.jpg`
+        ? run.igdb.background
+            ? `https://images.igdb.com/igdb/image/upload/t_cover_small/${run.igdb?.cover}.jpg`
+            : `https://images.igdb.com/igdb/image/upload/t_cover_big_2x/${run.igdb?.cover}.jpg`
         : '';
     $: keyart_url = 
         run.igdb?.background ? `https://images.igdb.com/igdb/image/upload/t_screenshot_med/${run.igdb?.background}.jpg`
