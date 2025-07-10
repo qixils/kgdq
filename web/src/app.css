@@ -821,3 +821,7 @@ form button[type="submit"] {
 .run.has-art .run-content {
     padding-right: 70px;
 }
+
+.run.has-art .run-content > .suggest-btn {
+    margin-right: -55px;
+}
