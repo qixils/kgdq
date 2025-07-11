@@ -434,7 +434,7 @@ sup {
     vertical-align: middle;
 }
 
-.run-details > div::before {
+.run-details .icon {
     /*noinspection CssNoGenericFontName*/
     font-family: 'Material Symbols Rounded';
     font-size: 150%;
@@ -442,22 +442,6 @@ sup {
     margin-right: .3125em;
     color: var(--text-quiet);
     width: 1ch;
-}
-
-.run-runners.single::before {
-    content: 'person';
-}
-
-.run-runners.multiple::before {
-    content: 'group';
-}
-
-.run-console::before {
-    content: 'stadia_controller';
-}
-
-.run-time::before {
-    content: 'timer';
 }
 
 .run-src {
@@ -500,10 +484,9 @@ sup {
     padding: 0;
 }
 
-.vod::before {
+.vod .icon {
     /*noinspection CssNoGenericFontName*/
     font-family: 'Material Symbols Rounded';
-    content: 'play_circle';
     font-size: 150%;
     margin-top: -0.15em;
     margin-bottom: -0.15em;
@@ -521,11 +504,11 @@ sup {
             ;
 }
 
-.vod.youtube::before {
+.vod.youtube .icon {
     --whatever-rgb: var(--youtube-rgb);
 }
 
-.vod.twitch::before {
+.vod.twitch .icon {
     --whatever-rgb: var(--twitch-rgb);
 }
 
@@ -648,12 +631,12 @@ form button[type="submit"] {
     text-decoration: none;
 }
 
-.schedule-btn::before {
+.schedule-btn .icon {
     /*noinspection CssNoGenericFontName*/
     font-family: 'Material Symbols Rounded';
-    content: 'format_list_bulleted';
     font-size: 150%;
     margin-right: .3125em;
+    width: 24px; /* hardcode final render width to fix oversized width while loading */
 
 }
 
@@ -673,10 +656,9 @@ form button[type="submit"] {
     box-shadow: var(--bid-closed-half) 0 3px 0 0;
 }
 
-.suggest-btn::before {
+.suggest-btn .icon {
     /*noinspection CssNoGenericFontName*/
     font-family: 'Material Symbols Rounded';
-    content: 'add_circle';
     font-size: 150%;
     margin-right: .3125em;
     width: 1ch;
