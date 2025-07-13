@@ -287,6 +287,10 @@ footer {
     .run-cover img {
         display: none;
     }
+
+    .collapse-btn {
+        margin-left: 0 !important;
+    }
 }
 
 .schedule-bar-bit::before, .schedule-bar-bit::after {
