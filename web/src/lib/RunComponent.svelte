@@ -13,8 +13,11 @@
     export let run_index: number = undefined as unknown as number;
     export let formatter: Formatters = undefined as unknown as Formatters;
 
+    // opt for a higher resolution cover if there is no keyart (since it will be reused), else lower
     $: cover_url = run.igdb?.cover
-        ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${run.igdb?.cover}.jpg`
+        ? run.igdb.background
+            ? `https://images.igdb.com/igdb/image/upload/t_cover_small/${run.igdb?.cover}.jpg`
+            : `https://images.igdb.com/igdb/image/upload/t_cover_big_2x/${run.igdb?.cover}.jpg`
         : '';
     $: keyart_url = 
         run.igdb?.background ? `https://images.igdb.com/igdb/image/upload/t_screenshot_med/${run.igdb?.background}.jpg`
@@ -177,6 +180,7 @@
             </dialog>
 
             <button class="suggest-btn action-btn" on:click={ () => suggest_dialog().showModal() }>
+                <div class="icon" inert>add_circle</div>
                 Suggest VOD
             </button>
         {/if}
@@ -196,11 +200,18 @@
 
 
         <div class="run-details">
-            <div class="run-time">{ run.runTime }</div>
+            <div class="run-time">
+                <div class="icon" inert>timer</div>
+                { run.runTime }
+            </div>
             {#if run.console}
-                <div class="run-console">{ run.console }</div>
+                <div class="run-console">
+                    <div class="icon" inert>stadia_controller</div>
+                    { run.console }
+                </div>
             {/if}
             <div class="run-runners {run.runners.length === 1 ? 'single' : 'multiple'}">
+                <div class="icon" inert>{ run.runners.length === 1 ? 'person' : 'group' }</div>
                 <span>
                     {#each run.runners as runner, index}
                         {#if index > 0}

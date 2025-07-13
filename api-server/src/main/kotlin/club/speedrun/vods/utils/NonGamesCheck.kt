@@ -12,6 +12,7 @@ val skipCache = mutableSetOf(
     Regex("tasbot", setOf(RegexOption.IGNORE_CASE)),
     Regex("the checkpoint", setOf(RegexOption.IGNORE_CASE)),
     Regex("just chatting", setOf(RegexOption.IGNORE_CASE)),
+    Regex("special events", setOf(RegexOption.IGNORE_CASE)),
 )
 
 fun isSkipGame(game: String) = skipCache.any { it.containsMatchIn(game) }

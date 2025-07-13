@@ -10,6 +10,7 @@
 </script>
 
 <li class="vod { platform_css }">
+    <div class="icon" inert>play_circle</div>
     <a href={vod.url} target="_blank" rel="noopener noreferrer">
     { platform_nice } {#if index > 0}(Part {index + 1}){/if}
     </a>
