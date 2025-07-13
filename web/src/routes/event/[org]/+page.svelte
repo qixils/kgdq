@@ -2,7 +2,7 @@
     import type {MarathonEvent, Organization} from "vods.speedrun.club-client";
     import {SvcClient} from "vods.speedrun.club-client";
     import {page} from "$app/stores";
-    import {WEBSITE_BASE, BASE_URL} from "$lib/kgdq";
+    import {WEBSITE_BASE, BASE_URL, compareEventStartTime} from "$lib/kgdq";
     import {onMount} from "svelte";
     import EventSummary from "$lib/EventSummary.svelte";
     import LoadingButton from "$lib/LoadingButton.svelte";
@@ -16,7 +16,7 @@
 
     onMount(async () => {
         try {
-            events = (await SVC.getEvents($page.params.org.toLowerCase())).reverse();
+            events = (await SVC.getEvents($page.params.org.toLowerCase())).sort(compareEventStartTime).reverse();
         } catch (e) {
             error = e;
         }
