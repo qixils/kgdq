@@ -292,7 +292,7 @@ class DonationTrackerMarathon(
     }
 
     override fun getDonationUrl(event: BaseEvent): String {
-        return "https://gamesdonequick.com/tracker/ui/donate/${event.id}"
+        return "https://gamesdonequick.com/donate/${event.id}"
     }
 
     override fun getScheduleUrl(event: BaseEvent): String {
