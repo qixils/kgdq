@@ -1,6 +1,6 @@
 [versions]
 ktor = "2.3.12"
-kotlin = "2.1.0"
+kotlin = "2.1.10"
 configurate = "4.1.2"
 coroutines = "1.10.1"
 serialization = "1.8.0"
